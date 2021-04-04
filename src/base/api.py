@@ -21,11 +21,11 @@ class BasicAPI(AbstractAPI):
 
     def __init__(
             self,
-            url: str,  # ---------------------------- Base URL for API.
-            auth: str or tuple,  # ------------------ API authorization (includes user's API token)
-            headers: dict,  # ----------------------- Global headers (including content-type)
-            rate_limit: int = 0,  # ----------------- Seconds to wait between each request
-            timeout: int = 5,  # -------------------- Seconds to wait before a request times out
+            url: str,  # --------------- Base URL for API.
+            auth: str or tuple,  # ----- API authorization (includes user's API token)
+            headers: dict,  # ---------- Global headers (including content-type)
+            rate_limit: int = 0,  # ---- Number of seconds to debounce requests
+            timeout: int = 5,  # ------- Number of seconds to wait before timing out
     ):
         self.base_url = url
         self.auth = auth
@@ -38,7 +38,7 @@ class BasicAPI(AbstractAPI):
 
     @confirm_connection
     @rate_limited
-    def get(self, endpoint: str, headers: dict = None, **kwargs):
+    def get(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request.
         :param endpoint: URL to which the request will be sent.
@@ -53,7 +53,7 @@ class BasicAPI(AbstractAPI):
 
     @confirm_connection
     @rate_limited
-    def post(self, endpoint: str, headers: dict = None, **kwargs):
+    def post(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP POST request.
         :param endpoint: URL to which the request will be sent.
@@ -69,7 +69,7 @@ class BasicAPI(AbstractAPI):
 
     @confirm_connection
     @rate_limited
-    def put(self, endpoint: str, headers: dict = None, **kwargs):
+    def put(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PUT request.
         :param endpoint: URL to which the request will be sent.
@@ -85,7 +85,7 @@ class BasicAPI(AbstractAPI):
 
     @confirm_connection
     @rate_limited
-    def delete(self, endpoint: str, headers: dict = None, **kwargs):
+    def delete(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP DELETE request.
         :param endpoint: URL to which the request will be sent.

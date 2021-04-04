@@ -14,11 +14,11 @@ class AbstractEndpoint(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, *args, **kwargs):
+    def all(self, *args, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list(self, *args, **kwargs):
+    def get(self, *args, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
