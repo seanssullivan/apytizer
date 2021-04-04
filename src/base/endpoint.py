@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
+import logging
 from urllib.parse import urljoin
 
-# Third-Party Imports
-import logging
-
 # Local Imports
+from ..abstracts.api import AbstractAPI
 from ..abstracts.endpoint import AbstractEndpoint
 
 
@@ -15,44 +14,55 @@ class BasicEndpoint(AbstractEndpoint):
     Class for interacting with an API endpoint.
     """
 
-    def __init__(self, api, route: str = ''):
+    def __init__(self, api: AbstractAPI, route: str, headers: dict = None):
         self.api = api
         self.url = urljoin(self.api.url, route)
+        self.headers = headers
 
     def add(self, data: dict):
         """
-        Create a new object on the API.
+        Creates a new object at the API endpoint.
         """
-        response = self.api.post(self.url, data=data)
+        logging.debug(f"Creating object at {self.url}")
+
+        response = self.api.post(self.url, headers=self.headers, data=data)
         return response
 
     def all(self):
         """
-        Get all available objects.
+        Get all available objects from the API endpoint.
         """
-        response = self.api.get(self.url)
+        logging.debug(f"Listing objects at {self.url}")
+
+        response = self.api.get(self.url, headers=self.headers)
         return response
 
     def get(self, ref: int or str):
         """
-        Get object details from API.
+        Get object details from the API endpoint.
         """
+        logging.debug(f"Getting object at {self.url}")
+
         call = urljoin(self.url, str(ref))
-        response = self.api.get(call)
+        response = self.api.get(call, headers=self.headers)
         return response
 
     def update(self, ref: int or str, data: dict):
         """
-        Update object(s) on the API.
+        Update an object on the API endpoint.
         """
+        logging.debug(f"Updating object at {self.url}")
+
         call = urljoin(self.url, str(ref))
-        response = self.api.put(call, data=data)
+        response = self.api.put(call, headers=self.headers, data=data)
         return response
 
     def delete(self, ref: int or str):
         """
-        Delete object(s).
+        Delete an object from the API endpoint.
         """
+        logging.debug(f"Removing object at {self.url}")
+
         call = urljoin(self.url, str(ref))
-        response = self.api.delete(call)
+        response = self.api.delete(call, headers=self.headers)
         return response

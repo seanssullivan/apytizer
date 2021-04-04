@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Third-Party Imports
+# Standard Library Imports
 import logging
+from urllib.parse import urljoin
+
+# Third-Party Imports
 import requests
 
 # Local Imports
