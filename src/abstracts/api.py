@@ -10,17 +10,17 @@ class AbstractAPI(abc.ABC):
     """
 
     @abc.abstractmethod
-    def get(self, endpoint: str, **kwargs):
+    def get(self, endpoint: str, headers: dict = None, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def post(self, endpoint: str, **kwargs):
+    def post(self, endpoint: str, headers: dict = None, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, endpoint: str, **kwargs):
+    def put(self, endpoint: str, headers: dict = None, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, endpoint: str, **kwargs):
+    def delete(self, endpoint: str, headers: dict = None, **kwargs):
         raise NotImplementedError
