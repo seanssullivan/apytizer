@@ -14,9 +14,9 @@ class BasicEndpoint(AbstractEndpoint):
     Class for interacting with an API endpoint.
     """
 
-    def __init__(self, api: AbstractAPI, route: str, headers: dict = None):
+    def __init__(self, api: AbstractAPI, path: str, headers: dict = None):
         self.api = api
-        self.url = urljoin(self.api.url, route)
+        self.url = urljoin(self.api.url, path)
         self.headers = headers
 
     def add(self, data: dict):
