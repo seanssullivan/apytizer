@@ -23,24 +23,30 @@ class BasicAPI(AbstractAPI):
 
     def __init__(
             self,
-            url: str,  # --------------- Base URL for API.
-            auth: tuple,  # ------------ API authorization (includes user's API token)
-            headers: dict,  # ---------- Global headers (including content-type)
-            rate_limit: int = 0,  # ---- Number of seconds to debounce requests
-            timeout: int = 5,  # ------- Number of seconds to wait before timing out
+            url: str,  # ----------------------------- Base URL for API.
+            auth: tuple,  # -------------------------- API authorization (includes user's API token)
+            headers: dict,  # ------------------------ Global headers (including content-type)
+            rate_limit: int = 0,  # ------------------ Number of seconds to debounce requests
+            timeout: int = 5,  # --------------------- Number of seconds to wait before timing out
+            session: requests.Session = None,  # ----- Session object
     ):
         self.base_url = url
         self.auth = auth
         self.headers = headers
+        self.session = session
 
         # Request settings:
         self._time_of_previous_request = 0
         self._wait_between_requests = rate_limit
         self._timeout_after = timeout
 
+    @property
+    def url(self):
+        return self.base_url
+
     def start_session(self) -> None:
         """
-        Begins a session with the API.
+        Begins an API session.
         """
         logging.debug("Beginning API session")
 
@@ -51,7 +57,7 @@ class BasicAPI(AbstractAPI):
 
     def end_session(self) -> None:
         """
-        Manually destroys the session with the API.
+        Manually destroys the API session.
         """
         logging.debug("Closing API session")
 
@@ -69,8 +75,9 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP GET request")
 
+        headers = dict(self.headers, **headers) if headers else self.headers
+
         if not self.session:
-            headers = dict(self.headers, **headers) if headers else self.headers
             response = requests.get(endpoint, auth=self.auth, headers=headers, **kwargs)
         else:
             response = self.session.get(endpoint, headers=headers, **kwargs)
@@ -89,8 +96,9 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP POST request")
 
+        headers = dict(self.headers, **headers) if headers else self.headers
+
         if not self.session:
-            headers = dict(self.headers, **headers) if headers else self.headers
             response = requests.post(endpoint, auth=self.auth, headers=headers, **kwargs)
         else:
             response = self.session.post(endpoint, headers=headers, **kwargs)
@@ -109,8 +117,9 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP PUT request")
 
+        headers = dict(self.headers, **headers) if headers else self.headers
+
         if not self.session:
-            headers = dict(self.headers, **headers) if headers else self.headers
             response = requests.put(endpoint, auth=self.auth, headers=headers, **kwargs)
         else:
             response = self.session.put(endpoint, headers=headers, **kwargs)
@@ -128,8 +137,9 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP DELETE request")
 
+        headers = dict(self.headers, **headers) if headers else self.headers
+
         if not self.session:
-            headers = dict(self.headers, **headers) if headers else self.headers
             response = requests.delete(endpoint, auth=self.auth, headers=headers, **kwargs)
         else:
             response = self.session.delete(endpoint, headers=headers, **kwargs)
