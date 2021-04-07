@@ -16,7 +16,8 @@ class BasicEndpoint(AbstractEndpoint):
 
     def __init__(self, api: AbstractAPI, path: str, headers: dict = None):
         self.api = api
-        self.url = urljoin(self.api.url, path)
+        self.path = path
+        self.url = urljoin(api.url, path)
         self.headers = headers
 
     def add(self, data: dict, headers: dict = None):
@@ -26,7 +27,7 @@ class BasicEndpoint(AbstractEndpoint):
         logging.debug(f"Creating object at {self.url}")
 
         headers = dict(self.headers, **headers) if headers else self.headers
-        response = self.api.post(self.url, headers=self.headers, data=data)
+        response = self.api.post(self.path, headers=self.headers, data=data)
         return response
 
     def all(self, headers: dict = None):
@@ -36,7 +37,7 @@ class BasicEndpoint(AbstractEndpoint):
         logging.debug(f"Listing objects at {self.url}")
 
         headers = dict(self.headers, **headers) if headers else self.headers
-        response = self.api.get(self.url, headers=self.headers)
+        response = self.api.get(self.path, headers=self.headers)
         return response
 
     def get(self, ref: int or str, headers: dict = None):
@@ -45,7 +46,7 @@ class BasicEndpoint(AbstractEndpoint):
         """
         logging.debug(f"Getting object at {self.url}")
 
-        call = f"{self.url}/{str(ref)}"
+        call = f"{self.path}/{str(ref)}"
         headers = dict(self.headers, **headers) if headers else self.headers
         response = self.api.get(call, headers=self.headers)
         return response
@@ -56,18 +57,18 @@ class BasicEndpoint(AbstractEndpoint):
         """
         logging.debug(f"Updating object at {self.url}")
 
-        call = f"{self.url}/{str(ref)}"
+        call = f"{self.path}/{str(ref)}"
         headers = dict(self.headers, **headers) if headers else self.headers
         response = self.api.put(call, headers=self.headers, data=data)
         return response
 
-    def delete(self, ref: int or str, headers: dict = None):
+    def remove(self, ref: int or str, headers: dict = None):
         """
         Delete an object from the API endpoint.
         """
         logging.debug(f"Removing object at {self.url}")
 
-        call = f"{self.url}/{str(ref)}"
+        call = f"{self.path}/{str(ref)}"
         headers = dict(self.headers, **headers) if headers else self.headers
         response = self.api.delete(call, headers=self.headers)
         return response

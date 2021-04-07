@@ -26,5 +26,5 @@ class AbstractEndpoint(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, *args, **kwargs):
+    def remove(self, *args, **kwargs):
         raise NotImplementedError

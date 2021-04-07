@@ -2,6 +2,7 @@
 
 # Standard Library Imports
 import logging
+from urllib.parse import urljoin
 
 # Third-Party Imports
 import requests
@@ -75,12 +76,13 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP GET request")
 
+        url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
         if not self.session:
-            response = requests.get(endpoint, auth=self.auth, headers=headers, **kwargs)
+            response = requests.get(url, auth=self.auth, headers=headers, **kwargs)
         else:
-            response = self.session.get(endpoint, headers=headers, **kwargs)
+            response = self.session.get(url, headers=headers, **kwargs)
 
         return response
 
@@ -96,12 +98,13 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP POST request")
 
+        url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
         if not self.session:
-            response = requests.post(endpoint, auth=self.auth, headers=headers, **kwargs)
+            response = requests.post(url, auth=self.auth, headers=headers, **kwargs)
         else:
-            response = self.session.post(endpoint, headers=headers, **kwargs)
+            response = self.session.post(url, headers=headers, **kwargs)
 
         return response
 
@@ -117,12 +120,13 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP PUT request")
 
+        url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
         if not self.session:
-            response = requests.put(endpoint, auth=self.auth, headers=headers, **kwargs)
+            response = requests.put(url, auth=self.auth, headers=headers, **kwargs)
         else:
-            response = self.session.put(endpoint, headers=headers, **kwargs)
+            response = self.session.put(url, headers=headers, **kwargs)
 
         return response
 
@@ -137,11 +141,12 @@ class BasicAPI(AbstractAPI):
         """
         logging.debug("Sending HTTP DELETE request")
 
+        url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
         if not self.session:
-            response = requests.delete(endpoint, auth=self.auth, headers=headers, **kwargs)
+            response = requests.delete(url, auth=self.auth, headers=headers, **kwargs)
         else:
-            response = self.session.delete(endpoint, headers=headers, **kwargs)
+            response = self.session.delete(url, headers=headers, **kwargs)
 
         return response
