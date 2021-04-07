@@ -5,7 +5,6 @@ import logging
 
 # Local Imports
 from ..base.api import BasicAPI
-from ..base.decorators import json_response
 
 
 class JiraAPI(BasicAPI):

@@ -9,6 +9,7 @@ import requests
 
 # Local Imports
 from ..abstracts.api import AbstractAPI
+from ..base.adapters import TransportAdapter
 from .decorators import confirm_connection
 from .decorators import rate_limited
 
@@ -49,11 +50,16 @@ class BasicAPI(AbstractAPI):
         """
         Begins an API session.
         """
-        logging.debug("Beginning API session")
+        logging.debug("Starting API session")
 
         self.session = requests.Session()
         self.session.auth = self.auth
         self.session.headers.update(self.headers)
+
+        # Mount transport adapter:
+        adapter = TransportAdapter()
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
         return
 
     def end_session(self) -> None:
