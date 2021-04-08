@@ -35,12 +35,12 @@ class BasicAPI(AbstractAPI):
         self.base_url = url
         self.auth = auth
         self.headers = headers
+        self.timeout = timeout
         self.session = session
 
         # Request settings:
         self._time_of_previous_request = 0
         self._wait_between_requests = rate_limit
-        self._timeout_after = timeout
 
     @property
     def url(self):
@@ -56,8 +56,8 @@ class BasicAPI(AbstractAPI):
         self.session.auth = self.auth
         self.session.headers.update(self.headers)
 
-        # Mount transport adapter:
-        adapter = TransportAdapter()
+        # Mount transport adapter
+        adapter = TransportAdapter(timeout=self.timeout)
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
         return
@@ -76,19 +76,27 @@ class BasicAPI(AbstractAPI):
     def get(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request.
-        :param endpoint: URL to which the request will be sent.
-        :param headers: Request headers (overrides global headers).
-        :return: Response object.
+
+        Args:
+            endpoint: API path to which the request will be sent.
+            headers: Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
         logging.debug("Sending HTTP GET request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        if not self.session:
-            response = requests.get(url, auth=self.auth, headers=headers, **kwargs)
-        else:
+        logging.info(f"Request: GET {url}")
+
+        if self.session:
             response = self.session.get(url, headers=headers, **kwargs)
+        else:
+            response = requests.get(url, auth=self.auth, headers=headers, **kwargs)
 
         return response
 
@@ -97,20 +105,27 @@ class BasicAPI(AbstractAPI):
     def post(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP POST request.
-        :param endpoint: URL to which the request will be sent.
-        :param headers: Request headers (overrides global headers).
-        :param kwargs: Data to include in request.
-        :return: Response object.
+
+        Args:
+            endpoint: API path to which the request will be sent.
+            headers: Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
         logging.debug("Sending HTTP POST request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        if not self.session:
-            response = requests.post(url, auth=self.auth, headers=headers, **kwargs)
-        else:
+        logging.info(f"Request: POST {url}")
+
+        if self.session:
             response = self.session.post(url, headers=headers, **kwargs)
+        else:
+            response = requests.post(url, auth=self.auth, headers=headers, **kwargs)
 
         return response
 
@@ -119,20 +134,27 @@ class BasicAPI(AbstractAPI):
     def put(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PUT request.
-        :param endpoint: URL to which the request will be sent.
-        :param headers: Request headers (overrides global headers).
-        :param kwargs: Data to include in request.
-        :return: Response object.
+
+        Args:
+            endpoint: API path to which the request will be sent.
+            headers: Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
         logging.debug("Sending HTTP PUT request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        if not self.session:
-            response = requests.put(url, auth=self.auth, headers=headers, **kwargs)
-        else:
+        logging.info(f"Request: PUT {url}")
+
+        if self.session:
             response = self.session.put(url, headers=headers, **kwargs)
+        else:
+            response = requests.put(url, auth=self.auth, headers=headers, **kwargs)
 
         return response
 
@@ -141,18 +163,26 @@ class BasicAPI(AbstractAPI):
     def delete(self, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP DELETE request.
-        :param endpoint: URL to which the request will be sent.
-        :param headers: Request headers (overrides global headers).
-        :return: Response object.
+
+        Args:
+            endpoint: API path to which the request will be sent.
+            headers: Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
         logging.debug("Sending HTTP DELETE request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        if not self.session:
-            response = requests.delete(url, auth=self.auth, headers=headers, **kwargs)
-        else:
+        logging.info(f"Request: DELETE {url}")
+
+        if self.session:
             response = self.session.delete(url, headers=headers, **kwargs)
+        else:
+            response = requests.delete(url, auth=self.auth, headers=headers, **kwargs)
 
         return response

@@ -20,7 +20,7 @@ def confirm_connection(func):
     @functools.wraps(func)
     def request_wrapper(self, *args, **kwargs):
         try:
-            response = func(self, *args, timeout=self._timeout_after, **kwargs)
+            response = func(self, *args, **kwargs)
 
         except requests.exceptions.ConnectionError as error:
             logging.debug("connection error")
