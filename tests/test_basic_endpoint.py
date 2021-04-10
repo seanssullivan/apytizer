@@ -52,6 +52,18 @@ def test_endpoint_add_method_when_response_is_ok(mock_api):
     )
 
 
+def test_endpoint_add_method_when_post_not_allowed(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.post.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET', 'PUT', 'DELETE'])
+
+    with pytest.raises(NotImplementedError, match=''):
+        test_endpoint.add({})
+
+    assert not mock_api.post.called
+
+
 def test_endpoint_all_method_when_response_is_ok(mock_api):
     # Configure the mock to return a response with an OK status code.
     mock_api.get.return_value.ok = True
@@ -71,6 +83,18 @@ def test_endpoint_all_method_when_response_is_ok(mock_api):
         'test',
         headers={'status': 'testing'}
     )
+
+
+def test_endpoint_all_method_when_get_not_allowed(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.get.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['POST', 'PUT', 'DELETE'])
+
+    with pytest.raises(NotImplementedError, match=''):
+        test_endpoint.all()
+
+    assert not mock_api.get.called
 
 
 def test_endpoint_get_method_when_response_is_ok(mock_api):
@@ -96,6 +120,18 @@ def test_endpoint_get_method_when_response_is_ok(mock_api):
     )
 
 
+def test_endpoint_get_method_when_get_not_allowed(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.get.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['POST', 'PUT', 'DELETE'])
+
+    with pytest.raises(NotImplementedError, match=''):
+        test_endpoint.get(1)
+
+    assert not mock_api.get.called
+
+
 def test_endpoint_update_method_when_response_is_ok(mock_api):
     # Configure the mock to return a response with an OK status code.
     mock_api.put.return_value.ok = True
@@ -117,7 +153,19 @@ def test_endpoint_update_method_when_response_is_ok(mock_api):
     )
 
 
-def test_endpoint_delete_method_when_response_is_ok(mock_api):
+def test_endpoint_update_method_when_put_not_allowed(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.put.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET', 'POST', 'DELETE'])
+
+    with pytest.raises(NotImplementedError, match=''):
+        test_endpoint.update(1, {})
+
+    assert not mock_api.put.called
+
+
+def test_endpoint_remove_method_when_response_is_ok(mock_api):
     # Configure the mock to return a response with an OK status code.
     mock_api.delete.return_value.ok = True
     mock_api.delete.return_value.text = 'success'
@@ -130,3 +178,15 @@ def test_endpoint_delete_method_when_response_is_ok(mock_api):
         'test/1',
         headers={'status': 'testing'}
     )
+
+
+def test_endpoint_remove_method_when_delete_not_allowed(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.delete.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET', 'POST', 'PUT'])
+
+    with pytest.raises(NotImplementedError, match=''):
+        test_endpoint.remove(1)
+
+    assert not mock_api.delete.called

@@ -14,8 +14,7 @@ from .decorators import confirm_connection
 from .decorators import rate_limited
 
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-# logging.disable(logging.CRITICAL)'
+log = logging.getLogger(__name__)
 
 
 class BasicAPI(AbstractAPI):
@@ -50,7 +49,7 @@ class BasicAPI(AbstractAPI):
         """
         Begins an API session.
         """
-        logging.debug("Starting API session")
+        log.debug("Starting API session")
 
         self.session = requests.Session()
         self.session.auth = self.auth
@@ -66,7 +65,7 @@ class BasicAPI(AbstractAPI):
         """
         Manually destroys the API session.
         """
-        logging.debug("Closing API session")
+        log.debug("Closing API session")
 
         self.session.close()
         return
@@ -86,12 +85,12 @@ class BasicAPI(AbstractAPI):
             Response object.
 
         """
-        logging.debug("Sending HTTP GET request")
+        log.debug("Sending HTTP GET request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        logging.info(f"Request: GET {url}")
+        log.info(f"Request: GET {url}")
 
         if self.session:
             response = self.session.get(url, headers=headers, **kwargs)
@@ -115,12 +114,12 @@ class BasicAPI(AbstractAPI):
             Response object.
 
         """
-        logging.debug("Sending HTTP POST request")
+        log.debug("Sending HTTP POST request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        logging.info(f"Request: POST {url}")
+        log.info(f"Request: POST {url}")
 
         if self.session:
             response = self.session.post(url, headers=headers, **kwargs)
@@ -144,12 +143,12 @@ class BasicAPI(AbstractAPI):
             Response object.
 
         """
-        logging.debug("Sending HTTP PUT request")
+        log.debug("Sending HTTP PUT request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        logging.info(f"Request: PUT {url}")
+        log.info(f"Request: PUT {url}")
 
         if self.session:
             response = self.session.put(url, headers=headers, **kwargs)
@@ -173,12 +172,12 @@ class BasicAPI(AbstractAPI):
             Response object.
 
         """
-        logging.debug("Sending HTTP DELETE request")
+        log.debug("Sending HTTP DELETE request")
 
         url = urljoin(self.base_url, endpoint)
         headers = dict(self.headers, **headers) if headers else self.headers
 
-        logging.info(f"Request: DELETE {url}")
+        log.info(f"Request: DELETE {url}")
 
         if self.session:
             response = self.session.delete(url, headers=headers, **kwargs)

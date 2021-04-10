@@ -10,16 +10,33 @@ from ...base.endpoint import BasicEndpoint
 from ...base.decorators import json_response
 
 
+log = logging.getLogger(__name__)
+
+
 class JiraIssuesEndpoint(BasicEndpoint):
     """
     Class for interacting with the Jira issues API endpoint.
+
+        - Create issue:                POST /rest/api/3/issue
+        - Bulk create issue:           POST /rest/api/3/issue/bulk
+        - Get create issue metadata:   GET /rest/api/3/issue/createmeta
+        - Get issue:                   GET /rest/api/3/issue/{issueIdOrKey}
+        - Edit issue:                  PUT /rest/api/3/issue/{issueIdOrKey}
+        - Delete issue:                DELETE /rest/api/3/issue/{issueIdOrKey}
+        - Assign Issue:                PUT /rest/api/3/issue/{issueIdOrKey}/assignee
+        - Get change logs:             GET /rest/api/3/issue/{issueIdOrKey}/changelog
+        - Get edit issue metadata:     GET /rest/api/3/issue/{issueIdOrKey}/editmeta
+        - Send notification for issue: POST /rest/api/3/issue/{issueIdOrKey}/notify
+        - Get transitions:             GET /rest/api/3/issue/{issueIdOrKey}/transitions
+
     """
 
     def __init__(self, api: AbstractAPI, headers: dict = None):
         super().__init__(self, api, path="issue", headers=headers)
 
-    def add(self, data: dict, headers: dict = None):
+    def add(self, data: dict, headers: dict = None, **kwargs):
         """
+        Create an issue with the Jira REST API.
         """
         response = super().add(data, headers)
         return response
@@ -32,7 +49,7 @@ class JiraIssuesEndpoint(BasicEndpoint):
         raise NotImplementedError
 
     @json_response
-    def get(self, ref: int or str, headers: dict = None):
+    def get(self, ref: int or str, headers: dict = None, **kwargs):
         """
         Get an issue from the Jira API endpoint.
 
@@ -48,7 +65,7 @@ class JiraIssuesEndpoint(BasicEndpoint):
         return response
 
     @json_response
-    def transitions(self, headers: dict = None):
+    def transitions(self, headers: dict = None, **kwargs):
         """
         Get attachment settings from the Jira API endpoint.
 
@@ -68,7 +85,7 @@ class JiraIssuesEndpoint(BasicEndpoint):
         """
         raise NotImplementedError
 
-    def remove(self, ref: int or str, headers: dict = None):
+    def remove(self, ref: int or str, headers: dict = None, **kwargs):
         """
         Delete an attachment from the Jira API endpoint.
 

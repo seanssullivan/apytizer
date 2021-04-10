@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
+# Standard Library Imports
+import logging
+
 # Local Imports
 from ...abstracts.api import AbstractAPI
 from ...base.endpoint import BasicEndpoint
 from ...base.decorators import json_response
+
+
+log = logging.getLogger(__name__)
 
 
 class JiraAttachmentsEndpoint(BasicEndpoint):
@@ -27,7 +33,7 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
         raise NotImplementedError
 
     @json_response
-    def get(self, ref: int or str, headers: dict = None, options: dict = None):
+    def get(self, ref: int or str, headers: dict = None, **kwargs):
         """
         Get attachment metadata from the Jira API endpoint.
 
@@ -44,7 +50,7 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
             ValueError: Expand option has been provided but is not an accepted value.
 
         """
-        expand = options.get('expand')
+        expand = kwargs.get('expand')
         if expand and expand in ('human', 'raw'):
             response = super().api.get(f'{self.url}/{ref!s}/expand/{expand}', headers)
         elif not expand:
@@ -55,7 +61,7 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
         return response
 
     @json_response
-    def settings(self, headers: dict = None):
+    def settings(self, headers: dict = None, **kwargs):
         """
         Get attachment settings from the Jira API endpoint.
 
@@ -75,7 +81,7 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
         """
         raise NotImplementedError
 
-    def remove(self, ref: int or str, headers: dict = None):
+    def remove(self, ref: int or str, headers: dict = None, **kwargs):
         """
         Delete an attachment from the Jira API endpoint.
 

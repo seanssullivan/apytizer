@@ -60,8 +60,8 @@ def test_api_get_request_when_response_is_ok(mock_get_request):
     mock_get_request.assert_called_once_with(
         "https://www.testing.com/test",
         auth=('test_case', 'token'),
-        headers={'Content-Type': 'application/json'},
-        timeout=5)
+        headers={'Content-Type': 'application/json'}
+    )
     assert response.json() == {
         'name': 'example',
         'status': 'testing'
@@ -113,8 +113,8 @@ def test_api_post_request_when_response_is_ok(mock_post_request):
         "https://www.testing.com/test",
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
-        data=data,
-        timeout=5)
+        data=data
+    )
     assert response.status_code == 201
 
 
@@ -162,8 +162,8 @@ def test_api_put_request_when_response_is_ok(mock_put_request):
         "https://www.testing.com/test/1",
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
-        data=data,
-        timeout=5)
+        data=data
+    )
     assert response.status_code == 200
 
 
@@ -205,8 +205,8 @@ def test_api_delete_request_when_response_is_ok(mock_delete_request):
     mock_delete_request.assert_called_once_with(
         "https://www.testing.com/test/1",
         auth=('test_case', 'token'),
-        headers={'Content-Type': 'application/json'},
-        timeout=5)
+        headers={'Content-Type': 'application/json'}
+    )
     assert response.status_code == 200
 
 
