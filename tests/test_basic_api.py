@@ -12,53 +12,32 @@ from src.base.api import BasicAPI
 
 
 @pytest.fixture
-def mock_get_request():
-    mock_get_patcher = patch('src.base.api.requests.get')
-    yield mock_get_patcher.start()
-    mock_get_patcher.stop()
+def mock_request():
+    mock_patcher = patch('src.base.api.requests.request')
+    yield mock_patcher.start()
+    mock_patcher.stop()
 
-
-@pytest.fixture
-def mock_post_request():
-    mock_post_patcher = patch('src.base.api.requests.post')
-    yield mock_post_patcher.start()
-    mock_post_patcher.stop()
-
-
-@pytest.fixture
-def mock_put_request():
-    mock_put_patcher = patch('src.base.api.requests.put')
-    yield mock_put_patcher.start()
-    mock_put_patcher.stop()
-
-
-@pytest.fixture
-def mock_delete_request():
-    mock_delete_patcher = patch('src.base.api.requests.delete')
-    yield mock_delete_patcher.start()
-    mock_delete_patcher.stop()
-
-
-def test_api_get_request_when_response_is_ok(mock_get_request):
+def test_api_get_request_when_response_is_ok(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_get_request.return_value.ok = True
-    mock_get_request.return_value = Mock()
-    mock_get_request.return_value.json.return_value = {
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
+    mock_request.return_value.json.return_value = {
         'name': 'example',
         'status': 'testing'
     }
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'}
     )
 
     response = api.get("test")
 
-    mock_get_request.assert_called_once_with(
-        "https://www.testing.com/test",
+    mock_request.assert_called_once_with(
+        'GET',
+        'testing/test',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'}
     )
@@ -68,14 +47,14 @@ def test_api_get_request_when_response_is_ok(mock_get_request):
     }
 
 
-def test_api_get_request_rate_limit(mock_get_request):
+def test_api_get_request_rate_limit(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_get_request.return_value.ok = True
-    mock_get_request.return_value = Mock()
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
         rate_limit=0.1
@@ -89,15 +68,15 @@ def test_api_get_request_rate_limit(mock_get_request):
     assert time_end - time_start >= 0.1
 
 
-def test_api_post_request_when_response_is_ok(mock_post_request):
+def test_api_post_request_when_response_is_ok(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_post_request.return_value.ok = True
-    mock_post_request.return_value = Mock()
-    mock_post_request.return_value.status_code = 201
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
+    mock_request.return_value.status_code = 201
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
     )
@@ -109,8 +88,9 @@ def test_api_post_request_when_response_is_ok(mock_post_request):
     }
 
     response = api.post("test", data=data)
-    mock_post_request.assert_called_once_with(
-        "https://www.testing.com/test",
+    mock_request.assert_called_once_with(
+        'POST',
+        'testing/test',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
         data=data
@@ -118,14 +98,14 @@ def test_api_post_request_when_response_is_ok(mock_post_request):
     assert response.status_code == 201
 
 
-def test_api_post_request_rate_limit(mock_post_request):
+def test_api_post_request_rate_limit(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_post_request.return_value.ok = True
-    mock_post_request.return_value = Mock()
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
         rate_limit=0.1
@@ -139,15 +119,15 @@ def test_api_post_request_rate_limit(mock_post_request):
     assert  time_end - time_start >= 0.1
 
 
-def test_api_put_request_when_response_is_ok(mock_put_request):
+def test_api_put_request_when_response_is_ok(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_put_request.return_value.ok = True
-    mock_put_request.return_value = Mock()
-    mock_put_request.return_value.status_code = 200
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
+    mock_request.return_value.status_code = 200
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
     )
@@ -158,8 +138,9 @@ def test_api_put_request_when_response_is_ok(mock_put_request):
     }
 
     response = api.put("test/1", data=data)
-    mock_put_request.assert_called_once_with(
-        "https://www.testing.com/test/1",
+    mock_request.assert_called_once_with(
+        'PUT',
+        'testing/test/1',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
         data=data
@@ -167,14 +148,14 @@ def test_api_put_request_when_response_is_ok(mock_put_request):
     assert response.status_code == 200
 
 
-def test_api_put_request_rate_limit(mock_put_request):
+def test_api_put_request_rate_limit(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_put_request.return_value.ok = True
-    mock_put_request.return_value = Mock()
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
         rate_limit=0.1
@@ -188,36 +169,37 @@ def test_api_put_request_rate_limit(mock_put_request):
     assert  time_end - time_start >= 0.1
 
 
-def test_api_delete_request_when_response_is_ok(mock_delete_request):
+def test_api_delete_request_when_response_is_ok(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_delete_request.return_value.ok = True
-    mock_delete_request.return_value = Mock()
-    mock_delete_request.return_value.status_code = 200
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
+    mock_request.return_value.status_code = 200
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
     )
 
     response = api.delete("test/1")
-    mock_delete_request.assert_called_once_with(
-        "https://www.testing.com/test/1",
+    mock_request.assert_called_once_with(
+        'DELETE',
+        'testing/test/1',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'}
     )
     assert response.status_code == 200
 
 
-def test_api_delete_request_rate_limit(mock_delete_request):
+def test_api_delete_request_rate_limit(mock_request):
     # Configure the mock to return a response with an OK status code.
-    mock_delete_request.return_value.ok = True
-    mock_delete_request.return_value = Mock()
+    mock_request.return_value.ok = True
+    mock_request.return_value = Mock()
 
     # Initialize the API.
     api = BasicAPI(
-        url="https://www.testing.com",
+        url='testing/',
         auth=('test_case', 'token'),
         headers={'Content-Type': 'application/json'},
         rate_limit=0.1

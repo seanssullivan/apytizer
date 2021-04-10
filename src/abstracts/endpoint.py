@@ -10,11 +10,7 @@ class AbstractEndpoint(abc.ABC):
     """
 
     @abc.abstractmethod
-    def add(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def all(self, *args, **kwargs):
+    def head(self, *args, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -22,9 +18,21 @@ class AbstractEndpoint(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, *args, **kwargs):
+    def post(self, *args, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def remove(self, *args, **kwargs):
+    def put(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def options(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def trace(self, *args, **kwargs):
         raise NotImplementedError

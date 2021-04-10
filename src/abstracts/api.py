@@ -10,6 +10,10 @@ class AbstractAPI(abc.ABC):
     """
 
     @abc.abstractmethod
+    def head(self, endpoint: str, headers: dict = None, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get(self, endpoint: str, headers: dict = None, **kwargs):
         raise NotImplementedError
 
@@ -23,4 +27,12 @@ class AbstractAPI(abc.ABC):
 
     @abc.abstractmethod
     def delete(self, endpoint: str, headers: dict = None, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def options(self, endpoint: str, headers: dict = None, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def trace(self, endpoint: str, headers: dict = None, **kwargs):
         raise NotImplementedError
