@@ -32,11 +32,11 @@ class BasicEndpoint(AbstractEndpoint):
         """
         return self.get(ref, headers, **kwargs)
 
-    # def __getitem__(self, ref: int or str):
-    #     """
-    #     Returns a new endpoint with the appended reference.
-    #     """
-    #     return BasicEndpoint(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
+    def __getitem__(self, ref: int or str):
+        """
+        Returns a new endpoint with the appended reference.
+        """
+        return BasicEndpoint(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
 
     @property
     def url(self):

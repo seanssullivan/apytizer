@@ -157,3 +157,20 @@ def test_endpoint_delete_method_when_delete_not_allowed(mock_api):
         test_endpoint.delete(1)
 
     assert not mock_api.delete.called
+
+
+def test_endpoint_getitem_returns_new_endpoint(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.get.return_value.ok = True
+
+    initial_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET'])
+
+    assert initial_endpoint.path == 'test'
+
+    extended_endpoint = initial_endpoint[1]
+
+    assert extended_endpoint.path == 'test/1'
+
+    final_endpoint = extended_endpoint['stuff']
+
+    assert final_endpoint.path == 'test/1/stuff'
