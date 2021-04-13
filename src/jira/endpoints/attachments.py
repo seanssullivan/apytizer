@@ -2,7 +2,6 @@
 
 # Standard Library Imports
 import logging
-from urllib.parse import urljoin
 
 # Local Imports
 from ...abstracts.api import AbstractAPI
@@ -21,25 +20,26 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
     """
 
     def __init__(self, api: AbstractAPI, headers: dict = None):
-        super().__init__(self, api, path="attachment", headers=headers)
+        super().__init__(self, api, path="attachment", headers=headers, methods=['GET', 'DELETE'])
 
-    def add(self, *args, **kwargs):
-        """
-        Attachments must be added directly to an issue.
-        """
-        raise NotImplementedError
+    # def __getitem__(self, ref: int or str):
+    #     """
+    #     Returns a new endpoint with the appended reference.
+    #     """
+    #     endpoint = super().__getitem__(ref)
+    #     endpoint.methods = self.methods
+    #     return endpoint
 
     @json_response
-    def get(self, ref: int or str, headers: dict = None, **kwargs):
+    def get(self, ref: int or str, expand: str = None):
         """
         Get attachment metadata from the Jira API endpoint.
+
         Reference: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-attachments/#api-rest-api-3-attachment-id-get
 
         Args:
             ref: Issue ID or Key.
-            headers (optional):  Override endpoint- and API-level headers.
-            options (optional): Accepts an 'expand' parameter which specifies
-                in which format to return the metadata.
+            expand (optional): Specifies in which format to return the metadata.
 
         Returns:
             Dictionary containing the metadata.
@@ -48,49 +48,52 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
             ValueError: Expand option has been provided but is not an accepted value.
 
         """
-        expand = kwargs.get('expand')
+        headers = {'Accept': 'application/json'}
+
         if expand and expand in ('human', 'raw'):
-            url = urljoin(f'{ref!s}/expand/{expand}')
-            response = super().api.get(url, headers)
+            response = super().api.get(f'{ref!s}/expand/{expand}', headers)
         elif not expand:
-            response = super().get(ref, headers)
+            response = super().get(ref, headers=headers)
         else:
             raise ValueError(f"{expand} is not a valid option for 'expand'")
 
         return response
 
-    @json_response
-    def meta(self, headers: dict = None, **kwargs):
+    def meta(self):
         """
         Get attachment settings from the Jira API endpoint.
-        Reference: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-attachments/#api-rest-api-3-attachment-meta-get
 
-        Args:
-            headers (optional):  Override endpoint- and API-level headers.
+        Reference: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-attachments/#api-rest-api-3-attachment-meta-get
 
         Returns:
             Dictionary containing the settings.
 
         """
-        url = urljoin(self.path, 'meta')
-        response = super().api.get(url, headers)
+        response = super().api.get(f'{self.path!s}/meta', {'Accept': 'application/json'})
         return response
 
-    def settings(self, headers: dict = None, **kwargs):
+    def settings(self):
         """
         Alternative name for the meta() method.
         """
-        return self.meta(headers, **kwargs)
+        return self.meta()
 
-    def update(self, *args, **kwargs):
+    def post(self, *args, **kwargs):
+        """
+        Attachments must be added directly to an issue.
+        """
+        raise NotImplementedError
+
+    def put(self, *args, **kwargs):
         """
         Not able to update attachments.
         """
         raise NotImplementedError
 
-    def remove(self, ref: int or str, headers: dict = None, **kwargs):
+    def delete(self, ref: int or str):
         """
         Delete an attachment from the Jira API endpoint.
+
         Reference: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-attachments/#api-rest-api-3-attachment-id-delete
 
         Args:
@@ -98,5 +101,5 @@ class JiraAttachmentsEndpoint(BasicEndpoint):
             headers (optional):  Override endpoint- and API-level headers.
 
         """
-        response = super().remove(ref, headers)
+        response = super().delete(ref)
         return response

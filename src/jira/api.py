@@ -16,9 +16,9 @@ class JiraAPI(BasicAPI):
     Implements the API that makes it possible to interact with a Jira account and its data.
     """
 
-    def __init__(self, url: str, username: str, api_key: str, version: int = 3):
+    def __init__(self, url: str, credentials: tuple, version: int = 3):
         super().__init__(
             url=urljoin(url, f'/rest/api/{version}'),
-            auth=(username, api_key),
+            auth=credentials,
             headers={'Content-Type': 'application/json'}
         )

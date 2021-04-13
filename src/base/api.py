@@ -211,3 +211,4 @@ class BasicAPI(AbstractAPI):
         """
         response = self.request('TRACE', endpoint, headers=headers, **kwargs)
         return response
+
