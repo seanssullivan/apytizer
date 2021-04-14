@@ -159,18 +159,57 @@ def test_endpoint_delete_method_when_delete_not_allowed(mock_api):
     assert not mock_api.delete.called
 
 
-def test_endpoint_getitem_returns_new_endpoint(mock_api):
+def test_endpoint__getitem__returns_new_endpoint(mock_api):
     # Configure the mock to return a response with an OK status code.
     mock_api.get.return_value.ok = True
 
     initial_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET'])
-
     assert initial_endpoint.path == 'test'
 
     extended_endpoint = initial_endpoint[1]
-
     assert extended_endpoint.path == 'test/1'
 
     final_endpoint = extended_endpoint['stuff']
-
     assert final_endpoint.path == 'test/1/stuff'
+
+    assert not mock_api.called
+
+
+def test_endpoint__add__returns_new_endpoint(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.get.return_value.ok = True
+
+    initial_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET'])
+    assert initial_endpoint.path == 'test'
+
+    extended_endpoint = initial_endpoint + 1
+    assert extended_endpoint.path == 'test/1'
+
+    final_endpoint = extended_endpoint + 'stuff'
+    assert final_endpoint.path == 'test/1/stuff'
+
+    second_endpoint = BasicEndpoint(mock_api, 'stuff', headers={'status': 'testing'}, methods=['GET'])
+    concat_endpoint = initial_endpoint + second_endpoint
+    assert concat_endpoint.path == 'test/stuff'
+
+    assert not mock_api.called
+
+
+def test_endpoint__truediv__returns_new_endpoint(mock_api):
+    # Configure the mock to return a response with an OK status code.
+    mock_api.get.return_value.ok = True
+
+    initial_endpoint = BasicEndpoint(mock_api, 'test', headers={'status': 'testing'}, methods=['GET'])
+    assert initial_endpoint.path == 'test'
+
+    extended_endpoint = initial_endpoint / 1
+    assert extended_endpoint.path == 'test/1'
+
+    final_endpoint = extended_endpoint / 'stuff'
+    assert final_endpoint.path == 'test/1/stuff'
+
+    second_endpoint = BasicEndpoint(mock_api, 'stuff', headers={'status': 'testing'}, methods=['GET'])
+    concat_endpoint = initial_endpoint / second_endpoint
+    assert concat_endpoint.path == 'test/stuff'
+
+    assert not mock_api.called
