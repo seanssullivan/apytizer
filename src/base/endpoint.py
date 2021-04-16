@@ -31,6 +31,12 @@ class BasicEndpoint(AbstractEndpoint):
     def url(self):
         return urljoin(self.api.url, self.path)
 
+    def __repr__(self) -> str:
+        return f'<BasicEndpoint methods={self.methods!s} url={self.url!s}>'
+
+    def __str__(self) -> str:
+        return f'{self.url!s}'
+
     def __call__(self, ref: int or str = None, headers: dict = None, **kwargs) -> requests.Response:
         """
         Calling an instance of an endpoint performs a simple HTTP GET request.
@@ -54,7 +60,7 @@ class BasicEndpoint(AbstractEndpoint):
 
         return BasicEndpoint(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
 
-    def __add__(self, other: AbstractEndpoint or str) -> BasicEndpoint:
+    def __add__(self, path: int or str) -> BasicEndpoint:
         """
         Returns a new endpoint after combining both paths.
 
@@ -62,23 +68,21 @@ class BasicEndpoint(AbstractEndpoint):
         It behaves exactly the same as the __truediv__ method.
 
         Args:
-            other: Another endpoint-class object or a string to append to the current path.
+            path: Value to append to the current path.
 
         Returns:
             A new BasicEndpoint instance.
 
         """
 
-        if isinstance(other, AbstractEndpoint):
-            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{other.path!s}', headers=self.headers)
-        elif isinstance(other, str) or isinstance(other, int):
-            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{other!s}', headers=self.headers)
+        if isinstance(path, str) or isinstance(path, int):
+            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{path!s}', headers=self.headers)
         else:
             raise TypeError
 
         return endpoint
 
-    def __truediv__(self, other: AbstractEndpoint or str) -> BasicEndpoint:
+    def __truediv__(self, path: str) -> BasicEndpoint:
         """
         Returns a new endpoint after combining both paths.
 
@@ -86,17 +90,15 @@ class BasicEndpoint(AbstractEndpoint):
         It behaves exactly the same as the __add__ method.
 
         Args:
-            other: Another endpoint-class object or a string to append to the current path.
+            path: Value to append to the current path.
 
         Returns:
             A new BasicEndpoint instance.
 
         """
 
-        if isinstance(other, AbstractEndpoint):
-            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{other.path!s}', headers=self.headers)
-        elif isinstance(other, str) or isinstance(other, int):
-            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{other!s}', headers=self.headers)
+        if isinstance(path, str) or isinstance(path, int):
+            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{path!s}', headers=self.headers)
         else:
             raise TypeError
 

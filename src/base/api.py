@@ -20,16 +20,25 @@ log = logging.getLogger(__name__)
 class BasicAPI(AbstractAPI):
     """
     Implements a basic API.
+
+    Args:
+        url: Base URL for API.
+        auth: User's authorization or credentials.
+        headers: Headers to set globally for API.
+        rate_limit: Number of seconds to debounce requests.
+        timeout: Number of seconds to wait before a request times out.
+        session: A requests.Session object.
+
     """
 
     def __init__(
             self,
-            url: str,  # ----------------------------- Base URL for API.
-            auth: tuple,  # -------------------------- API authorization (includes user's API token)
-            headers: dict,  # ------------------------ Global headers (including content-type)
-            rate_limit: int = 0,  # ------------------ Number of seconds to debounce requests
-            timeout: int = 5,  # --------------------- Number of seconds to wait before timing out
-            session: requests.Session = None,  # ----- Session object
+            url: str,
+            auth: tuple = None,
+            headers: dict = None,
+            rate_limit: int = 0,
+            timeout: int = 5,
+            session: requests.Session = None,
     ):
         self.base_url = url
         self.auth = auth
@@ -41,10 +50,23 @@ class BasicAPI(AbstractAPI):
         self._time_of_previous_request = 0
         self._wait_between_requests = rate_limit
 
-
     @property
     def url(self):
         return self.base_url
+
+    def __repr__(self) -> str:
+        return f'<BasicAPI url={self.url!s}>'
+
+    def __str__(self) -> str:
+        return self.url
+
+    def __enter__(self):
+        self.start()
+        return super().__enter__()
+
+    def __exit__(self, *args):
+        super().__exit__(*args)
+        self.close()
 
     def start(self) -> None:
         """
@@ -52,15 +74,21 @@ class BasicAPI(AbstractAPI):
         """
         log.debug("Starting API session")
 
-        self.session = requests.Session()
-        self.session.auth = self.auth
-        self.session.headers.update(self.headers)
+        if not self.session:
+            self.session = requests.Session()
+
+        if self.auth and not self.session.auth:
+            self.session.auth = self.auth
+
+        if self.headers:
+            self.session.headers.update(self.headers)
 
         # Mount transport adapter
         adapter = self.adapter if self.adapter else TransportAdapter(timeout=self.timeout)
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
-        return
+
+        return self.session
 
     def close(self) -> None:
         """
