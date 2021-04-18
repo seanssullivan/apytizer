@@ -188,10 +188,6 @@ def test_endpoint__add__returns_new_endpoint(mock_api):
     final_endpoint = extended_endpoint + 'stuff'
     assert final_endpoint.path == 'test/1/stuff'
 
-    second_endpoint = BasicEndpoint(mock_api, 'stuff', headers={'status': 'testing'}, methods=['GET'])
-    concat_endpoint = initial_endpoint + second_endpoint
-    assert concat_endpoint.path == 'test/stuff'
-
     assert not mock_api.called
 
 
@@ -207,9 +203,5 @@ def test_endpoint__truediv__returns_new_endpoint(mock_api):
 
     final_endpoint = extended_endpoint / 'stuff'
     assert final_endpoint.path == 'test/1/stuff'
-
-    second_endpoint = BasicEndpoint(mock_api, 'stuff', headers={'status': 'testing'}, methods=['GET'])
-    concat_endpoint = initial_endpoint / second_endpoint
-    assert concat_endpoint.path == 'test/stuff'
 
     assert not mock_api.called

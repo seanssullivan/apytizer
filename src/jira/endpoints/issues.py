@@ -72,7 +72,7 @@ class JiraIssuesEndpoint(BasicEndpoint):
 
     def update(self, *args, **kwargs):
         """
-        Not able to update attachments.
+        Not able to update issues.
         """
         raise NotImplementedError
 

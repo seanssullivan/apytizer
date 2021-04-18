@@ -2,7 +2,7 @@
 
 # Standard Library Imports
 from __future__ import annotations
-# import logging
+import logging
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -13,7 +13,7 @@ from ..abstracts.api import AbstractAPI
 from ..abstracts.endpoint import AbstractEndpoint
 
 
-# log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class BasicEndpoint(AbstractEndpoint):
@@ -28,21 +28,30 @@ class BasicEndpoint(AbstractEndpoint):
         self.methods = methods
 
     @property
-    def url(self):
+    def url(self) -> str:
         return urljoin(self.api.url, self.path)
 
     def __repr__(self) -> str:
-        return f'<BasicEndpoint methods={self.methods!s} url={self.url!s}>'
+        return f'<{self.__class__.__name__!s} methods={self.methods!s} url={self.url!s}>'
 
     def __str__(self) -> str:
         return f'{self.url!s}'
 
     def __call__(self, ref: int or str = None, headers: dict = None, **kwargs) -> requests.Response:
         """
-        Calling an instance of an endpoint performs a simple HTTP GET request.
+        Returns a new endpoint with the appended reference.
+
+        This method is a shortcut for accessing HTTP methods on a child endpoint or a nested resource.
+
+        Args:
+            ref: Reference for a nested resource or an object available through a resource collection endpoint.
+
+        Returns:
+            A new BasicEndpoint instance.
+
         """
 
-        return self.get(ref, headers, **kwargs)
+        return self.__class__(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
 
     def __getitem__(self, ref: int or str) -> BasicEndpoint:
         """
@@ -58,7 +67,7 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        return BasicEndpoint(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
+        return self.__class__(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
 
     def __add__(self, path: int or str) -> BasicEndpoint:
         """
@@ -76,7 +85,7 @@ class BasicEndpoint(AbstractEndpoint):
         """
 
         if isinstance(path, str) or isinstance(path, int):
-            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{path!s}', headers=self.headers)
+            endpoint = self.__class__(self.api, f'{self.path!s}/{path!s}', headers=self.headers)
         else:
             raise TypeError
 
@@ -98,7 +107,7 @@ class BasicEndpoint(AbstractEndpoint):
         """
 
         if isinstance(path, str) or isinstance(path, int):
-            endpoint = BasicEndpoint(self.api, f'{self.path!s}/{path!s}', headers=self.headers)
+            endpoint = self.__class__(self.api, f'{self.path!s}/{path!s}', headers=self.headers)
         else:
             raise TypeError
 
@@ -107,6 +116,14 @@ class BasicEndpoint(AbstractEndpoint):
     def head(self, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP HEAD request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
 
         if self.methods and 'HEAD' not in self.methods:
@@ -119,6 +136,14 @@ class BasicEndpoint(AbstractEndpoint):
     def get(self, ref: int or str = None, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
 
         if self.methods and 'GET' not in self.methods:
@@ -132,6 +157,14 @@ class BasicEndpoint(AbstractEndpoint):
     def post(self, data: dict, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP POST request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
 
         if self.methods and 'POST' not in self.methods:
@@ -144,6 +177,14 @@ class BasicEndpoint(AbstractEndpoint):
     def put(self, ref: int or str, data: dict, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PUT request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
 
         if self.methods and 'PUT' not in self.methods:
@@ -157,6 +198,14 @@ class BasicEndpoint(AbstractEndpoint):
     def delete(self, ref: int or str, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP DELETE request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
 
         if self.methods and 'DELETE' not in self.methods:
@@ -170,6 +219,14 @@ class BasicEndpoint(AbstractEndpoint):
     def options(self, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP OPTIONS request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
         if self.methods and 'OPTIONS' not in self.methods:
             raise NotImplementedError
@@ -181,6 +238,14 @@ class BasicEndpoint(AbstractEndpoint):
     def trace(self, headers: dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP TRACE request to API endpoint.
+
+        Args:
+            headers (optional): Request headers (overrides global headers).
+            **kwargs: Data or parameters to include in request.
+
+        Returns:
+            Response object.
+
         """
 
         if self.methods and 'TRACE' not in self.methods:
