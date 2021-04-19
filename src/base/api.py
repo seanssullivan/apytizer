@@ -176,7 +176,7 @@ class BasicAPI(AbstractAPI):
 
 
 
-class SessionAPI(AbstractAPI):
+class SessionAPI(BasicAPI):
     """
     Implements a session-based API.
 
