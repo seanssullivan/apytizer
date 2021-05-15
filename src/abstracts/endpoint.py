@@ -20,9 +20,14 @@ from .api import AbstractAPI
 class AbstractEndpoint(abc.ABC):
     """
     Represents an abstract endpoint.
+
+    Attributes:
+        api: Instance of an API subclass.
+        route: Relative path to API endpoint.
+
     """
     api: AbstractAPI
-    path: str
+    route: str
 
     @abc.abstractmethod
     def head(self, *args, **kwargs) -> Response:
@@ -30,6 +35,9 @@ class AbstractEndpoint(abc.ABC):
         Abstract method for sending an HTTP HEAD request.
 
         This method must call the `head` method on the component API instance.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
@@ -44,6 +52,9 @@ class AbstractEndpoint(abc.ABC):
 
         This method must call the `get` method on the component API instance.
 
+        Returns:
+            Response object.
+
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
@@ -56,6 +67,9 @@ class AbstractEndpoint(abc.ABC):
         Abstract method for sending an HTTP POST request.
 
         This method must call the `post` method on the component API instance.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
@@ -70,6 +84,9 @@ class AbstractEndpoint(abc.ABC):
 
         This method must call the `put` method on the component API instance.
 
+        Returns:
+            Response object.
+
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
@@ -82,6 +99,9 @@ class AbstractEndpoint(abc.ABC):
         Abstract method for sending an HTTP PATCH request.
 
         This method must call the `patch` method on the component API instance.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
@@ -96,6 +116,9 @@ class AbstractEndpoint(abc.ABC):
 
         This method must call the `delete` method on the component API instance.
 
+        Returns:
+            Response object.
+
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
@@ -109,6 +132,9 @@ class AbstractEndpoint(abc.ABC):
 
         This method must call the `options` method on the component API instance.
 
+        Returns:
+            Response object.
+
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
@@ -121,6 +147,9 @@ class AbstractEndpoint(abc.ABC):
         Abstract method for sending an HTTP TRACE request.
 
         This method must call the `trace` method on the component API instance.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE

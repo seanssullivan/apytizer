@@ -24,9 +24,12 @@ class AbstractAPI(abc.ABC):
     auth: Union[HTTPBasicAuth, Tuple]
 
     @abc.abstractmethod
-    def head(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def head(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP HEAD request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
@@ -35,9 +38,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def get(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP GET request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
@@ -46,9 +52,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def post(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def post(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP POST request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
@@ -57,9 +66,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def put(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP PUT request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
@@ -68,9 +80,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def patch(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def patch(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP PATCH request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
@@ -79,9 +94,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def delete(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP DELETE request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
@@ -90,9 +108,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def options(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def options(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP OPTIONS request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
@@ -101,9 +122,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def trace(self, endpoint: str, headers: Dict = None, **kwargs) -> Response:
+    def trace(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP TRACE request.
+
+        Returns:
+            Response object.
 
         .. _MDN Web Docs:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
