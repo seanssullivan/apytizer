@@ -50,7 +50,9 @@ class BasicEndpoint(AbstractEndpoint):
             A new BasicEndpoint instance.
 
         """
-
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         return self.__class__(self.api, f'{self.path!s}/{ref!s}', headers=self.headers)
 
     def __getitem__(self, ref: int or str) -> BasicEndpoint:
@@ -129,7 +131,9 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'HEAD' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.head(self.url, headers=self.headers, **kwargs)
         return response
 
@@ -150,7 +154,9 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         call = f"{self.path!s}/{ref!s}" if ref else self.path
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.get(call, headers=self.headers, **kwargs)
         return response
 
@@ -170,7 +176,9 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'POST' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.post(self.path, headers=self.headers, data=data, **kwargs)
         return response
 
@@ -191,7 +199,9 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         call = f"{self.path!s}/{ref!s}"
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.put(call, headers=self.headers, data=data, **kwargs)
         return response
 
@@ -212,7 +222,9 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         call = f"{self.path!s}/{ref!s}"
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.delete(call, headers=self.headers, **kwargs)
         return response
 
@@ -231,7 +243,9 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'OPTIONS' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.options(self.url, headers=self.headers, **kwargs)
         return response
 
@@ -251,6 +265,8 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'TRACE' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if headers else self.headers
+        headers = dict(self.headers, **headers) if self.headers and headers \
+            else headers if headers and not self.headers \
+            else self.headers
         response = self.api.trace(self.url, headers=self.headers, **kwargs)
         return response
