@@ -116,7 +116,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('HEAD', route, headers=headers, **kwargs)
         return response
 
-    def get(self, route: str, headers: dict = None, **kwargs) -> requests.Response:
+    def get(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request.
 
@@ -135,7 +135,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('GET', route, headers=headers, **kwargs)
         return response
 
-    def post(self, route: str, data: dict = None, headers: dict = None, **kwargs) -> requests.Response:
+    def post(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP POST request.
 
@@ -154,7 +154,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('POST', route, data=data, headers=headers, **kwargs)
         return response
 
-    def put(self, route: str, data: dict = None, headers: dict = None, **kwargs) -> requests.Response:
+    def put(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PUT request.
 
@@ -173,7 +173,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('PUT', route, data=data, headers=headers, **kwargs)
         return response
 
-    def patch(self, route: str, data: dict = None, headers: dict = None, **kwargs) -> requests.Response:
+    def patch(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PATCH request.
 
@@ -192,7 +192,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('PATCH', route, data=data, headers=headers, **kwargs)
         return response
 
-    def delete(self, route: str, headers: dict = None, **kwargs) -> requests.Response:
+    def delete(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP DELETE request.
 
@@ -211,7 +211,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('DELETE', route, headers=headers, **kwargs)
         return response
 
-    def options(self, route: str, headers: dict = None, **kwargs) -> requests.Response:
+    def options(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP OPTIONS request.
 
@@ -230,7 +230,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('OPTIONS', route, headers=headers, **kwargs)
         return response
 
-    def trace(self, route: str, headers: dict = None, **kwargs) -> requests.Response:
+    def trace(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP TRACE request.
 
@@ -333,13 +333,13 @@ class SessionAPI(BasicAPI):
         self.session.close()
         return
 
-    def request(self, method: str, endpoint: str, headers: dict = None, **kwargs) -> requests.Response:
+    def request(self, method: str, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP request.
 
         Args:
             method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
-            endpoint: API path to which the request will be sent.
+            route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
             **kwargs: Data or parameters to include in request.
 
@@ -352,7 +352,7 @@ class SessionAPI(BasicAPI):
         """
         log.debug("Sending HTTP %(method)s request", {'method': method})
 
-        uri = urljoin(self.url, endpoint)
+        uri = urljoin(self.url, route)
         log.info("Request: %(method)s %(url)s", {'method': method, 'uri': uri})
 
         if self.session:

@@ -13,7 +13,7 @@ import requests
 log = logging.getLogger(__name__)
 
 
-def pagination(func):
+def pagination(func) -> Callable:
     """
     Args:
         func: Decorated function.

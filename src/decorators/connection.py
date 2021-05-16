@@ -3,6 +3,7 @@
 # Standard Library Imports
 import functools
 import logging
+from typing import Callable
 
 # Third-Party Imports
 import requests
@@ -11,7 +12,7 @@ import requests
 log = logging.getLogger(__name__)
 
 
-def confirm_connection(func):
+def confirm_connection(func) -> Callable:
     """
     Confirms successful connection to API.
 
@@ -19,7 +20,7 @@ def confirm_connection(func):
         func: Function to decorate.
 
     Returns:
-            Wrapped function.
+        Wrapped function.
 
     """
     @functools.wraps(func)

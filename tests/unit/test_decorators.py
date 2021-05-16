@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
-import time
 from unittest.mock import Mock
 
 # Third-Party Imports
@@ -18,7 +17,10 @@ def test_pagination_repeats_request():
         'total': 2
     }
 
-    reducer = lambda state, res: { **state, 'results': state.get('results') + res.get('results') if state.get('results') else res.get('results'), 'total': res.get('total')}
+    reducer = lambda state, res: {
+        **state,
+        'results': state.get('results') + res.get('results') if state.get('results') else res.get('results'),
+        'total': res.get('total')}
     callback = lambda state, res: state.get('results') >= res.get('total')
 
     wrapper = pagination(request)
