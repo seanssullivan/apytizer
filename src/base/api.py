@@ -7,16 +7,19 @@ This module defines a basic API class implementation.
 
 # Standard Library Imports
 import logging
+import operator
 from typing import Dict, MutableMapping, Tuple, Union
 from urllib.parse import urljoin
 
 # Third-Party Imports
+from cachetools import cachedmethod
 import requests
 from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
 
 # Local Imports
 from ..abstracts.api import AbstractAPI
+from .utils import generate_key
 
 
 log = logging.getLogger(__name__)
@@ -71,7 +74,7 @@ class BasicAPI(AbstractAPI):
             method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -92,19 +95,15 @@ class BasicAPI(AbstractAPI):
         response = requests.request(method, uri, auth=self.auth, headers=headers, **kwargs)
         return response
 
-    def head(
-        self,
-        route: str,
-        headers: Dict = None,
-        **kwargs
-    ) -> requests.Response:
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('HEAD'))
+    def head(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP HEAD request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -116,6 +115,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('HEAD', route, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('GET'))
     def get(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request.
@@ -123,7 +123,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -135,6 +135,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('GET', route, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('POST'))
     def post(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP POST request.
@@ -142,7 +143,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -154,6 +155,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('POST', route, data=data, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('PUT'))
     def put(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PUT request.
@@ -161,7 +163,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -173,6 +175,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('PUT', route, data=data, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('PATCH'))
     def patch(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PATCH request.
@@ -180,7 +183,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -192,6 +195,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('PATCH', route, data=data, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('DELETE'))
     def delete(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP DELETE request.
@@ -199,7 +203,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -211,6 +215,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('DELETE', route, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('OPTIONS'))
     def options(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP OPTIONS request.
@@ -218,7 +223,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -230,6 +235,7 @@ class BasicAPI(AbstractAPI):
         response = self.request('OPTIONS', route, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('TRACE'))
     def trace(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP TRACE request.
@@ -237,7 +243,7 @@ class BasicAPI(AbstractAPI):
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.
@@ -248,7 +254,6 @@ class BasicAPI(AbstractAPI):
         """
         response = self.request('TRACE', route, headers=headers, **kwargs)
         return response
-
 
 
 class SessionAPI(BasicAPI):
@@ -341,7 +346,7 @@ class SessionAPI(BasicAPI):
             method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
-            **kwargs: Data or parameters to include in request.
+            **kwargs: Additional arguments to pass to request.
 
         Returns:
             Response object.

@@ -8,11 +8,15 @@ This module defines a basic endpoint class implementation.
 
 # Standard Library Imports
 from __future__ import annotations
+from functools import partial
 import logging
+import operator
 from typing import Dict, List, MutableMapping, Union
 from urllib.parse import urljoin
 
 # Third-Party Imports
+from cachetools import cachedmethod
+from cachetools.keys import hashkey
 import requests
 
 # Local Imports
@@ -209,6 +213,7 @@ class BasicEndpoint(AbstractEndpoint):
         response = self.api.head(self.path, headers=self.headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=partial(hashkey, 'ENDPOINT', 'GET'))
     def get(self, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request to API endpoint.
