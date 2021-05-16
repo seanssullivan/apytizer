@@ -22,6 +22,7 @@ import requests
 # Local Imports
 from ..abstracts.api import AbstractAPI
 from ..abstracts.endpoint import AbstractEndpoint
+from .utils import merge_headers
 
 
 log = logging.getLogger(__name__)
@@ -90,10 +91,6 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
         if isinstance(ref, (int, str)):
-            headers = dict(self.headers, **headers) if self.headers and headers \
-                else headers if headers and not self.headers \
-                else self.headers
-
             endpoint = BasicEndpoint(
                 self.api,
                 f'{self.path!s}/{ref!s}',
@@ -122,11 +119,9 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
         if isinstance(ref, (int, str)):
-            headers = self.headers if self.headers else None
             endpoint = BasicEndpoint(
                 self.api,
-                f'{self.path!s}/{ref!s}',
-                headers=headers
+                f'{self.path!s}/{ref!s}'
             )
         else:
             raise TypeError
@@ -149,11 +144,9 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
         if isinstance(path, (int, str)):
-            headers = self.headers if self.headers else None
             endpoint = BasicEndpoint(
                 self.api,
-                f'{self.path!s}/{path!s}',
-                headers=headers
+                f'{self.path!s}/{path!s}'
             )
         else:
             raise TypeError
@@ -176,11 +169,9 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
         if isinstance(path, (int, str)):
-            headers = self.headers if self.headers else None
             endpoint = BasicEndpoint(
                 self.api,
-                f'{self.path!s}/{path!s}',
-                headers=headers
+                f'{self.path!s}/{path!s}'
             )
         else:
             raise TypeError
@@ -206,10 +197,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'HEAD' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.head(self.path, headers=self.headers, **kwargs)
         return response
 
@@ -233,10 +221,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'GET' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.get(self.path, headers=self.headers, **kwargs)
         return response
 
@@ -259,10 +244,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'POST' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.post(self.path, headers=self.headers, data=data, **kwargs)
         return response
 
@@ -285,10 +267,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'PUT' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.put(self.path, headers=self.headers, data=data, **kwargs)
         return response
 
@@ -311,10 +290,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'PATCH' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.patch(self.path, headers=self.headers, data=data, **kwargs)
         return response
 
@@ -337,10 +313,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'DELETE' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.delete(self.path, headers=self.headers, **kwargs)
         return response
 
@@ -362,10 +335,7 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'OPTIONS' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.options(self.path, headers=self.headers, **kwargs)
         return response
 
@@ -388,9 +358,6 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'TRACE' not in self.methods:
             raise NotImplementedError
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = self.api.trace(self.path, headers=self.headers, **kwargs)
         return response

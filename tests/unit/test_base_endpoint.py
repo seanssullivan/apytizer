@@ -103,53 +103,6 @@ def test_endpoint_get_method_when_not_allowed(mock_api):
     assert not mock_api.get.called
 
 
-
-def test_endpoint_get_request_response_is_cached(mock_api):
-    mock_api.get.return_value.ok = True
-    mock_api.get.return_value.json.return_value = {
-        'name': 'example',
-        'status': 'testing'
-    }
-
-    mock_cache = {}
-
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        cache=mock_cache
-    )
-
-    first_response = test_endpoint.get()
-    second_response = test_endpoint.get()
-
-    assert first_response.json() == second_response.json()
-    assert mock_api.get.call_count == 1
-    assert mock_cache == {
-        ('ENDPOINT', 'GET'): mock_api.get.return_value
-    }
-
-
-def test_api_get_request_response_not_cached_when_cache_not_provided(mock_api):
-    mock_api.get.return_value.ok = True
-    mock_api.get.return_value.json.return_value = {
-        'name': 'example',
-        'status': 'testing'
-    }
-
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
-    )
-
-    first_response = test_endpoint.get()
-    second_response = test_endpoint.get()
-
-    assert first_response.json() == second_response.json()
-    assert mock_api.get.call_count == 2
-
-
 def test_endpoint_post_method_when_response_is_ok(mock_api):
     mock_api.post.return_value.ok = True
     mock_api.post.return_value.text = 'created'

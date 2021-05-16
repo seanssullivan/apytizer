@@ -20,6 +20,7 @@ from requests.auth import HTTPBasicAuth
 # Local Imports
 from ..abstracts.api import AbstractAPI
 from .utils import generate_key
+from .utils import merge_headers
 
 
 log = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ class BasicAPI(AbstractAPI):
 
     The BasicAPI class provides an interface for interacting with a REST API.
     It implements the standard HTTP methods (HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS and TRACE)
-    as well as a `requests` method for sending a custom HTTP request.
+    as well as a `request` method for sending a custom HTTP request.
 
     Args:
         url: Base URL for API.
@@ -88,10 +89,7 @@ class BasicAPI(AbstractAPI):
         uri = urljoin(self.url, route)
         log.info("Request: %(method)s %(uri)s", {'method': method, 'uri': uri})
 
-        headers = dict(self.headers, **headers) if self.headers and headers \
-            else headers if headers and not self.headers \
-            else self.headers
-
+        headers = merge_headers(self.headers, headers)
         response = requests.request(method, uri, auth=self.auth, headers=headers, **kwargs)
         return response
 
