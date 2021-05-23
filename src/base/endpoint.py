@@ -17,8 +17,8 @@ from cachetools import cachedmethod
 import requests
 
 # Local Imports
-from ..abstracts.api import AbstractAPI
-from ..abstracts.endpoint import AbstractEndpoint
+from src.abstracts.api import AbstractAPI
+from src.abstracts.endpoint import AbstractEndpoint
 from .utils import generate_key
 from .utils import merge_headers
 

@@ -18,7 +18,7 @@ from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
 
 # Local Imports
-from ..abstracts.api import AbstractAPI
+from src.abstracts.api import AbstractAPI
 from .utils import generate_key
 from .utils import merge_headers
 
@@ -39,9 +39,6 @@ class BasicAPI(AbstractAPI):
         auth: Authorization or credentials.
         headers (optional): Headers to set globally for API.
         cache (optional): Mutable mapping for caching responses.
-
-    .. Requests Documentation:
-        https://docs.python-requests.org/en/latest/
 
     """
 
@@ -87,7 +84,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. Requests Documentation:
+        .. _Requests Documentation:
             https://docs.python-requests.org/en/latest/api/
 
         """
@@ -113,7 +110,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP HEAD Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
@@ -133,7 +130,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP GET Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
@@ -153,7 +150,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP POST Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
@@ -173,7 +170,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP PUT Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
@@ -193,7 +190,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP PATCH Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
@@ -213,7 +210,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP DELETE Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
@@ -233,7 +230,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP OPTIONS Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
@@ -253,7 +250,7 @@ class BasicAPI(AbstractAPI):
         Returns:
             Response object.
 
-        .. _MDN Web Docs:
+        .. _HTTP TRACE Method:
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """

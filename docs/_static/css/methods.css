@@ -1,0 +1,7 @@
+.method {
+  padding-bottom: 50px;
+}
+
+.method > dd {
+  padding-top: 10px;
+}

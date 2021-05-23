@@ -1,0 +1,9 @@
+# .coveragerc to control coverage.py
+
+[run]
+include =
+    src/*
+
+omit =
+    env/*
+    tests/*

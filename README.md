@@ -1,2 +1,3 @@
 # apytizer
-A collection of wrappers for REST APIs built with Python.
+
+Implement wrappers for REST APIs quickly in Python.

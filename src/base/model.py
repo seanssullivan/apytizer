@@ -11,7 +11,7 @@ import functools
 from typing import Dict, List, Tuple, Union
 
 # Local Imports
-from ..abstracts.model import AbstractModel
+from src.abstracts.model import AbstractModel
 
 
 class BasicModel(AbstractModel):
