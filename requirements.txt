@@ -1,5 +1,9 @@
 cachetools
+coverage
 pytest
 python-dateutil
 python-dotenv
 requests
+sphinx
+tox
+wheel
