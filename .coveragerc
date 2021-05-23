@@ -6,4 +6,5 @@ include =
 
 omit =
     env/*
+    src/abstracts/*
     tests/*
