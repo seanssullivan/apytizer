@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Basic endpoint class.
 
 This module defines a basic endpoint class implementation.
@@ -8,7 +7,6 @@ This module defines a basic endpoint class implementation.
 
 # Standard Library Imports
 from __future__ import annotations
-from functools import partial
 import logging
 import operator
 from typing import Dict, List, MutableMapping, Union
@@ -16,12 +14,12 @@ from urllib.parse import urljoin
 
 # Third-Party Imports
 from cachetools import cachedmethod
-from cachetools.keys import hashkey
 import requests
 
 # Local Imports
 from ..abstracts.api import AbstractAPI
 from ..abstracts.endpoint import AbstractEndpoint
+from .utils import generate_key
 from .utils import merge_headers
 
 
@@ -58,6 +56,13 @@ class BasicEndpoint(AbstractEndpoint):
     @property
     def uri(self) -> str:
         return urljoin(self.api.url, self.path)
+
+    @property
+    def url(self) -> str:
+        return self.uri
+
+    def __hash__(self) -> int:
+        return hash(self.uri)
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__!s} methods={self.methods!s} uri={self.uri!s}>'
@@ -178,6 +183,7 @@ class BasicEndpoint(AbstractEndpoint):
 
         return endpoint
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('HEAD'))
     def head(self, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP HEAD request to API endpoint.
@@ -198,10 +204,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.head(self.path, headers=self.headers, **kwargs)
+        response = self.api.head(self.path, headers=headers, **kwargs)
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=partial(hashkey, 'ENDPOINT', 'GET'))
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('GET'))
     def get(self, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP GET request to API endpoint.
@@ -222,9 +228,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.get(self.path, headers=self.headers, **kwargs)
+        response = self.api.get(self.path, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('POST'))
     def post(self, data: Dict, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP POST request to API endpoint.
@@ -245,9 +252,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.post(self.path, headers=self.headers, data=data, **kwargs)
+        response = self.api.post(self.path, headers=headers, data=data, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('PUT'))
     def put(self, data: Dict, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PUT request to API endpoint.
@@ -268,9 +276,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.put(self.path, headers=self.headers, data=data, **kwargs)
+        response = self.api.put(self.path, headers=headers, data=data, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('PATCH'))
     def patch(self, data: Dict, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP PATCH request to API endpoint.
@@ -291,9 +300,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.patch(self.path, headers=self.headers, data=data, **kwargs)
+        response = self.api.patch(self.path, headers=headers, data=data, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('DELETE'))
     def delete(self, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP DELETE request to API endpoint.
@@ -314,9 +324,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.delete(self.path, headers=self.headers, **kwargs)
+        response = self.api.delete(self.path, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('OPTIONS'))
     def options(self, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP OPTIONS request to API endpoint.
@@ -336,9 +347,10 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.options(self.path, headers=self.headers, **kwargs)
+        response = self.api.options(self.path, headers=headers, **kwargs)
         return response
 
+    @cachedmethod(operator.attrgetter('cache'), key=generate_key('TRACE'))
     def trace(self, headers: Dict = None, **kwargs) -> requests.Response:
         """
         Sends an HTTP TRACE request to API endpoint.
@@ -359,5 +371,5 @@ class BasicEndpoint(AbstractEndpoint):
             raise NotImplementedError
 
         headers = merge_headers(self.headers, headers)
-        response = self.api.trace(self.path, headers=self.headers, **kwargs)
+        response = self.api.trace(self.path, headers=headers, **kwargs)
         return response

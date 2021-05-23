@@ -29,7 +29,7 @@ class TransportAdapter(HTTPAdapter):
         kwargs.setdefault('max_retries', Retry(
             total=10,
             status_forcelist=[413, 429, 500, 502, 503, 504],
-            method_whitelist=["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE"],
+            allowed_methods=["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE"],
             backoff_factor=kwargs.pop('rate_limit', 1)
         ))
         self.timeout = kwargs.pop('timeout', 5)

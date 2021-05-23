@@ -1,25 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Standard Library Imports
-from unittest.mock import Mock
+# pylint: disable=protected-access
 
 # Third-Party Imports
 import pytest
 
 # Local Imports
 from src.base.endpoint import BasicEndpoint
-
-
-@pytest.fixture
-def mock_api():
-    mock = Mock()
-    mock.url = 'testing/'
-    mock.headers = {'Content-Type': 'application/json'}
-    mock.get = Mock()
-    mock.post = Mock()
-    mock.put = Mock()
-    mock.delete = Mock()
-    return mock
 
 
 def test_endpoint_uri_contains_base_and_path(mock_api):
@@ -64,6 +51,44 @@ def test_endpoint_head_method_when_not_allowed(mock_api):
     assert not mock_api.head.called
 
 
+def test_endpoint_head_response_is_cached(mock_api):
+    mock_api.head.return_value.ok = True
+
+    mock_cache = {}
+
+    test_endpoint = BasicEndpoint(
+        mock_api,
+        'test',
+        headers={'Accept': 'application/json'},
+        cache=mock_cache
+    )
+
+    first_response = test_endpoint.head()
+    second_response = test_endpoint.head()
+
+    assert first_response == second_response
+    assert mock_api.head.call_count == 1
+    assert mock_cache == {
+        ('HEAD',): mock_api.head.return_value
+    }
+
+
+def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
+    mock_api.head.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(
+        mock_api,
+        'test',
+        headers={'Accept': 'application/json'}
+    )
+
+    first_response = test_endpoint.head()
+    second_response = test_endpoint.head()
+
+    assert first_response == second_response
+    assert mock_api.head.call_count == 2
+
+
 def test_endpoint_get_method_when_response_is_ok(mock_api):
     mock_api.get.return_value.ok = True
     mock_api.get.return_value.json.return_value = {
@@ -101,6 +126,44 @@ def test_endpoint_get_method_when_not_allowed(mock_api):
         test_endpoint.get()
 
     assert not mock_api.get.called
+
+
+def test_endpoint_get_response_is_cached(mock_api):
+    mock_api.get.return_value.ok = True
+
+    mock_cache = {}
+
+    test_endpoint = BasicEndpoint(
+        mock_api,
+        'test',
+        headers={'Accept': 'application/json'},
+        cache=mock_cache
+    )
+
+    first_response = test_endpoint.get()
+    second_response = test_endpoint.get()
+
+    assert first_response == second_response
+    assert mock_api.get.call_count == 1
+    assert mock_cache == {
+        ('GET',): mock_api.get.return_value
+    }
+
+
+def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
+    mock_api.get.return_value.ok = True
+
+    test_endpoint = BasicEndpoint(
+        mock_api,
+        'test',
+        headers={'Accept': 'application/json'}
+    )
+
+    first_response = test_endpoint.get()
+    second_response = test_endpoint.get()
+
+    assert first_response == second_response
+    assert mock_api.get.call_count == 2
 
 
 def test_endpoint_post_method_when_response_is_ok(mock_api):
@@ -240,7 +303,7 @@ def test_endpoint_delete_method_when_response_is_ok(mock_api):
     )
 
 
-def test_endpoint_delete_method_when_delete_not_allowed(mock_api):
+def test_endpoint_delete_method_when_not_allowed(mock_api):
     test_endpoint = BasicEndpoint(
         mock_api,
         'test',
@@ -277,7 +340,7 @@ def test_endpoint_options_method_when_response_is_ok(mock_api):
     )
 
 
-def test_endpoint_options_method_when_delete_not_allowed(mock_api):
+def test_endpoint_options_method_when_not_allowed(mock_api):
     test_endpoint = BasicEndpoint(
         mock_api,
         'test',

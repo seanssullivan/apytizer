@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=protected-access
+
 # Standard Library Imports
 from unittest.mock import Mock
-
-# Third-Party Imports
-import pytest
 
 # Local Imports
 from src.decorators.pagination import pagination

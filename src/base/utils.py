@@ -25,4 +25,5 @@ def merge_headers(initial_headers: Dict, new_headers: Dict) -> Dict:
     headers = dict(initial_headers, **new_headers) if initial_headers and new_headers \
         else new_headers if new_headers and not initial_headers \
         else initial_headers
+
     return headers

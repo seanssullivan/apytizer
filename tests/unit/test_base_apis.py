@@ -1,31 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Standard Library Imports
-from unittest.mock import Mock, patch
+# pylint: disable=protected-access
 
 # Third-Party Imports
-import pytest
 import requests
 
 # Local Imports
 from src.base.api import BasicAPI
 from src.base.api import SessionAPI
-
-
-@pytest.fixture
-def mock_request():
-    mock_patcher = patch('src.base.api.requests.request')
-    yield mock_patcher.start()
-    mock_patcher.stop()
-
-
-@pytest.fixture
-def mock_session():
-    session = Mock()
-    session.start = Mock()
-    session.close = Mock()
-    session.request = Mock()
-    return session
 
 
 def test_api_head_request_when_response_is_ok(mock_request):
@@ -52,7 +34,7 @@ def test_api_head_request_when_response_is_ok(mock_request):
     }
 
 
-def test_api_head_request_response_is_cached(mock_request):
+def test_api_head_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -73,7 +55,7 @@ def test_api_head_request_response_is_cached(mock_request):
     }
 
 
-def test_api_head_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_head_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -115,7 +97,7 @@ def test_api_get_request_when_response_is_ok(mock_request):
     }
 
 
-def test_api_get_request_response_is_cached(mock_request):
+def test_api_get_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -137,7 +119,7 @@ def test_api_get_request_response_is_cached(mock_request):
     }
 
 
-def test_api_get_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_get_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -186,7 +168,7 @@ def test_api_post_request_when_response_is_ok(mock_request):
     assert response.status_code == 201
 
 
-def test_api_post_request_response_is_cached(mock_request):
+def test_api_post_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -216,7 +198,7 @@ def test_api_post_request_response_is_cached(mock_request):
     }
 
 
-def test_api_post_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_post_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -273,7 +255,7 @@ def test_api_put_request_when_response_is_ok(mock_request):
     assert response.status_code == 204
 
 
-def test_api_put_request_response_is_cached(mock_request):
+def test_api_put_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -303,7 +285,7 @@ def test_api_put_request_response_is_cached(mock_request):
     }
 
 
-def test_api_put_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_put_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -360,7 +342,7 @@ def test_api_patch_request_when_response_is_ok(mock_request):
     assert response.status_code == 204
 
 
-def test_api_patch_request_response_is_cached(mock_request):
+def test_api_patch_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -390,7 +372,7 @@ def test_api_patch_request_response_is_cached(mock_request):
     }
 
 
-def test_api_patch_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_patch_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -435,7 +417,7 @@ def test_api_delete_request_when_response_is_ok(mock_request):
     assert response.status_code == 204
 
 
-def test_api_delete_request_response_is_cached(mock_request):
+def test_api_delete_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -456,7 +438,7 @@ def test_api_delete_request_response_is_cached(mock_request):
     }
 
 
-def test_api_delete_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_delete_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -496,7 +478,7 @@ def test_api_options_request_when_response_is_ok(mock_request):
     }
 
 
-def test_api_options_request_response_is_cached(mock_request):
+def test_api_options_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -517,7 +499,7 @@ def test_api_options_request_response_is_cached(mock_request):
     }
 
 
-def test_api_options_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_options_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(
@@ -556,7 +538,7 @@ def test_api_trace_request_when_response_is_ok(mock_request):
     }
 
 
-def test_api_trace_request_response_is_cached(mock_request):
+def test_api_trace_response_is_cached(mock_request):
     mock_request.return_value.ok = True
 
     mock_cache = {}
@@ -577,7 +559,7 @@ def test_api_trace_request_response_is_cached(mock_request):
     }
 
 
-def test_api_trace_request_response_not_cached_when_cache_not_provided(mock_request):
+def test_api_trace_response_not_cached_when_cache_not_provided(mock_request):
     mock_request.return_value.ok = True
 
     api = BasicAPI(

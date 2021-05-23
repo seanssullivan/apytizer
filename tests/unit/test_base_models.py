@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=protected-access
+
 # Standard Library Imports
 from unittest.mock import Mock
 
