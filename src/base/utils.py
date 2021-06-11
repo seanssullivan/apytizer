@@ -18,12 +18,12 @@ def generate_key(*tags):
     return hash_parameters
 
 
-def merge_headers(initial_headers: Dict, new_headers: Dict) -> Dict:
+def merge(initial: Dict, new: Dict) -> Dict:
     """
     Combines two sets of headers.
     """
-    headers = dict(initial_headers, **new_headers) if initial_headers and new_headers \
-        else new_headers if new_headers and not initial_headers \
-        else initial_headers
+    headers = dict(initial, **new) if initial and new \
+        else new if new and not initial \
+        else initial
 
     return headers

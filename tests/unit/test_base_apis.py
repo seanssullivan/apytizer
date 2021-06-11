@@ -10,6 +10,10 @@ from src.base.api import BasicAPI
 from src.base.api import SessionAPI
 
 
+# --------------------------------------------------------------------------------
+# Tests for HEAD Method
+# --------------------------------------------------------------------------------
+
 def test_api_head_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.headers = {
@@ -27,7 +31,8 @@ def test_api_head_request_when_response_is_ok(mock_request):
         'HEAD',
         'testing/test',
         auth=('test_case', 'token'),
-        headers=None
+        headers=None,
+        params=None,
     )
     assert response.headers == {
         'Content-Type': 'application/json'
@@ -70,6 +75,10 @@ def test_api_head_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for GET Method
+# --------------------------------------------------------------------------------
+
 def test_api_get_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.json.return_value = {
@@ -89,7 +98,8 @@ def test_api_get_request_when_response_is_ok(mock_request):
         'GET',
         'testing/test',
         auth=('test_case', 'token'),
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        params=None,
     )
     assert response.json() == {
         'name': 'example',
@@ -135,6 +145,10 @@ def test_api_get_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for POST Method
+# --------------------------------------------------------------------------------
+
 def test_api_post_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.status_code = 201
@@ -159,11 +173,12 @@ def test_api_post_request_when_response_is_ok(mock_request):
         'POST',
         'testing/test',
         auth=('test_case', 'token'),
+        data=data,
         headers={
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        data=data
+        params=None,
     )
     assert response.status_code == 201
 
@@ -222,6 +237,10 @@ def test_api_post_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for PUT Method
+# --------------------------------------------------------------------------------
+
 def test_api_put_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.status_code = 204
@@ -246,11 +265,12 @@ def test_api_put_request_when_response_is_ok(mock_request):
         'PUT',
         'testing/test',
         auth=('test_case', 'token'),
+        data=data,
         headers={
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        data=data
+        params=None,
     )
     assert response.status_code == 204
 
@@ -309,6 +329,10 @@ def test_api_put_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for PATCH Method
+# --------------------------------------------------------------------------------
+
 def test_api_patch_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.status_code = 204
@@ -333,11 +357,12 @@ def test_api_patch_request_when_response_is_ok(mock_request):
         'PATCH',
         'testing/test',
         auth=('test_case', 'token'),
+        data=data,
         headers={
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        data=data
+        params=None,
     )
     assert response.status_code == 204
 
@@ -396,6 +421,10 @@ def test_api_patch_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for DELETE Method
+# --------------------------------------------------------------------------------
+
 def test_api_delete_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.status_code = 204
@@ -412,7 +441,8 @@ def test_api_delete_request_when_response_is_ok(mock_request):
         'DELETE',
         'testing/test',
         auth=('test_case', 'token'),
-        headers=None
+        headers=None,
+        params=None,
     )
     assert response.status_code == 204
 
@@ -453,6 +483,10 @@ def test_api_delete_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for OPTIONS Method
+# --------------------------------------------------------------------------------
+
 def test_api_options_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.headers = {
@@ -471,7 +505,8 @@ def test_api_options_request_when_response_is_ok(mock_request):
         'OPTIONS',
         'testing/test',
         auth=('test_case', 'token'),
-        headers=None
+        headers=None,
+        params=None,
     )
     assert response.headers == {
         'Allow': ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE']
@@ -514,6 +549,10 @@ def test_api_options_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for TRACE Method
+# --------------------------------------------------------------------------------
+
 def test_api_trace_request_when_response_is_ok(mock_request):
     mock_request.return_value.ok = True
     mock_request.return_value.headers = {
@@ -531,7 +570,8 @@ def test_api_trace_request_when_response_is_ok(mock_request):
         'TRACE',
         'testing/test',
         auth=('test_case', 'token'),
-        headers=None
+        headers=None,
+        params=None,
     )
     assert response.headers == {
         'Content-Type': 'application/json'
@@ -574,6 +614,11 @@ def test_api_trace_response_not_cached_when_cache_not_provided(mock_request):
     assert mock_request.call_count == 2
 
 
+
+# --------------------------------------------------------------------------------
+# Additional Tests for API
+# --------------------------------------------------------------------------------
+
 def test_api_request_updates_headers(mock_request):
     mock_request.return_value.ok = True
 
@@ -582,13 +627,14 @@ def test_api_request_updates_headers(mock_request):
         headers={'Accept': 'application/json'}
     )
 
-    api.request("GET", "test", headers={'Accept': 'text/html'})
+    api.get("test", headers={'Accept': 'text/html'})
 
     mock_request.assert_called_once_with(
         'GET',
         'testing/test',
         auth=None,
-        headers={'Accept': 'text/html'}
+        headers={'Accept': 'text/html'},
+        params=None,
     )
 
 
@@ -611,11 +657,12 @@ def test_session_request_updates_headers(mock_session):
     mock_session.request.assert_called_once_with(
         'POST',
         'testing/test',
+        data=data,
         headers={
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        data=data
+        params=None,
     )
 
 

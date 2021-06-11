@@ -2,6 +2,9 @@
 
 # pylint: disable=protected-access
 
+# Standard Library Imports
+from unittest.mock import Mock
+
 # Third-Party Imports
 import pytest
 
@@ -9,10 +12,34 @@ import pytest
 from src.base.endpoint import BasicEndpoint
 
 
+@pytest.fixture
+def mock_api():
+    mock = Mock()
+    mock.url = 'testing/'
+    mock.headers = {'Content-Type': 'application/json'}
+    mock.head = Mock()
+    mock.get = Mock()
+    mock.post = Mock()
+    mock.put = Mock()
+    mock.patch = Mock()
+    mock.delete = Mock()
+    mock.options = Mock()
+    mock.trace = Mock()
+    return mock
+
+
+# --------------------------------------------------------------------------------
+# Tests for Endpoint
+# --------------------------------------------------------------------------------
+
 def test_endpoint_uri_contains_base_and_path(mock_api):
     test_endpoint = BasicEndpoint(mock_api, 'test')
     assert test_endpoint.uri == 'testing/test'
 
+
+# --------------------------------------------------------------------------------
+# Tests for HEAD Method
+# --------------------------------------------------------------------------------
 
 def test_endpoint_head_method_when_response_is_ok(mock_api):
     mock_api.head.return_value.ok = True
@@ -33,7 +60,8 @@ def test_endpoint_head_method_when_response_is_ok(mock_api):
     }
     mock_api.head.assert_called_once_with(
         'test',
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        params=None,
     )
 
 
@@ -89,6 +117,10 @@ def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
     assert mock_api.head.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for GET Method
+# --------------------------------------------------------------------------------
+
 def test_endpoint_get_method_when_response_is_ok(mock_api):
     mock_api.get.return_value.ok = True
     mock_api.get.return_value.json.return_value = {
@@ -110,7 +142,8 @@ def test_endpoint_get_method_when_response_is_ok(mock_api):
     }
     mock_api.get.assert_called_once_with(
         'test',
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        params=None,
     )
 
 
@@ -166,6 +199,10 @@ def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
     assert mock_api.get.call_count == 2
 
 
+# --------------------------------------------------------------------------------
+# Tests for POST Method
+# --------------------------------------------------------------------------------
+
 def test_endpoint_post_method_when_response_is_ok(mock_api):
     mock_api.post.return_value.ok = True
     mock_api.post.return_value.text = 'created'
@@ -187,8 +224,9 @@ def test_endpoint_post_method_when_response_is_ok(mock_api):
     assert response.text == 'created'
     mock_api.post.assert_called_once_with(
         'test',
+        data=data,
         headers={'Accept': 'application/json'},
-        data=data
+        params=None,
     )
 
 
@@ -205,6 +243,10 @@ def test_endpoint_post_method_when_not_allowed(mock_api):
 
     assert not mock_api.post.called
 
+
+# --------------------------------------------------------------------------------
+# Tests for PUT Method
+# --------------------------------------------------------------------------------
 
 def test_endpoint_put_method_when_response_is_ok(mock_api):
     mock_api.put.return_value.ok = True
@@ -226,8 +268,9 @@ def test_endpoint_put_method_when_response_is_ok(mock_api):
     assert response.text == 'success'
     mock_api.put.assert_called_once_with(
         'test',
+        data=data,
         headers={'Accept': 'application/json'},
-        data=data
+        params=None,
     )
 
 
@@ -244,6 +287,10 @@ def test_endpoint_put_method_when_not_allowed(mock_api):
 
     assert not mock_api.put.called
 
+
+# --------------------------------------------------------------------------------
+# Tests for PATCH Method
+# --------------------------------------------------------------------------------
 
 def test_endpoint_patch_method_when_response_is_ok(mock_api):
     mock_api.patch.return_value.ok = True
@@ -265,8 +312,9 @@ def test_endpoint_patch_method_when_response_is_ok(mock_api):
     assert response.text == 'success'
     mock_api.patch.assert_called_once_with(
         'test',
+        data=data,
         headers={'Accept': 'application/json'},
-        data=data
+        params=None,
     )
 
 
@@ -284,6 +332,10 @@ def test_endpoint_patch_method_when_not_allowed(mock_api):
     assert not mock_api.patch.called
 
 
+# --------------------------------------------------------------------------------
+# Tests for DELETE Method
+# --------------------------------------------------------------------------------
+
 def test_endpoint_delete_method_when_response_is_ok(mock_api):
     mock_api.delete.return_value.ok = True
     mock_api.delete.return_value.text = 'success'
@@ -299,7 +351,8 @@ def test_endpoint_delete_method_when_response_is_ok(mock_api):
     assert response.text == 'success'
     mock_api.delete.assert_called_once_with(
         'test',
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        params=None,
     )
 
 
@@ -316,6 +369,10 @@ def test_endpoint_delete_method_when_not_allowed(mock_api):
 
     assert not mock_api.delete.called
 
+
+# --------------------------------------------------------------------------------
+# Tests for OPTIONS Method
+# --------------------------------------------------------------------------------
 
 def test_endpoint_options_method_when_response_is_ok(mock_api):
     mock_api.options.return_value.ok = True
@@ -336,7 +393,8 @@ def test_endpoint_options_method_when_response_is_ok(mock_api):
     }
     mock_api.options.assert_called_once_with(
         'test',
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        params=None,
     )
 
 
@@ -354,6 +412,10 @@ def test_endpoint_options_method_when_not_allowed(mock_api):
     assert not mock_api.options.called
 
 
+
+# --------------------------------------------------------------------------------
+# Tests for TRACE Method
+# --------------------------------------------------------------------------------
 
 def test_endpoint_trace_method_when_response_is_ok(mock_api):
     mock_api.trace.return_value.ok = True
@@ -374,7 +436,8 @@ def test_endpoint_trace_method_when_response_is_ok(mock_api):
     }
     mock_api.trace.assert_called_once_with(
         'test',
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        params=None,
     )
 
 
@@ -391,6 +454,10 @@ def test_endpoint_trace_method_when_not_allowed(mock_api):
 
     assert not mock_api.trace.called
 
+
+# --------------------------------------------------------------------------------
+# Tests for Magic Methods
+# --------------------------------------------------------------------------------
 
 def test_endpoint__call__returns_new_endpoint(mock_api):
     initial_endpoint = BasicEndpoint(

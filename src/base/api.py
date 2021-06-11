@@ -7,20 +7,18 @@ This module defines a basic API class implementation.
 
 # Standard Library Imports
 import logging
-import operator
 from typing import Dict, MutableMapping, Tuple, Union
 from urllib.parse import urljoin
 
 # Third-Party Imports
-from cachetools import cachedmethod
 import requests
 from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
 
 # Local Imports
-from src.abstracts.api import AbstractAPI
-from .utils import generate_key
-from .utils import merge_headers
+from ..abstracts.api import AbstractAPI
+from ..decorators.caching import cache_response
+from .utils import merge
 
 
 log = logging.getLogger(__name__)
@@ -38,7 +36,11 @@ class BasicAPI(AbstractAPI):
         url: Base URL for API.
         auth: Authorization or credentials.
         headers (optional): Headers to set globally for API.
+        params (optional): Parameters to set globally for API.
         cache (optional): Mutable mapping for caching responses.
+
+    Attributes:
+        url: API URL.
 
     """
 
@@ -48,11 +50,13 @@ class BasicAPI(AbstractAPI):
         auth: Union[HTTPBasicAuth, Tuple] = None,
         *,
         headers: Dict = None,
+        params: Dict = None,
         cache: MutableMapping = None
     ):
         self.url = url
         self.auth = auth
         self.headers = headers
+        self.params = params
         self.cache = cache
 
     def __eq__(self, other: AbstractAPI) -> bool:
@@ -70,6 +74,7 @@ class BasicAPI(AbstractAPI):
         method: str,
         route: str,
         headers: Dict = None,
+        params: Dict = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -79,6 +84,7 @@ class BasicAPI(AbstractAPI):
             method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -93,18 +99,33 @@ class BasicAPI(AbstractAPI):
         uri = urljoin(self.url, route)
         log.info("Request: %(method)s %(uri)s", {'method': method, 'uri': uri})
 
-        headers = merge_headers(self.headers, headers)
-        response = requests.request(method, uri, auth=self.auth, headers=headers, **kwargs)
+        headers = merge(self.headers, headers)
+        params = merge(self.params, params)
+        response = requests.request(
+            method,
+            uri,
+            auth=self.auth,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('HEAD'))
-    def head(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def head(
+        self,
+        route: str,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP HEAD request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -114,17 +135,30 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
-        response = self.request('HEAD', route, headers=headers, **kwargs)
+        response = self.request(
+            'HEAD',
+            route,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('GET'))
-    def get(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def get(
+        self,
+        route: str,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP GET request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -134,17 +168,31 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
-        response = self.request('GET', route, headers=headers, **kwargs)
+        response = self.request(
+            'GET',
+            route,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('POST'))
-    def post(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def post(
+        self,
+        route: str,
+        data: Dict = None,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP POST request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -154,17 +202,32 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
-        response = self.request('POST', route, data=data, headers=headers, **kwargs)
+        response = self.request(
+            'POST',
+            route,
+            data=data,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('PUT'))
-    def put(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def put(
+        self,
+        route: str,
+        data: Dict = None,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP PUT request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -174,17 +237,32 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
-        response = self.request('PUT', route, data=data, headers=headers, **kwargs)
+        response = self.request(
+            'PUT',
+            route,
+            data=data,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('PATCH'))
-    def patch(self, route: str, data: Dict = None, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def patch(
+        self,
+        route: str,
+        data: Dict = None,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP PATCH request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -194,17 +272,31 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
-        response = self.request('PATCH', route, data=data, headers=headers, **kwargs)
+        response = self.request(
+            'PATCH',
+            route,
+            data=data,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('DELETE'))
-    def delete(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def delete(
+        self,
+        route: str,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP DELETE request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -214,17 +306,30 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
-        response = self.request('DELETE', route, headers=headers, **kwargs)
+        response = self.request(
+            'DELETE',
+            route,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('OPTIONS'))
-    def options(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def options(
+        self,
+        route: str,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP OPTIONS request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -234,17 +339,30 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
-        response = self.request('OPTIONS', route, headers=headers, **kwargs)
+        response = self.request(
+            'OPTIONS',
+            route,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key('TRACE'))
-    def trace(self, route: str, headers: Dict = None, **kwargs) -> requests.Response:
+    @cache_response
+    def trace(
+        self,
+        route: str,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP TRACE request.
 
         Args:
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -254,7 +372,13 @@ class BasicAPI(AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
-        response = self.request('TRACE', route, headers=headers, **kwargs)
+        response = self.request(
+            'TRACE',
+            route,
+            headers=headers,
+            params=params,
+            **kwargs
+        )
         return response
 
 
@@ -272,6 +396,7 @@ class SessionAPI(BasicAPI):
         url: Base URL for API.
         auth: Authorization or credentials.
         headers (optional): Headers to set globally for API.
+        params (optional): Parameters to set globally for API.
         adapter (optional): Instance of an HTTPAdapter.
         session (optional): Instance of a requests.Session.
         cache (optional): Mutable mapping for caching responses.
@@ -287,11 +412,18 @@ class SessionAPI(BasicAPI):
             auth: Union[HTTPBasicAuth, Tuple] = None,
             *,
             headers: Dict = None,
+            params: Dict = None,
             adapter: HTTPAdapter = None,
             session: requests.Session = None,
             cache: MutableMapping = None,
     ):
-        super().__init__(url, auth, headers=headers, cache=cache)
+        super().__init__(
+            url,
+            auth,
+            headers=headers,
+            params=params,
+            cache=cache
+        )
         self.adapter = adapter
         self.session = session
 
@@ -340,7 +472,14 @@ class SessionAPI(BasicAPI):
         self.session.close()
         return
 
-    def request(self, method: str, route: str, headers: Dict = None, **kwargs) -> requests.Response:
+    def request(
+        self,
+        method: str,
+        route: str,
+        headers: Dict = None,
+        params: Dict = None,
+        **kwargs
+    ) -> requests.Response:
         """
         Sends an HTTP request.
 
@@ -348,6 +487,7 @@ class SessionAPI(BasicAPI):
             method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
 
         Returns:
@@ -363,14 +503,24 @@ class SessionAPI(BasicAPI):
         log.info("Request: %(method)s %(url)s", {'method': method, 'uri': uri})
 
         if self.session:
-            headers = dict(self.headers, **headers) if self.headers and headers \
-                else headers if headers and not self.headers \
-                else self.headers
-
-            response = self.session.request(method, uri, headers=headers, **kwargs)
+            headers = merge(self.headers, headers)
+            params = merge(self.params, params)
+            response = self.session.request(
+                method,
+                uri,
+                headers=headers,
+                params=params,
+                **kwargs
+            )
 
         else:
             log.warning("session not started: start() method not called before sending request")
-            response = super().request(method, uri, headers=headers, **kwargs)
+            response = super().request(
+                method,
+                uri,
+                headers=headers,
+                params=params,
+                **kwargs
+            )
 
         return response
