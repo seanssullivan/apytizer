@@ -59,16 +59,6 @@ class BasicAPI(AbstractAPI):
         self.params = params
         self.cache = cache
 
-    def __eq__(self, other: AbstractAPI) -> bool:
-        return other.url == self.url \
-            and other.auth == self.auth
-
-    def __hash__(self) -> int:
-        return hash(self.url)
-
-    def __repr__(self) -> str:
-        return f'<{self.__class__.__name__!s} url={self.url!s}>'
-
     def request(
         self,
         method: str,

@@ -9,7 +9,6 @@ This module defines a basic endpoint class implementation.
 from __future__ import annotations
 import logging
 from typing import Dict, List, MutableMapping, Union
-from urllib.parse import urljoin
 
 # Third-Party Imports
 import requests
@@ -57,23 +56,6 @@ class BasicEndpoint(AbstractEndpoint):
         self.methods = methods
         self.cache = cache
 
-    @property
-    def uri(self) -> str:
-        return urljoin(self.api.url, self.path)
-
-    @property
-    def url(self) -> str:
-        return self.uri
-
-    def __hash__(self) -> int:
-        return hash(self.uri)
-
-    def __repr__(self) -> str:
-        return f'<{self.__class__.__name__!s} methods={self.methods!s} uri={self.uri!s}>'
-
-    def __str__(self) -> str:
-        return f'{self.uri!s}'
-
     def __call__(
         self,
         ref: Union[int, str],
@@ -90,8 +72,7 @@ class BasicEndpoint(AbstractEndpoint):
         child endpoint or a nested resource.
 
         Args:
-            ref: Reference for a nested resource or an object
-                available through a resource collection endpoint.
+            ref: Reference for a collection or nested resource.
             headers (optional) : Headers to set globally for endpoint.
             params (optional) : Parameters to set globally for endpoint.
             methods (optional): List of HTTP methods accepted by endpoint.
@@ -123,8 +104,7 @@ class BasicEndpoint(AbstractEndpoint):
         child endpoint or a nested resource.
 
         Args:
-            ref: Reference for a nested resource or an object
-                available through a resource collection endpoint.
+            ref: Reference for a collection or nested resource.
 
         Returns:
             BasicEndpoint instance.
@@ -140,7 +120,7 @@ class BasicEndpoint(AbstractEndpoint):
 
         return endpoint
 
-    def __add__(self, path: int or str) -> BasicEndpoint:
+    def __add__(self, path: Union[int, str]) -> BasicEndpoint:
         """
         Returns a new endpoint after combining both paths.
 
@@ -165,7 +145,7 @@ class BasicEndpoint(AbstractEndpoint):
 
         return endpoint
 
-    def __truediv__(self, path: str) -> BasicEndpoint:
+    def __truediv__(self, path: Union[int, str]) -> BasicEndpoint:
         """
         Returns a new endpoint after combining both paths.
 
