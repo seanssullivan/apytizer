@@ -12,7 +12,10 @@ def generate_key(*tags):
 
     def hash_parameters(*args, **kwargs):
         """Hashes function parameters."""
-        key = hashkey(*tags, *args, *[f"{k!s}={v!s}" for k, v in kwargs.items()])
+        key = hashkey(
+            *tags, *args,
+            *[f"{k!s}={v!s}" for k, v in sorted(kwargs.items())]
+        )
         return key
 
     return hash_parameters
@@ -31,9 +34,3 @@ def merge(*args: Dict) -> Dict:
     """
     result = {k: v for dictionary in args if dictionary for k, v in dictionary.items()}
     return result if result else None
-
-    # headers = dict(first, **new) if first and new \
-    #     else new if new and not first \
-    #     else first
-
-    # return headers

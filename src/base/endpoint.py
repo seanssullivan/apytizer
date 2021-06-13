@@ -196,12 +196,10 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'HEAD' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.head(
             self.path,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -232,9 +230,12 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'GET' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
-        response = self.api.get(self.path, headers=headers, params=params, **kwargs)
+        response = self.api.get(
+            self.path,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
+            **kwargs
+        )
         return response
 
     @cache_response
@@ -264,13 +265,11 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'POST' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.post(
             self.path,
             data=data,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -302,13 +301,11 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'PUT' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.put(
             self.path,
             data=data,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -340,13 +337,11 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'PATCH' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.patch(
             self.path,
             data=data,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -377,12 +372,10 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'DELETE' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.delete(
             self.path,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -412,12 +405,10 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'OPTIONS' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.options(
             self.path,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -448,12 +439,10 @@ class BasicEndpoint(AbstractEndpoint):
         if self.methods and 'TRACE' not in self.methods:
             raise NotImplementedError
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = self.api.trace(
             self.path,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response

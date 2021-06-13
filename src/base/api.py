@@ -53,7 +53,7 @@ class BasicAPI(AbstractAPI):
         params: Dict = None,
         cache: MutableMapping = None
     ):
-        self.url = url
+        self.url = url + "/" if url[-1] != "/" else url
         self.auth = auth
         self.headers = headers
         self.params = params
@@ -89,14 +89,12 @@ class BasicAPI(AbstractAPI):
         uri = urljoin(self.url, route)
         log.info("Request: %(method)s %(uri)s", {'method': method, 'uri': uri})
 
-        headers = merge(self.headers, headers)
-        params = merge(self.params, params)
         response = requests.request(
             method,
             uri,
             auth=self.auth,
-            headers=headers,
-            params=params,
+            headers=merge(self.headers, headers),
+            params=merge(self.params, params),
             **kwargs
         )
         return response
@@ -493,13 +491,11 @@ class SessionAPI(BasicAPI):
         log.info("Request: %(method)s %(url)s", {'method': method, 'uri': uri})
 
         if self.session:
-            headers = merge(self.headers, headers)
-            params = merge(self.params, params)
             response = self.session.request(
                 method,
                 uri,
-                headers=headers,
-                params=params,
+                headers=merge(self.headers, headers),
+                params=merge(self.params, params),
                 **kwargs
             )
 
