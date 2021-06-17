@@ -14,7 +14,7 @@ from typing import Dict, Tuple, Union
 
 # Third-Party Imports
 from requests import Response
-from requests.auth import HTTPBasicAuth
+from requests.auth import AuthBase
 
 
 class AbstractAPI(abc.ABC):
@@ -22,7 +22,7 @@ class AbstractAPI(abc.ABC):
     Represents an abstract API.
     """
     url: str
-    auth: Union[HTTPBasicAuth, Tuple]
+    auth: Union[AuthBase, Tuple]
 
     def __eq__(self, other: AbstractAPI) -> bool:
         return other.url == self.url \

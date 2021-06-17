@@ -13,7 +13,7 @@ from urllib.parse import urljoin
 # Third-Party Imports
 import requests
 from requests.adapters import HTTPAdapter
-from requests.auth import HTTPBasicAuth
+from requests.auth import AuthBase
 
 # Local Imports
 from ..abstracts.api import AbstractAPI
@@ -47,7 +47,7 @@ class BasicAPI(AbstractAPI):
     def __init__(
         self,
         url: str,
-        auth: Union[HTTPBasicAuth, Tuple] = None,
+        auth: Union[AuthBase, Tuple] = None,
         *,
         headers: Dict = None,
         params: Dict = None,
@@ -397,7 +397,7 @@ class SessionAPI(BasicAPI):
     def __init__(
             self,
             url: str,
-            auth: Union[HTTPBasicAuth, Tuple] = None,
+            auth: Union[AuthBase, Tuple] = None,
             *,
             headers: Dict = None,
             params: Dict = None,
