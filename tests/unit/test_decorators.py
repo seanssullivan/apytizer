@@ -6,7 +6,7 @@
 from unittest.mock import Mock
 
 # Local Imports
-from src.decorators.pagination import pagination
+from src.apytizer.decorators import pagination
 
 
 def test_pagination_repeats_request():

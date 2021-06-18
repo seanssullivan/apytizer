@@ -18,7 +18,7 @@ from requests.auth import AuthBase
 # Local Imports
 from ..abstracts.api import AbstractAPI
 from ..decorators.caching import cache_response
-from .utils import merge
+from ..utils import merge
 
 
 log = logging.getLogger(__name__)

@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 
 # Local Imports
-from src.base.model import BasicModel
+from src.apytizer.base import BasicModel
 
 
 def test_model_returns_true_when_key_in_state():

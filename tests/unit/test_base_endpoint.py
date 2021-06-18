@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 
 # Local Imports
-from src.base.endpoint import BasicEndpoint
+from src.apytizer.base import BasicEndpoint
 
 
 @pytest.fixture

@@ -9,8 +9,8 @@ import os
 import sys
 
 # Local Imports
-from src import __version__
-from src import __release__
+from src.apytizer import __version__
+from src.apytizer import __release__
 
 # -- Path setup --------------------------------------------------------------
 
@@ -18,7 +18,7 @@ from src import __release__
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-sys.path.insert(0, os.path.abspath('../src'))
+sys.path.insert(0, os.path.abspath('../src/apytizer'))
 
 # -- Project information -----------------------------------------------------
 

@@ -10,7 +10,7 @@ from typing import Callable
 from cachetools import cachedmethod
 
 # Local Imports
-from src.base.utils import generate_key
+from ..utils import generate_key
 
 
 log = logging.getLogger(__name__)

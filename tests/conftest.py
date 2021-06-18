@@ -11,7 +11,7 @@ import pytest
 
 @pytest.fixture
 def mock_request():
-    mock_patcher = patch('src.base.api.requests.request')
+    mock_patcher = patch('src.apytizer.base.api.requests.request')
     yield mock_patcher.start()
     mock_patcher.stop()
 

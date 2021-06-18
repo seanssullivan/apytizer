@@ -6,8 +6,8 @@
 import requests
 
 # Local Imports
-from src.base.api import BasicAPI
-from src.base.api import SessionAPI
+from src.apytizer.base import BasicAPI
+from src.apytizer.base import SessionAPI
 
 
 # --------------------------------------------------------------------------------

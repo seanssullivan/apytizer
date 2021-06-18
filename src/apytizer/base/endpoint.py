@@ -14,10 +14,10 @@ from typing import Dict, List, MutableMapping, Union
 import requests
 
 # Local Imports
-from src.abstracts.api import AbstractAPI
-from src.abstracts.endpoint import AbstractEndpoint
+from ..abstracts.api import AbstractAPI
+from ..abstracts.endpoint import AbstractEndpoint
 from ..decorators.caching import cache_response
-from .utils import merge
+from ..utils import merge
 
 
 log = logging.getLogger(__name__)

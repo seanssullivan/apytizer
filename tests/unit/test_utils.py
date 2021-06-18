@@ -3,7 +3,7 @@
 # pylint: disable=protected-access
 
 # Local Imports
-from src.base.utils import merge
+from src.apytizer.utils import merge
 
 
 def test_merge_combines_dictionaries():
