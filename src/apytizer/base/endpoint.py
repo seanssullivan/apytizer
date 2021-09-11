@@ -241,7 +241,6 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def post(
         self,
-        data: Dict,
         headers: Dict = None,
         params: Dict = None,
         **kwargs
@@ -267,7 +266,6 @@ class BasicEndpoint(AbstractEndpoint):
 
         response = self.api.post(
             self.path,
-            data=data,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
             **kwargs
@@ -277,7 +275,6 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def put(
         self,
-        data: Dict,
         headers: Dict = None,
         params: Dict = None,
         **kwargs
@@ -303,7 +300,6 @@ class BasicEndpoint(AbstractEndpoint):
 
         response = self.api.put(
             self.path,
-            data=data,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
             **kwargs
@@ -313,7 +309,6 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def patch(
         self,
-        data: Dict,
         headers: Dict = None,
         params: Dict = None,
         **kwargs
@@ -339,7 +334,6 @@ class BasicEndpoint(AbstractEndpoint):
 
         response = self.api.patch(
             self.path,
-            data=data,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
             **kwargs

@@ -32,17 +32,18 @@ class AbstractEndpoint(abc.ABC):
 
     @property
     def uri(self) -> str:
+        """Retrieve the endpoint URI."""
         return urljoin(self.api.url, self.path)
 
     @property
     def url(self) -> str:
-        return self.uris
+        return self.uri
 
     def __hash__(self) -> int:
         return hash(self.uri)
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__!s} methods={self.methods!s} uri={self.uri!s}>'
+        return f'<{self.__class__.__name__!s} uri={self.uri!s}>'
 
     def __str__(self) -> str:
         return f'{self.uri!s}'

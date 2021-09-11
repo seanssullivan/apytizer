@@ -169,7 +169,6 @@ class BasicAPI(AbstractAPI):
     def post(
         self,
         route: str,
-        data: Dict = None,
         headers: Dict = None,
         params: Dict = None,
         **kwargs
@@ -193,7 +192,6 @@ class BasicAPI(AbstractAPI):
         response = self.request(
             'POST',
             route,
-            data=data,
             headers=headers,
             params=params,
             **kwargs
@@ -204,7 +202,6 @@ class BasicAPI(AbstractAPI):
     def put(
         self,
         route: str,
-        data: Dict = None,
         headers: Dict = None,
         params: Dict = None,
         **kwargs
@@ -228,7 +225,6 @@ class BasicAPI(AbstractAPI):
         response = self.request(
             'PUT',
             route,
-            data=data,
             headers=headers,
             params=params,
             **kwargs
@@ -239,7 +235,6 @@ class BasicAPI(AbstractAPI):
     def patch(
         self,
         route: str,
-        data: Dict = None,
         headers: Dict = None,
         params: Dict = None,
         **kwargs
@@ -263,7 +258,6 @@ class BasicAPI(AbstractAPI):
         response = self.request(
             'PATCH',
             route,
-            data=data,
             headers=headers,
             params=params,
             **kwargs
@@ -458,7 +452,6 @@ class SessionAPI(BasicAPI):
         """
         log.debug("Closing API session")
         self.session.close()
-        return
 
     def request(
         self,
