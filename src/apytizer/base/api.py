@@ -7,7 +7,7 @@ This module defines a basic API class implementation.
 
 # Standard Library Imports
 import logging
-from typing import Dict, MutableMapping, Tuple, Union
+from typing import Dict, MutableMapping, Tuple, Union, final
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -16,7 +16,7 @@ from requests.adapters import HTTPAdapter
 from requests.auth import AuthBase
 
 # Local Imports
-from ..abstracts.api import AbstractAPI
+from .. import abstracts
 from ..decorators.caching import cache_response
 from ..utils import merge
 
@@ -24,7 +24,7 @@ from ..utils import merge
 log = logging.getLogger(__name__)
 
 
-class BasicAPI(AbstractAPI):
+class BasicAPI(abstracts.AbstractAPI):
     """
     Implements a basic API.
 
@@ -84,10 +84,11 @@ class BasicAPI(AbstractAPI):
             https://docs.python-requests.org/en/latest/api/
 
         """
-        log.debug("Sending HTTP %(method)s request", {'method': method})
-
         uri = urljoin(self.url, route)
-        log.info("Request: %(method)s %(uri)s", {'method': method, 'uri': uri})
+        log.debug(
+            "Sending HTTP %(method)s request to %(uri)s",
+            {'method': method, 'uri': uri}
+        )
 
         response = requests.request(
             method,
@@ -364,7 +365,7 @@ class BasicAPI(AbstractAPI):
         return response
 
 
-class SessionAPI(BasicAPI):
+class SessionAPI(abstracts.AbstractSession, BasicAPI):
     """
     Implements a session-based API.
 
@@ -404,17 +405,19 @@ class SessionAPI(BasicAPI):
             auth,
             headers=headers,
             params=params,
-            cache=cache
+            cache=cache,
         )
         self.adapter = adapter
         self.session = session
 
+    @final
     def __enter__(self):
         """
         Starts the API session as a context manager.
         """
         self.start()
 
+    @final
     def __exit__(self, *args):
         """
         Closes the API session as a context manager.
@@ -425,7 +428,7 @@ class SessionAPI(BasicAPI):
         """
         Begins an API session.
         """
-        log.debug("Starting API session")
+        log.debug("Starting API session...")
 
         # Create session
         if not self.session:
@@ -446,11 +449,11 @@ class SessionAPI(BasicAPI):
 
         return self.session
 
-    def close(self) -> None:
+    def close(self, *args) -> None:
         """
         Manually destroys the API session.
         """
-        log.debug("Closing API session")
+        log.debug("Closing API session...")
         self.session.close()
 
     def request(
@@ -478,10 +481,11 @@ class SessionAPI(BasicAPI):
             https://docs.python-requests.org/en/latest/api/
 
         """
-        log.debug("Sending HTTP %(method)s request", {'method': method})
-
         uri = urljoin(self.url, route)
-        log.info("Request: %(method)s %(url)s", {'method': method, 'uri': uri})
+        log.debug(
+            "Sending HTTP %(method)s request to %(uri)s",
+            {'method': method, 'uri': uri}
+        )
 
         if self.session:
             response = self.session.request(
@@ -493,7 +497,7 @@ class SessionAPI(BasicAPI):
             )
 
         else:
-            log.warning("session not started: start() method not called before sending request")
+            log.warning("Session not started: start() method not called before sending request")
             response = super().request(
                 method,
                 uri,

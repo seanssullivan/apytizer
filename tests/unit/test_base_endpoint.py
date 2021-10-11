@@ -219,7 +219,7 @@ def test_endpoint_post_method_when_response_is_ok(mock_api):
         headers={'Accept': 'application/json'}
     )
 
-    response = test_endpoint.post(data)
+    response = test_endpoint.post(data=data)
 
     assert response.text == 'created'
     mock_api.post.assert_called_once_with(
@@ -263,7 +263,7 @@ def test_endpoint_put_method_when_response_is_ok(mock_api):
         headers={'Accept': 'application/json'}
     )
 
-    response = test_endpoint.put(data)
+    response = test_endpoint.put(data=data)
 
     assert response.text == 'success'
     mock_api.put.assert_called_once_with(
@@ -307,7 +307,7 @@ def test_endpoint_patch_method_when_response_is_ok(mock_api):
         headers={'Accept': 'application/json'}
     )
 
-    response = test_endpoint.patch(data)
+    response = test_endpoint.patch(data=data)
 
     assert response.text == 'success'
     mock_api.patch.assert_called_once_with(

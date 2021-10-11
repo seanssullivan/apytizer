@@ -16,7 +16,7 @@ class AbstractModel(abc.ABC):
     """
     Represents an abstract model.
     """
-    _state: Dict
+    state: Dict
 
     @abc.abstractmethod
     def __eq__(self, other: AbstractModel) -> bool:

@@ -29,18 +29,20 @@ def confirm_connection(func) -> Callable:
             response = func(self, *args, **kwargs)
 
         except requests.exceptions.ConnectionError as error:
-            log.debug("connection error")
-            log.info(f"Error message: {error}")
+            log.critical("Failed to establish a connection")
+            log.debug(f"Error message: {error}")
             return error
 
         except requests.exceptions.Timeout as error:
-            log.debug("request timed out")
-            log.info(f"Error message: {error}")
+            log.critical("request timed out")
+            log.debug(f"Error message: {error}")
             return error
 
         else:
-            log.debug("response received")
-            log.info(f"Status code: {response.status_code}")
+            log.debug(
+                "Response received with status code %(status)",
+                {'status': response.status_code}
+            )
             return response
 
     return wrapper
