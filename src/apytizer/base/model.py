@@ -9,11 +9,15 @@ This module defines the implementation of a basic model class.
 from __future__ import annotations
 import collections
 import functools
+import logging
 from typing import Any, List, Mapping, Tuple, Union
 
 # Local Imports
 from ..abstracts.model import AbstractModel
 
+
+# Initialize logger.
+log = logging.getLogger(__name__)
 
 # Define custom types.
 AttributeKey = Union[List[str], str, Tuple[str]]
@@ -41,7 +45,9 @@ class BasicModel(AbstractModel):
     def __getattr__(self, name: str) -> Any:
         attr = self.get(name)
         if not attr:
-            raise AttributeError
+            cls = self.__class__.__name__
+            message = f"type object '{cls!s}' has no attribute '{attr!s}'"
+            raise AttributeError(message)
         return attr
 
     def __getitem__(self, key: AttributeKey) -> Any:

@@ -9,7 +9,7 @@ from .base import BasicEndpoint as Endpoint
 from .base import BasicModel as Model
 
 
-VERSION = (0, 0, 1, 'dev', 0)
+VERSION = (0, 0, 1, 'alpha', 0)
 
 __version__ = '.'.join(str(v) for v in VERSION[:2])
 

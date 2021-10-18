@@ -21,6 +21,7 @@ from ..decorators.caching import cache_response
 from ..utils import merge
 
 
+# Initialize logger.
 log = logging.getLogger(__name__)
 
 

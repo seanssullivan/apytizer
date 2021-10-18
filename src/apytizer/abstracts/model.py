@@ -9,14 +9,15 @@ for subclasses to implement.
 # Standard Library Imports
 from __future__ import annotations
 import abc
-from typing import Dict
+from typing import Mapping
 
 
 class AbstractModel(abc.ABC):
     """
     Represents an abstract model.
+
     """
-    state: Dict
+    state: Mapping
 
     @abc.abstractmethod
     def __eq__(self, other: AbstractModel) -> bool:
@@ -41,12 +42,9 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, data: Dict) -> AbstractModel:
+    def update(self, __m: Mapping = None, **kwargs) -> None:
         """
         Abstract method for updating model state.
-
-        Returns:
-            Updated instance of model.
 
         """
         raise NotImplementedError
