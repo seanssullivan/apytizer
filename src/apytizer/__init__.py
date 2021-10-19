@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# pylint: skip-file
-
 from .adapters import TransportAdapter
 from .base import BasicAPI as API
 from .base import SessionAPI as Session
