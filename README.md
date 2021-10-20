@@ -1,3 +1,3 @@
 # apytizer
 
-Implement wrappers for REST APIs quickly in Python.
+Implement wrappers quickly for REST APIs.
