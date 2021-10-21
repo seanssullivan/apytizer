@@ -8,7 +8,8 @@ This module defines a basic endpoint class implementation.
 # Standard Library Imports
 from __future__ import annotations
 import logging
-from typing import Dict, List, MutableMapping, Union
+from typing import Any, Dict, List, MutableMapping, Union
+from urllib.parse import urljoin
 
 # Third-Party Imports
 import requests
@@ -23,6 +24,10 @@ from ..utils import merge
 # Initialize logger.
 log = logging.getLogger(__name__)
 
+# Define custom types.
+Headers = Dict[str, str]
+Parameters = Dict[str, Any]
+
 
 class BasicEndpoint(AbstractEndpoint):
     """
@@ -36,6 +41,8 @@ class BasicEndpoint(AbstractEndpoint):
         cache (optional): Mutable mapping for caching responses.
 
     Attributes:
+        api: Instance of an API subclass.
+        path: Relative path to API endpoint.
         uri: Endpoint URL.
 
     """
@@ -45,8 +52,8 @@ class BasicEndpoint(AbstractEndpoint):
         api: AbstractAPI,
         path: str,
         *,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         methods: List[str] = None,
         cache: MutableMapping = None,
     ):
@@ -57,12 +64,21 @@ class BasicEndpoint(AbstractEndpoint):
         self.methods = methods
         self.cache = cache
 
+    @property
+    def uri(self) -> str:
+        """Retrieve the endpoint URI."""
+        return urljoin(self.api.url, self.path)
+
+    @property
+    def url(self) -> str:
+        return self.uri
+
     def __call__(
         self,
         ref: Union[int, str],
         *,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         methods: List[str] = None,
         cache: MutableMapping = None
     ) -> BasicEndpoint:
@@ -81,6 +97,14 @@ class BasicEndpoint(AbstractEndpoint):
 
         Returns:
             BasicEndpoint instance.
+
+        Examples:
+            Calling an instance of a basic endpoint returns a new endpoint
+            with the appended reference string.
+
+            >>> endpoint = BasicEndpoint(api, 'base')
+            >>> endpoint('ref').uri
+            'api/base/ref'
 
         """
         if isinstance(ref, (int, str)):
@@ -110,6 +134,14 @@ class BasicEndpoint(AbstractEndpoint):
         Returns:
             BasicEndpoint instance.
 
+        Examples:
+            Getting an item from an instance of a basic endpoint returns a
+            new endpoint with the appended reference string.
+
+            >>> endpoint = BasicEndpoint(api, 'base')
+            >>> endpoint['ref'].uri
+            'api/base/ref'
+
         """
         if isinstance(ref, (int, str)):
             endpoint = BasicEndpoint(
@@ -134,6 +166,14 @@ class BasicEndpoint(AbstractEndpoint):
 
         Returns:
             BasicEndpoint instance.
+
+        Examples:
+            Using an addition operator on an instance of a basic endpoint
+            returns a new endpoint with the appended reference string.
+
+            >>> endpoint = BasicEndpoint(api, 'base') + 'ref'
+            >>> endpoint.uri
+            'api/base/ref'
 
         """
         if isinstance(path, (int, str)):
@@ -160,6 +200,14 @@ class BasicEndpoint(AbstractEndpoint):
         Returns:
             BasicEndpoint instance.
 
+        Examples:
+            Using a division operator on an instance of a basic endpoint
+            returns a new endpoint with the appended reference string.
+
+            >>> endpoint = BasicEndpoint(api, 'base') / 'ref'
+            >>> endpoint.uri
+            'api/base/ref'
+
         """
         if isinstance(path, (int, str)):
             endpoint = BasicEndpoint(
@@ -174,8 +222,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def head(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -208,8 +256,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def get(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -242,8 +290,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def post(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -276,8 +324,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def put(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -310,8 +358,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def patch(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -344,8 +392,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def delete(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -378,8 +426,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def options(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -411,8 +459,8 @@ class BasicEndpoint(AbstractEndpoint):
     @cache_response
     def trace(
         self,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """

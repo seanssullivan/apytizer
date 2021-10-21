@@ -7,7 +7,7 @@ This module defines a basic API class implementation.
 
 # Standard Library Imports
 import logging
-from typing import Dict, MutableMapping, Tuple, Union, final
+from typing import Any, Dict, MutableMapping, Tuple, Union, final
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -23,6 +23,10 @@ from ..utils import merge
 
 # Initialize logger.
 log = logging.getLogger(__name__)
+
+# Define custom types.
+Headers = Dict[str, str]
+Parameters = Dict[str, Any]
 
 
 class BasicAPI(abstracts.AbstractAPI):
@@ -50,8 +54,8 @@ class BasicAPI(abstracts.AbstractAPI):
         url: str,
         auth: Union[AuthBase, Tuple] = None,
         *,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         cache: MutableMapping = None
     ):
         self.url = url + "/" if url[-1] != "/" else url
@@ -64,8 +68,8 @@ class BasicAPI(abstracts.AbstractAPI):
         self,
         method: str,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -105,8 +109,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def head(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -138,8 +142,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def get(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -171,8 +175,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def post(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -204,8 +208,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def put(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -237,8 +241,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def patch(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -270,8 +274,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def delete(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -303,8 +307,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def options(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -336,8 +340,8 @@ class BasicAPI(abstracts.AbstractAPI):
     def trace(
         self,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """
@@ -395,8 +399,8 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
             url: str,
             auth: Union[AuthBase, Tuple] = None,
             *,
-            headers: Dict = None,
-            params: Dict = None,
+            headers: Headers = None,
+            params: Parameters = None,
             adapter: HTTPAdapter = None,
             session: requests.Session = None,
             cache: MutableMapping = None,
@@ -415,6 +419,7 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
     def __enter__(self):
         """
         Starts the API session as a context manager.
+
         """
         self.start()
 
@@ -422,12 +427,14 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
     def __exit__(self, *args):
         """
         Closes the API session as a context manager.
+
         """
         self.close()
 
     def start(self) -> None:
         """
         Begins an API session.
+
         """
         log.debug("Starting API session...")
 
@@ -435,15 +442,15 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
         if not self.session:
             self.session = requests.Session()
 
-        # Set autherization
+        # Set session autherization
         if self.auth and not self.session.auth:
             self.session.auth = self.auth
 
-        # Add default headers
+        # Add default headers to session
         if self.headers:
             self.session.headers.update(self.headers)
 
-        # Mount transport adapter
+        # Mount transport adapter to session
         if self.adapter:
             self.session.mount("https://", self.adapter)
             self.session.mount("http://", self.adapter)
@@ -453,6 +460,7 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
     def close(self, *args) -> None:
         """
         Manually destroys the API session.
+
         """
         log.debug("Closing API session...")
         self.session.close()
@@ -461,8 +469,8 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
         self,
         method: str,
         route: str,
-        headers: Dict = None,
-        params: Dict = None,
+        headers: Headers = None,
+        params: Parameters = None,
         **kwargs
     ) -> requests.Response:
         """

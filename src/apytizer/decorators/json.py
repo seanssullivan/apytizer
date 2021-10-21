@@ -9,6 +9,7 @@ from typing import Callable, Dict, List, Union
 from requests import Response
 
 
+# Initialize logger.
 log = logging.getLogger(__name__)
 
 

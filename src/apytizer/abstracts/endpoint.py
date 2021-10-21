@@ -9,13 +9,9 @@ a standard HTTP request method.
 
 # Third-Party Imports
 import abc
-from urllib.parse import urljoin
 
 # Third-Party Imports
 from requests import Response
-
-# Local Imports
-from .api import AbstractAPI
 
 
 class AbstractEndpoint(abc.ABC):
@@ -23,30 +19,19 @@ class AbstractEndpoint(abc.ABC):
     Represents an abstract endpoint.
 
     Attributes:
-        api: Instance of an API subclass.
         path: Relative path to API endpoint.
 
     """
-    api: AbstractAPI
     path: str
 
-    @property
-    def uri(self) -> str:
-        """Retrieve the endpoint URI."""
-        return urljoin(self.api.url, self.path)
-
-    @property
-    def url(self) -> str:
-        return self.uri
-
     def __hash__(self) -> int:
-        return hash(self.uri)
+        return hash(self.path)
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__!s} uri={self.uri!s}>'
+        return f'<{self.__class__.__name__!s} path={self.path!s}>'
 
     def __str__(self) -> str:
-        return f'{self.uri!s}'
+        return f'{self.path!s}'
 
     @abc.abstractmethod
     def head(self, *args, **kwargs) -> Response:

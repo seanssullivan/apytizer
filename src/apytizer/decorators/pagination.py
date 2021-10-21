@@ -6,6 +6,7 @@ import logging
 from typing import Callable
 
 
+# Initialize logger.
 log = logging.getLogger(__name__)
 
 

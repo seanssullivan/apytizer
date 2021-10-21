@@ -13,6 +13,7 @@ from cachetools import cachedmethod
 from ..utils import generate_key
 
 
+# Initialize logger.
 log = logging.getLogger(__name__)
 
 

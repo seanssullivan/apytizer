@@ -10,7 +10,7 @@ a standard HTTP request method.
 # Third-Party Imports
 from __future__ import annotations
 import abc
-from typing import Dict, Tuple, Union
+from typing import Tuple, Union
 
 # Third-Party Imports
 from requests import Response
@@ -20,6 +20,7 @@ from requests.auth import AuthBase
 class AbstractAPI(abc.ABC):
     """
     Represents an abstract API.
+
     """
     url: str
     auth: Union[AuthBase, Tuple]
@@ -35,9 +36,14 @@ class AbstractAPI(abc.ABC):
         return f'<{self.__class__.__name__!s} url={self.url!s}>'
 
     @abc.abstractmethod
-    def head(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def head(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP HEAD request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -49,9 +55,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def get(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP GET request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -63,9 +74,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def post(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def post(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP POST request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -77,9 +93,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def put(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP PUT request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -91,9 +112,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def patch(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def patch(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP PATCH request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -105,9 +131,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def delete(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP DELETE request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -119,9 +150,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def options(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def options(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP OPTIONS request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.
@@ -133,9 +169,14 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def trace(self, route: str, *args, headers: Dict = None, **kwargs) -> Response:
+    def trace(self, route: str, *args, **kwargs) -> Response:
         """
         Abstract method for sending an HTTP TRACE request.
+
+        Args:
+            route: API path to which the request will be sent.
+            *args
+            **kwargs
 
         Returns:
             Response object.

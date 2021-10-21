@@ -9,6 +9,7 @@ from typing import Callable
 import requests
 
 
+# Initialize logger.
 log = logging.getLogger(__name__)
 
 
