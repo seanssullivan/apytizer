@@ -18,6 +18,7 @@ from requests.auth import AuthBase
 # Local Imports
 from .. import abstracts
 from ..decorators.caching import cache_response
+from ..decorators.connection import confirm_connection
 from ..utils import merge
 
 
@@ -64,6 +65,7 @@ class BasicAPI(abstracts.AbstractAPI):
         self.params = params
         self.cache = cache
 
+    @confirm_connection
     def request(
         self,
         method: str,
@@ -477,6 +479,7 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
         log.debug("Closing API session...")
         self.session.close()
 
+    @confirm_connection
     def request(
         self,
         method: str,

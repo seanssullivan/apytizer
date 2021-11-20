@@ -1,7 +1,7 @@
 cachetools
 coverage
+mypy
 pytest
-python-dotenv
 requests
 sphinx
 tox
