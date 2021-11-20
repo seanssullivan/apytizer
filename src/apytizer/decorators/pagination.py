@@ -29,8 +29,8 @@ def pagination(func) -> Callable:
             reducer (Callable): Function to update state with pagination metadata.
             callback (Callable): Function which returns True once request is completed.
                 Stop condition must depend on state or pagination metadata.
-            *args
-            **kwargs
+            *args: Positional arguments to pass to wrapped function.
+            **kwargs: Keyword arguments to pass to wrapped function.
 
         """
 

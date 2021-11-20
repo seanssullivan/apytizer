@@ -27,13 +27,22 @@ def json_response(func: Callable) -> Callable:
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Union[Dict, List, Response]:
-        """Wrapper applied to decorated function."""
+        """
+        Wrapper applied to decorated function.
+
+        Args:
+            *args: Positional arguments to pass to wrapped function.
+            **kwargs: Keyword arguments to pass to wrapped function.
+
+        """
 
         log.debug('Parsing JSON response...')
         response = func(*args, **kwargs)
-        return response.json() \
-            if response.headers.get('Content-Type') == "application/json" \
+        return (
+            response.json()
+            if response.headers.get('Content-Type') == "application/json"
             else response
+        )
 
     functools.update_wrapper(wrapper, func)
     return wrapper

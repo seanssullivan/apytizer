@@ -26,24 +26,33 @@ def confirm_connection(func) -> Callable:
     """
 
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> requests.Response:
+        """
+        Wrapper applied to decorated function.
+
+        Args:
+            *args: Positional arguments to pass to wrapped function.
+            **kwargs: Keyword arguments to pass to wrapped function.
+
+        """
+
         try:
-            response = func(self, *args, **kwargs)
+            response = func(self, *args, **kwargs) # type: requests.Response
 
         except requests.exceptions.ConnectionError as error:
             log.critical("Failed to establish a connection")
-            log.debug(f"Error message: {error}")
+            log.error(error)
             return error
 
         except requests.exceptions.Timeout as error:
             log.critical("request timed out")
-            log.debug(f"Error message: {error}")
+            log.error(error)
             return error
 
         else:
             log.debug(
-                "Response received with status code %(status)",
-                {'status': response.status_code}
+                "Response received with status code %s",
+                response.status_code,
             )
             return response
 

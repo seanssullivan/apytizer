@@ -65,6 +65,19 @@ def deep_set(
 
     return __m
 
+
+def pick(__m: Mapping, keys: List[str]) -> Mapping:
+    """
+    Pick multiple values from a mapping.
+
+    Args:
+        __m: Mapping object.
+        keys: List of keys.
+
+    """
+    return {key.split('.')[-1]: deep_get(__m, key) for key in keys}
+
+
 def merge(*args: Mapping) -> Dict:
     """
     Combines mapping objects into a single dictionary.
