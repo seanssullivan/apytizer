@@ -92,9 +92,9 @@ def merge(*args: Mapping) -> Dict:
 
     result = {
         key: value
-        for dictionary in args
-        if dictionary
-        for key, value in dictionary.items()
+        for mapping in args
+        if mapping
+        for key, value in mapping.items()
     }
     return result if result else None
 
@@ -132,8 +132,4 @@ def remove_null(__m: Mapping) -> Dict[str, Any]:
 
     """
 
-    return {
-        key: value
-        for key, value in __m.items()
-        if value
-    }
+    return {key: value for key, value in __m.items() if value}
