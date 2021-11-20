@@ -67,6 +67,7 @@ class BasicEndpoint(AbstractEndpoint):
     @property
     def uri(self) -> str:
         """Retrieve the endpoint URI."""
+
         return urljoin(self.api.url, self.path)
 
     @property
@@ -107,6 +108,7 @@ class BasicEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
+
         if isinstance(ref, (int, str)):
             endpoint = BasicEndpoint(
                 self.api,
@@ -143,6 +145,7 @@ class BasicEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
+
         if isinstance(ref, (int, str)):
             endpoint = BasicEndpoint(
                 self.api,
@@ -176,6 +179,7 @@ class BasicEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
+
         if isinstance(path, (int, str)):
             endpoint = BasicEndpoint(
                 self.api,
@@ -209,6 +213,7 @@ class BasicEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
+
         if isinstance(path, (int, str)):
             endpoint = BasicEndpoint(
                 self.api,
@@ -445,6 +450,7 @@ class BasicEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
+
         if self.methods and 'OPTIONS' not in self.methods:
             raise NotImplementedError
 

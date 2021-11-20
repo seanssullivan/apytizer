@@ -17,6 +17,7 @@ class AbstractModel(abc.ABC):
     Represents an abstract model.
 
     """
+
     state: Mapping
 
     @abc.abstractmethod
@@ -28,6 +29,7 @@ class AbstractModel(abc.ABC):
             Whether models are equal.
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -39,6 +41,7 @@ class AbstractModel(abc.ABC):
             Value of property in model state.
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -47,4 +50,5 @@ class AbstractModel(abc.ABC):
         Abstract method for updating model state.
 
         """
+
         raise NotImplementedError

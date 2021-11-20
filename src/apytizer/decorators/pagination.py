@@ -19,6 +19,7 @@ def pagination(func) -> Callable:
         Function wrapper.
 
     """
+
     @functools.wraps(func)
     def wrapper(*args, reducer: Callable, callback: Callable, **kwargs):
         """
@@ -32,6 +33,7 @@ def pagination(func) -> Callable:
             **kwargs
 
         """
+
         completed = False
         state = {
             'params': kwargs.pop('params', None),
@@ -51,4 +53,5 @@ def pagination(func) -> Callable:
             state = reducer(state, response)
             completed = callback(state, response)
 
+    functools.update_wrapper(wrapper, func)
     return wrapper

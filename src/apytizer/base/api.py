@@ -89,6 +89,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://docs.python-requests.org/en/latest/api/
 
         """
+
         uri = urljoin(self.url, route)
         log.debug(
             "Sending HTTP %(method)s request to %(uri)s",
@@ -129,6 +130,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
+
         response = self.request(
             'HEAD',
             route,
@@ -162,6 +164,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
+
         response = self.request(
             'GET',
             route,
@@ -195,6 +198,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
+
         response = self.request(
             'POST',
             route,
@@ -228,6 +232,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
+
         response = self.request(
             'PUT',
             route,
@@ -261,6 +266,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
+
         response = self.request(
             'PATCH',
             route,
@@ -294,6 +300,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
+
         response = self.request(
             'DELETE',
             route,
@@ -327,6 +334,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
+
         response = self.request(
             'OPTIONS',
             route,
@@ -360,6 +368,7 @@ class BasicAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
+
         response = self.request(
             'TRACE',
             route,
@@ -417,25 +426,31 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
 
     @final
     def __enter__(self):
-        """
-        Starts the API session as a context manager.
+        """Starts the API session as a context manager."""
 
-        """
         self.start()
 
     @final
     def __exit__(self, *args):
-        """
-        Closes the API session as a context manager.
+        """Closes the API session as a context manager."""
 
-        """
         self.close()
 
-    def start(self) -> None:
+    def mount(self, adapter: HTTPAdapter) -> None:
         """
-        Begins an API session.
+        Mount an adapter to the session.
+
+        Args:
+            adapter: Instance of an HTTPAdapter.
 
         """
+
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
+
+    def start(self) -> None:
+        """Begins an API session."""
+
         log.debug("Starting API session...")
 
         # Create session
@@ -452,16 +467,13 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
 
         # Mount transport adapter to session
         if self.adapter:
-            self.session.mount("https://", self.adapter)
-            self.session.mount("http://", self.adapter)
+            self.mount(self.adapter)
 
         return self.session
 
     def close(self, *args) -> None:
-        """
-        Manually destroys the API session.
+        """Manually destroys the API session."""
 
-        """
         log.debug("Closing API session...")
         self.session.close()
 
@@ -490,6 +502,7 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
             https://docs.python-requests.org/en/latest/api/
 
         """
+
         uri = urljoin(self.url, route)
         log.debug(
             "Sending HTTP %(method)s request to %(uri)s",

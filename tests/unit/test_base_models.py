@@ -39,6 +39,20 @@ def test_model_state_is_iterable():
     }
 
 
+def test_iterating_through_model_includes_updates():
+    model = BasicModel(
+        name='Test Model',
+        description='For testing purposes only.',
+        status='pending'
+    )
+    model.update(status='completed')
+    assert dict(model) == {
+        'name': 'Test Model',
+        'description': 'For testing purposes only.',
+        'status': 'completed',
+    }
+
+
 def test_model_gets_attributes_from_state():
     model = BasicModel(name='Test Model', status='completed')
     assert model.status == 'completed'

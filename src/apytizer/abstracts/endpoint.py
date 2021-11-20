@@ -7,7 +7,7 @@ a standard HTTP request method.
 
 """
 
-# Third-Party Imports
+# Standard Library Imports
 import abc
 
 # Third-Party Imports
@@ -22,6 +22,7 @@ class AbstractEndpoint(abc.ABC):
         path: Relative path to API endpoint.
 
     """
+
     path: str
 
     def __hash__(self) -> int:
@@ -47,6 +48,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -63,6 +65,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -79,6 +82,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -95,6 +99,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -111,6 +116,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -127,6 +133,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -143,6 +150,7 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -159,4 +167,5 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
+
         raise NotImplementedError

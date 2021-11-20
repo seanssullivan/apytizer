@@ -9,6 +9,7 @@ def generate_key(*tags):
 
     def hash_parameters(*args, **kwargs):
         """Hashes function parameters."""
+
         key = hashkey(
             *tags, *args,
             *[f"{k!s}={v!s}" for k, v in sorted(kwargs.items())]

@@ -7,7 +7,7 @@ a standard HTTP request method.
 
 """
 
-# Third-Party Imports
+# Standard Library Imports
 from __future__ import annotations
 import abc
 from typing import Tuple, Union
@@ -22,6 +22,7 @@ class AbstractAPI(abc.ABC):
     Represents an abstract API.
 
     """
+
     url: str
     auth: Union[AuthBase, Tuple]
 
@@ -52,6 +53,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -71,6 +73,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -90,6 +93,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -109,6 +113,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -128,6 +133,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -147,6 +153,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -166,6 +173,7 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
+
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -185,4 +193,5 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
+
         raise NotImplementedError

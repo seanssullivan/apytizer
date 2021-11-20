@@ -18,12 +18,20 @@ def test_pagination_repeats_request():
 
     reducer = lambda state, res: {
         **state,
-        'results': state.get('results') + res.get('results') if state.get('results') else res.get('results'),
+        'results': (
+            state.get('results') + res.get('results')
+            if state.get('results')
+            else res.get('results')
+        ),
         'total': res.get('total')}
     callback = lambda state, res: state.get('results') >= res.get('total')
 
     wrapper = pagination(request)
-    results = [response for response in wrapper(reducer=reducer, callback=callback)]
+    results = [
+        response
+        for response
+        in wrapper(reducer=reducer, callback=callback)
+    ]
     assert request.called == True
     assert len(results) == 2
 
@@ -37,16 +45,28 @@ def test_pagination_updates_parameters():
 
     reducer = lambda state, res: {
             **state,
-            'results': state.get('results') + res.get('results') if state.get('results') else res.get('results'),
+            'results': (
+                state.get('results') + res.get('results')
+                if state.get('results')
+                else res.get('results')
+            ),
             'total': res.get('total'),
             'params': {
-                'startAt': state.get('params', {}).get('startAt') + res.get('results') if state.get('params', {}).get('startAt') else res.get('results')
+                'startAt': (
+                    state.get('params', {}).get('startAt') + res.get('results')
+                    if state.get('params', {}).get('startAt')
+                    else res.get('results')
+                )
             }
         }
     callback = lambda state, res: state.get('results') >= res.get('total')
 
     wrapper = pagination(request)
-    results = wrapper(params={'startAt': 0}, reducer=reducer, callback=callback)
+    results = wrapper(
+        params={'startAt': 0},
+        reducer=reducer,
+        callback=callback,
+    )
 
     next(results)
     request.assert_called_with(params={'startAt': 0})
@@ -63,13 +83,21 @@ def test_pagination_updates_data():
     }
 
     reducer = lambda state, res: {
-            **state,
-            'results': state.get('results') + res.get('results') if state.get('results') else res.get('results'),
-            'total': res.get('total'),
-            'data': {
-                'startAt': state.get('data', {}).get('startAt') + res.get('results') if state.get('data', {}).get('startAt') else res.get('results')
-            }
+        **state,
+        'results': (
+            state.get('results') + res.get('results')
+            if state.get('results')
+            else res.get('results')
+        ),
+        'total': res.get('total'),
+        'data': {
+            'startAt': (
+                state.get('data', {}).get('startAt') + res.get('results')
+                if state.get('data', {}).get('startAt')
+                else res.get('results')
+            )
         }
+    }
     callback = lambda state, res: state.get('results') >= res.get('total')
 
     wrapper = pagination(request)

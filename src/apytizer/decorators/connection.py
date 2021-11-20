@@ -24,6 +24,7 @@ def confirm_connection(func) -> Callable:
         Wrapped function.
 
     """
+
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         try:
@@ -46,4 +47,5 @@ def confirm_connection(func) -> Callable:
             )
             return response
 
+    functools.update_wrapper(wrapper, func)
     return wrapper

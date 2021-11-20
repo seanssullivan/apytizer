@@ -3,7 +3,17 @@
 # pylint: disable=protected-access
 
 # Local Imports
-from src.apytizer.utils import merge
+from src.apytizer.utils import deep_set, merge
+
+
+def test_deep_set_returns_mapping():
+    result = deep_set({}, 'key', 'test')
+    assert isinstance(result, dict)
+
+
+def test_deep_set_updates_nested_object():
+    result = deep_set({}, 'parent.child', 'test')
+    assert result == {'parent': {'child': 'test'}}
 
 
 def test_merge_combines_dictionaries():

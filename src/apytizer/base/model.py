@@ -13,7 +13,7 @@ import logging
 from typing import Any, List, Mapping, Tuple, Union
 
 # Local Imports
-from ..abstracts.model import AbstractModel
+from .. import abstracts
 
 
 # Initialize logger.
@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 AttributeKey = Union[List[str], str, Tuple[str]]
 
 
-class BasicModel(AbstractModel):
+class BasicModel(abstracts.AbstractModel):
     """
     Class for representing a basic object model.
 
@@ -39,8 +39,12 @@ class BasicModel(AbstractModel):
     def __contains__(self, key: str) -> bool:
         return key in self.state
 
-    def __eq__(self, other: AbstractModel) -> bool:
-        return dict(other) == dict(self) if isinstance(other, self.__class__) else False
+    def __eq__(self, other: abstracts.AbstractModel) -> bool:
+        return (
+            dict(other) == dict(self)
+            if isinstance(other, self.__class__)
+            else False
+        )
 
     def __getattr__(self, name: str) -> Any:
         attr = self.get(name)
@@ -71,9 +75,9 @@ class BasicModel(AbstractModel):
         """
         Get value for key(s) in local state.
 
-        Function allows lookups even within nested dictionaries. When passed multiple keys,
-        either separated by periods or as a list or tuple, the function looks up each key
-        in sequence.
+        Function allows lookups even within nested dictionaries. When passed
+        multiple keys, either separated by periods or as a list or tuple,
+        the function looks up each key in sequence.
 
         Args:
             key: Key(s) to use to retrieve value.
@@ -108,7 +112,11 @@ class BasicModel(AbstractModel):
 
         """
         # TODO: Develop method for recursively updating nested dictionaries in local state.
-        self.state.update(__m, **kwargs)
+        if __m:
+            self.state.update(__m, **kwargs)
+        else:
+            self.state.update(**kwargs)
+
         return self
 
     def rollback(self) -> None:
