@@ -66,32 +66,29 @@ def test_model_gets_nested_items_from_string_of_keys():
             'progress': 'completed',
         },
     )
-    assert model.get('status.progress') == 'completed'
     assert model['status.progress'] == 'completed'
 
 
-def test_model_gets_nested_items_from_list_of_keys():
-    model = BasicModel(
-        name='Test Model',
-        description='For testing purposes only.',
-        status={
-            'progress': 'completed',
-        },
-    )
-    assert model.get(['status', 'progress']) == 'completed'
-    assert model[['status', 'progress']] == 'completed'
+# def test_model_gets_nested_items_from_list_of_keys():
+#     model = BasicModel(
+#         name='Test Model',
+#         description='For testing purposes only.',
+#         status={
+#             'progress': 'completed',
+#         },
+#     )
+#     assert model[['status', 'progress']] == 'completed'
 
 
-def test_model_gets_nested_items_from_tuple_of_keys():
-    model = BasicModel(
-        name='Test Model',
-        description='For testing purposes only.',
-        status={
-            'progress': 'completed',
-        },
-    )
-    assert model.get(('status', 'progress')) == 'completed'
-    assert model[('status', 'progress')] == 'completed'
+# def test_model_gets_nested_items_from_tuple_of_keys():
+#     model = BasicModel(
+#         name='Test Model',
+#         description='For testing purposes only.',
+#         status={
+#             'progress': 'completed',
+#         },
+#     )
+#     assert model[('status', 'progress')] == 'completed'
 
 
 def test_get_method_raises_type_error_when_passed_a_dictionary():
@@ -103,7 +100,7 @@ def test_get_method_raises_type_error_when_passed_a_dictionary():
         },
     )
     with pytest.raises(TypeError):
-        model.get({'status': 'progress'})
+        model[{'status': 'progress'}]
 
 
 def test_update_method_changes_model_state():

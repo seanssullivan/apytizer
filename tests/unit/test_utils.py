@@ -3,8 +3,19 @@
 # pylint: disable=protected-access
 
 # Local Imports
-from src.apytizer.utils import deep_set, merge
+from src.apytizer.utils import deep_get, deep_set, merge
 
+
+def test_deep_get_returns_value():
+    obj = {'first': 'Success'}
+    result = deep_get(obj, 'first')
+    assert result == 'Success'
+
+
+def test_deep_get_returns_value_from_nested_object():
+    obj = {'first': {'second': 'Success'}}
+    result = deep_get(obj, 'first.second')
+    assert result == 'Success'
 
 def test_deep_set_returns_mapping():
     result = deep_set({}, 'key', 'test')

@@ -8,3 +8,4 @@ from .mappings import deep_set
 from .mappings import merge
 from .mappings import remap_keys
 from .mappings import remove_null
+from .typing import all_instance

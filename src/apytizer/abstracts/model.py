@@ -33,12 +33,33 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, keys: str, default = None):
+    def __getattr__(self, name: str):
         """
-        Abstract method for getting model property from state.
+        Abstract method for getting a attribute from state.
 
         Returns:
-            Value of property in model state.
+            Value of attribute.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __getitem__(self, name: str):
+        """
+        Abstract method for getting an item from state.
+
+        Returns:
+            Value of item.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __repr__(self) -> str:
+        """
+        Abstract method for returning the string representation of the model.
 
         """
 

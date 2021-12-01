@@ -12,7 +12,7 @@ methods represents a standard create, read, update or delete (CRUD) operation.
 
 # Standard Library Imports
 import abc
-from typing import List
+from typing import List, Set
 
 # Local Imports
 from .endpoint import AbstractEndpoint
@@ -26,7 +26,8 @@ class AbstractManager(abc.ABC):
     """
 
     endpoint: AbstractEndpoint
-    model_class = AbstractModel
+    model = AbstractModel
+    objects: Set[AbstractModel]
 
     def __hash__(self) -> int:
         return hash(self.endpoint)
@@ -35,7 +36,7 @@ class AbstractManager(abc.ABC):
         return '<{cls!s} endpoint={endpoint!s} model={model!s}>'.format(
             cls=self.__class__.__name__,
             endpoint=self.endpoint,
-            model=self.model_class.__class__.__name__,
+            model=self.model.__class__.__name__,
         )
 
     @abc.abstractmethod
@@ -67,9 +68,9 @@ class AbstractManager(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def select(self, *args, **kwargs) -> List[AbstractModel]:
+    def list(self, *args, **kwargs) -> List[AbstractModel]:
         """
-        Abstract method for selecting multiple objects.
+        Abstract method for retrieving multiple objects.
 
         Args:
             *args: Positional arguments.

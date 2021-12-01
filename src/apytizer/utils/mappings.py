@@ -2,7 +2,7 @@
 
 # Standard Library Imports
 import functools
-from typing import Any, Dict, List, Mapping, MutableMapping, Union
+from typing import Any, Dict, List, Mapping, MutableMapping
 
 
 def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
@@ -19,21 +19,18 @@ def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
 
     """
 
-    def _get(data: Any, key: str) -> Any:
-        if not data:
-            return default
+    def _get(data: Mapping, key: str) -> Any:
+        return data.get(key, default) if data else None
 
-        if not isinstance(data, dict):
-            return data
-
-        return data.get(key, default)
+    if not isinstance(__m, Mapping):
+        raise TypeError('must be an instance of a mapping')
 
     value = functools.reduce(_get, keys.split("."), __m)
     return value
 
 
 def deep_set(
-    __m: MutableMapping, keys: Union[List[str], str], value: Any
+    __m: MutableMapping, keys: str, value: Any
 ) -> Dict[str, Any]:
     """
     Sets a key to the provided value in a nested mapping object.
@@ -66,7 +63,7 @@ def deep_set(
     return __m
 
 
-def pick(__m: Mapping, keys: List[str]) -> Mapping:
+def pick(__m: Mapping, keys: List[str]) -> Dict[str, Any]:
     """
     Pick multiple values from a mapping.
 
@@ -74,8 +71,15 @@ def pick(__m: Mapping, keys: List[str]) -> Mapping:
         __m: Mapping object.
         keys: List of keys.
 
+    Returns:
+        Dictionary containing the selected key-value pairs.
+
     """
-    return {key.split('.')[-1]: deep_get(__m, key) for key in keys}
+    def _last(key: str) -> str:
+        return key.split('.')[-1]
+
+    results = {_last(key): deep_get(__m, key) for key in keys}
+    return results
 
 
 def merge(*args: Mapping) -> Dict:

@@ -8,19 +8,16 @@ This module defines the implementation of a basic model class.
 # Standard Library Imports
 from __future__ import annotations
 import collections
-import functools
 import logging
-from typing import Any, List, Mapping, Tuple, Union
+from typing import Any, Mapping
 
 # Local Imports
 from .. import abstracts
+from .. import utils
 
 
 # Initialize logger.
 log = logging.getLogger(__name__)
-
-# Define custom types.
-AttributeKey = Union[List[str], str, Tuple[str]]
 
 
 class BasicModel(abstracts.AbstractModel):
@@ -31,6 +28,7 @@ class BasicModel(abstracts.AbstractModel):
         **kwargs: Data with which to set model state.
 
     """
+
     state: collections.ChainMap
 
     def __init__(self, **kwargs):
@@ -47,15 +45,46 @@ class BasicModel(abstracts.AbstractModel):
         )
 
     def __getattr__(self, name: str) -> Any:
-        attr = self.get(name)
+        """
+        Get attribute from local state.
+
+        Args:
+            name: Name of attribute.
+
+        Returns:
+            Value of attribute in state.
+
+        """
+
+        attr = self.state.get(name)
         if not attr:
             cls = self.__class__.__name__
             message = f"type object '{cls!s}' has no attribute '{attr!s}'"
             raise AttributeError(message)
+
         return attr
 
-    def __getitem__(self, key: AttributeKey) -> Any:
-        return self.get(key)
+    def __getitem__(self, key: str) -> Any:
+        """
+        Get item from local state.
+
+        Function allows lookups even within nested dictionaries. When passed
+        multiple keys, separated by periods, the function looks up each key
+        in sequence.
+
+        Args:
+            key: Key(s) to use to retrieve value.
+
+        Returns:
+            Value for key in state.
+
+        """
+
+        if not isinstance(key, str):
+            raise TypeError('argument must be a string')
+
+        value = utils.deep_get(self.state, key)
+        return value
 
     def __iter__(self):
         yield from self.state.items()
@@ -68,39 +97,9 @@ class BasicModel(abstracts.AbstractModel):
         Commits changes to local state.
 
         """
+
         if self.state.maps[0]:
             self.state = self.state.new_child()
-
-    def get(self, key: AttributeKey, default = None) -> Any:
-        """
-        Get value for key(s) in local state.
-
-        Function allows lookups even within nested dictionaries. When passed
-        multiple keys, either separated by periods or as a list or tuple,
-        the function looks up each key in sequence.
-
-        Args:
-            key: Key(s) to use to retrieve value.
-
-        Returns:
-            Value for key in state.
-
-        """
-        if (isinstance(key, (list, tuple))) \
-            and all(isinstance(k, str) for k in key):
-            key = '.'.join(key)
-
-        if not isinstance(key, str):
-            raise TypeError
-
-        value = functools.reduce(
-            lambda data, key: data.get(key, default) \
-                if isinstance(data, (collections.ChainMap, dict)) \
-                else data if data else default,
-            key.split('.'),
-            self.state
-        )
-        return value
 
     def update(self, __m: Mapping = None, **kwargs) -> None:
         """
@@ -111,6 +110,7 @@ class BasicModel(abstracts.AbstractModel):
             **kwargs: Data with which to update local state.
 
         """
+
         # TODO: Develop method for recursively updating nested dictionaries in local state.
         if __m:
             self.state.update(__m, **kwargs)
@@ -124,4 +124,5 @@ class BasicModel(abstracts.AbstractModel):
         Rollback changes to local state.
 
         """
+
         self.state.clear()
