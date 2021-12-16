@@ -26,11 +26,12 @@ from ..utils import merge
 log = logging.getLogger(__name__)
 
 # Define custom types.
+Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
 
 
-class BasicAPI(abstracts.AbstractAPI):
+class BaseAPI(abstracts.AbstractAPI):
     """
     Implements a basic API.
 
@@ -40,7 +41,7 @@ class BasicAPI(abstracts.AbstractAPI):
 
     Args:
         url: Base URL for API.
-        auth: Authorization or credentials.
+        auth (optional): Authorization or credentials.
         headers (optional): Headers to set globally for API.
         params (optional): Parameters to set globally for API.
         cache (optional): Mutable mapping for caching responses.
@@ -57,7 +58,7 @@ class BasicAPI(abstracts.AbstractAPI):
         *,
         headers: Headers = None,
         params: Parameters = None,
-        cache: MutableMapping = None
+        cache: Cache = None,
     ):
         self.url = url + "/" if url[-1] != "/" else url
         self.auth = auth
@@ -72,7 +73,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP request.
@@ -95,7 +96,7 @@ class BasicAPI(abstracts.AbstractAPI):
         uri = urljoin(self.url, route)
         log.debug(
             "Sending HTTP %(method)s request to %(uri)s",
-            {'method': method, 'uri': uri}
+            {"method": method, "uri": uri},
         )
 
         response = requests.request(
@@ -104,7 +105,7 @@ class BasicAPI(abstracts.AbstractAPI):
             auth=self.auth,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
@@ -114,7 +115,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP HEAD request.
@@ -134,11 +135,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'HEAD',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "HEAD", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -148,7 +145,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP GET request.
@@ -168,11 +165,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'GET',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "GET", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -182,7 +175,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP POST request.
@@ -202,11 +195,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'POST',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "POST", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -216,7 +205,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP PUT request.
@@ -236,11 +225,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'PUT',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "PUT", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -250,7 +235,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP PATCH request.
@@ -270,11 +255,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'PATCH',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "PATCH", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -284,7 +265,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP DELETE request.
@@ -304,11 +285,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'DELETE',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "DELETE", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -318,7 +295,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP OPTIONS request.
@@ -338,11 +315,7 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'OPTIONS',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "OPTIONS", route, headers=headers, params=params, **kwargs
         )
         return response
 
@@ -352,7 +325,7 @@ class BasicAPI(abstracts.AbstractAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP TRACE request.
@@ -372,16 +345,12 @@ class BasicAPI(abstracts.AbstractAPI):
         """
 
         response = self.request(
-            'TRACE',
-            route,
-            headers=headers,
-            params=params,
-            **kwargs
+            "TRACE", route, headers=headers, params=params, **kwargs
         )
         return response
 
 
-class SessionAPI(abstracts.AbstractSession, BasicAPI):
+class SessionAPI(abstracts.AbstractSession, BaseAPI):
     """
     Implements a session-based API.
 
@@ -406,15 +375,15 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
     """
 
     def __init__(
-            self,
-            url: str,
-            auth: Union[AuthBase, Tuple] = None,
-            *,
-            headers: Headers = None,
-            params: Parameters = None,
-            adapter: HTTPAdapter = None,
-            session: requests.Session = None,
-            cache: MutableMapping = None,
+        self,
+        url: str,
+        auth: Union[AuthBase, Tuple] = None,
+        *,
+        headers: Headers = None,
+        params: Parameters = None,
+        adapter: HTTPAdapter = None,
+        session: requests.Session = None,
+        cache: MutableMapping = None,
     ):
         super().__init__(
             url,
@@ -486,7 +455,7 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
         route: str,
         headers: Headers = None,
         params: Parameters = None,
-        **kwargs
+        **kwargs,
     ) -> requests.Response:
         """
         Sends an HTTP request.
@@ -509,7 +478,7 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
         uri = urljoin(self.url, route)
         log.debug(
             "Sending HTTP %(method)s request to %(uri)s",
-            {'method': method, 'uri': uri}
+            {"method": method, "uri": uri},
         )
 
         if self.session:
@@ -518,17 +487,15 @@ class SessionAPI(abstracts.AbstractSession, BasicAPI):
                 uri,
                 headers=merge(self.headers, headers),
                 params=merge(self.params, params),
-                **kwargs
+                **kwargs,
             )
 
         else:
-            log.warning("Session not started: start() method not called before sending request")
+            log.warning(
+                "Session not started: start() method not called before sending request"
+            )
             response = super().request(
-                method,
-                uri,
-                headers=headers,
-                params=params,
-                **kwargs
+                method, uri, headers=headers, params=params, **kwargs
             )
 
         return response

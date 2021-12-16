@@ -25,6 +25,7 @@ from ..utils import merge
 log = logging.getLogger(__name__)
 
 # Define custom types.
+Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
 
@@ -55,7 +56,7 @@ class BasicEndpoint(AbstractEndpoint):
         headers: Headers = None,
         params: Parameters = None,
         methods: List[str] = None,
-        cache: MutableMapping = None,
+        cache: Cache = None,
     ):
         self.api = api
         self.path = path if path[0] != "/" else path[1:]
@@ -81,7 +82,7 @@ class BasicEndpoint(AbstractEndpoint):
         headers: Headers = None,
         params: Parameters = None,
         methods: List[str] = None,
-        cache: MutableMapping = None
+        cache: Cache = None,
     ) -> BasicEndpoint:
         """
         Returns a new endpoint with the appended reference.
@@ -112,7 +113,7 @@ class BasicEndpoint(AbstractEndpoint):
         if isinstance(ref, (int, str)):
             endpoint = BasicEndpoint(
                 self.api,
-                f'{self.path!s}/{ref!s}',
+                f"{self.path!s}/{ref!s}",
                 headers=headers,
                 params=params,
                 methods=methods,
@@ -147,10 +148,7 @@ class BasicEndpoint(AbstractEndpoint):
         """
 
         if isinstance(ref, (int, str)):
-            endpoint = BasicEndpoint(
-                self.api,
-                f'{self.path!s}/{ref!s}'
-            )
+            endpoint = BasicEndpoint(self.api, f"{self.path!s}/{ref!s}")
         else:
             raise TypeError
 
@@ -181,10 +179,7 @@ class BasicEndpoint(AbstractEndpoint):
         """
 
         if isinstance(path, (int, str)):
-            endpoint = BasicEndpoint(
-                self.api,
-                f'{self.path!s}/{path!s}'
-            )
+            endpoint = BasicEndpoint(self.api, f"{self.path!s}/{path!s}")
         else:
             raise TypeError
 
@@ -215,10 +210,7 @@ class BasicEndpoint(AbstractEndpoint):
         """
 
         if isinstance(path, (int, str)):
-            endpoint = BasicEndpoint(
-                self.api,
-                f'{self.path!s}/{path!s}'
-            )
+            endpoint = BasicEndpoint(self.api, f"{self.path!s}/{path!s}")
         else:
             raise TypeError
 
@@ -226,10 +218,7 @@ class BasicEndpoint(AbstractEndpoint):
 
     @cache_response
     def head(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP HEAD request to API endpoint.
@@ -247,23 +236,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'HEAD' not in self.methods:
+        if self.methods and "HEAD" not in self.methods:
             raise NotImplementedError
 
         response = self.api.head(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def get(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP GET request to API endpoint.
@@ -281,23 +267,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'GET' not in self.methods:
+        if self.methods and "GET" not in self.methods:
             raise NotImplementedError
 
         response = self.api.get(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def post(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP POST request to API endpoint.
@@ -315,23 +298,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'POST' not in self.methods:
+        if self.methods and "POST" not in self.methods:
             raise NotImplementedError
 
         response = self.api.post(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def put(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP PUT request to API endpoint.
@@ -349,23 +329,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'PUT' not in self.methods:
+        if self.methods and "PUT" not in self.methods:
             raise NotImplementedError
 
         response = self.api.put(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def patch(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP PATCH request to API endpoint.
@@ -383,23 +360,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'PATCH' not in self.methods:
+        if self.methods and "PATCH" not in self.methods:
             raise NotImplementedError
 
         response = self.api.patch(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def delete(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP DELETE request to API endpoint.
@@ -417,23 +391,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'DELETE' not in self.methods:
+        if self.methods and "DELETE" not in self.methods:
             raise NotImplementedError
 
         response = self.api.delete(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def options(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP OPTIONS request to API endpoint.
@@ -451,23 +422,20 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'OPTIONS' not in self.methods:
+        if self.methods and "OPTIONS" not in self.methods:
             raise NotImplementedError
 
         response = self.api.options(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response
 
     @cache_response
     def trace(
-        self,
-        headers: Headers = None,
-        params: Parameters = None,
-        **kwargs
+        self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
         """
         Sends an HTTP TRACE request to API endpoint.
@@ -485,13 +453,13 @@ class BasicEndpoint(AbstractEndpoint):
 
         """
 
-        if self.methods and 'TRACE' not in self.methods:
+        if self.methods and "TRACE" not in self.methods:
             raise NotImplementedError
 
         response = self.api.trace(
             self.path,
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
-            **kwargs
+            **kwargs,
         )
         return response

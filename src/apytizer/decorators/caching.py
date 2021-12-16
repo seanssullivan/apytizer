@@ -30,7 +30,10 @@ def cache_response(func: Callable) -> Callable:
     """
 
     @functools.wraps(func)
-    @cachedmethod(operator.attrgetter('cache'), key=generate_key(func.__name__.upper()))
+    @cachedmethod(
+        operator.attrgetter("cache"),
+        key=generate_key(func.__name__.upper()),
+    )
     def wrapper(*args, **kwargs):
         """Wrapper applied to decorated function."""
 

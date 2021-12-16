@@ -1,6 +1,25 @@
+[dev-dependencies]
+black = { version = "^21.7-beta.0", python = "^3.8" }
+
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools >= 44.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 79
+target_version = ['py38']
+exclude = '''
+
+(
+    /(
+          \.eggs      # exclude a few common directories in the
+        | \.git       # root of the project
+        | \.mypy_cache
+        | \.tox
+        | \.venv
+        | build
+        | dist
+        | env
+    )
+)
+'''

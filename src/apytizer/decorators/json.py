@@ -36,11 +36,12 @@ def json_response(func: Callable) -> Callable:
 
         """
 
-        log.debug('Parsing JSON response...')
-        response = func(*args, **kwargs)
+        response = func(*args, **kwargs)  # type: Response
+
+        log.debug("Parsing JSON response...")
         return (
             response.json()
-            if response.headers.get('Content-Type') == "application/json"
+            if "application/json" in response.headers.get("Content-Type")
             else response
         )
 
