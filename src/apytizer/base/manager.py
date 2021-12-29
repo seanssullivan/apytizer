@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Basic manager class.
+# src/apytizer/base/manager.py
+"""Base manager class.
 
-This module defines the implementation of a basic manager class.
+This module defines the implementation of a base manager class.
 
 """
 
@@ -11,15 +12,16 @@ from typing import Any, List, Set, Type
 
 # Local Imports
 from .. import abstracts
+from .. import utils
 
 
 # Initialize logger.
 log = logging.getLogger(__name__)
 
 
-class BasicManager(abstracts.AbstractManager):
+class BaseManager(abstracts.AbstractManager):
     """
-    Implements a basic object manager.
+    Implements a base object manager.
 
     Args:
         endpoint: Endpoint.
@@ -30,25 +32,36 @@ class BasicManager(abstracts.AbstractManager):
 
     def __init__(
         self,
-        endpoint: abstracts.AbstractEndpoint,
         model: Type[abstracts.AbstractModel],
+        endpoint: abstracts.AbstractEndpoint,
         objects: List[abstracts.AbstractModel] = None,
     ):
-        self.endpoint = endpoint
+        if not utils.allinstance(objects, model):
+            raise TypeError(f"objects must all be instances of {model}")
+
         self.model = model
+        self.endpoint = endpoint
 
         # Components
-        if not all(isinstance(obj, model) for obj in objects):
-            raise TypeError(f'objects must all be instances of {model}')
+        self.objects = set(objects or [])  # type: Set[abstracts.AbstractModel]
 
-        self.objects = set(objects or []) # type: Set[abstracts.AbstractModel]
+    def add(self, obj: abstracts.AbstractModel) -> None:
+        """
+        Add an object.
 
-    def create(self, obj: abstracts.AbstractModel) -> None:
+        Args:
+            obj: Object to add.
+
+        """
+
+        self.objects.add(obj)
+
+    def _create(self, obj: abstracts.AbstractModel) -> None:
         """
         Create an object.
 
         Args:
-            obj: Object.
+            obj: Object to create.
 
         """
 
@@ -63,29 +76,75 @@ class BasicManager(abstracts.AbstractManager):
             ref: Reference to object.
 
         Returns:
-            Instance of an abstract model subclass.
+            Object.
 
         """
 
         try:
-            result = next(
-                obj
-                for obj in self.objects
-                if getattr(obj, self._index) == ref
-            )
+            result = next(obj for obj in self.objects if obj.reference == ref)
         except StopIteration:
             result = self.endpoint.get(ref, *args, **kwargs)
+            self.objects.add(result)
             return result
         else:
             return result
 
-    def remove(self, obj: abstracts.AbstractModel) -> None:
+    def list(self, *args, **kwargs) -> List[abstracts.AbstractModel]:
         """
-        Abstract method for removing an object.
+        Retrieving all objects.
 
         Args:
-            obj: Instance of an abstract model subclass.
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            List of objects.
+
+        """
+
+        raise NotImplementedError
+
+    def _update(
+        self, obj: abstracts.AbstractModel, *args, **kwargs
+    ) -> abstracts.AbstractModel:
+        """
+        Update object.
+
+        Args:
+            obj: Object to update.
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Updated object.
+
+        """
+
+        raise NotImplementedError
+
+    def remove(self, obj: abstracts.AbstractModel) -> None:
+        """
+        Remove an object.
+
+        Args:
+            obj: Object to remove.
 
         """
 
         self.objects.discard(obj)
+
+    def commit(self) -> None:
+        """
+        Commit changes to objects.
+
+        """
+
+        raise NotImplementedError
+
+    def rollback(self) -> None:
+        """
+        Roll back changes to objects.
+
+        """
+
+        raise NotImplementedError

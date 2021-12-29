@@ -1,87 +1,121 @@
 # -*- coding: utf-8 -*-
 
-# pylint: disable=protected-access
-
 # Local Imports
-from src.apytizer.utils import deep_get, deep_set, merge
+from src.apytizer import utils
 
 
 def test_deep_get_returns_value():
-    obj = {'first': 'Success'}
-    result = deep_get(obj, 'first')
-    assert result == 'Success'
+    obj = {"first": "Success"}
+    result = utils.deep_get(obj, "first")
+    assert result == "Success"
 
 
 def test_deep_get_returns_value_from_nested_object():
-    obj = {'first': {'second': 'Success'}}
-    result = deep_get(obj, 'first.second')
-    assert result == 'Success'
+    obj = {"first": {"second": "Success"}}
+    result = utils.deep_get(obj, "first.second")
+    assert result == "Success"
+
 
 def test_deep_set_returns_mapping():
-    result = deep_set({}, 'key', 'test')
+    result = utils.deep_set({}, "key", "test")
     assert isinstance(result, dict)
 
 
 def test_deep_set_updates_nested_object():
-    result = deep_set({}, 'parent.child', 'test')
-    assert result == {'parent': {'child': 'test'}}
+    result = utils.deep_set({}, "parent.child", "test")
+    assert result == {"parent": {"child": "test"}}
+
+
+def test_iter_get_returns_values():
+    data = [{"value": 1}, {"value": 2}, {"value": 3}]
+    results = utils.iter_get(data, "value")
+    assert results == [1, 2, 3]
+
+
+def test_iter_get_returns_nested_values():
+    data = [
+        {"current": {"value": 1}},
+        {"current": {"value": 2}},
+        {"current": {"value": 3}},
+    ]
+    results = utils.iter_get(data, "current.value")
+    assert results == [1, 2, 3]
 
 
 def test_merge_combines_dictionaries():
-    first_dict = {'a': 1, 'b': 2}
-    second_dict = {'c': 3, 'd': 4}
-    result = merge(first_dict, second_dict)
-    assert result == {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    first_dict = {"a": 1, "b": 2}
+    second_dict = {"c": 3, "d": 4}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {"a": 1, "b": 2, "c": 3, "d": 4}
 
 
 def test_merge_combines_multiple_dictionaries():
     all_dicts = [
-        {'a': 0, 'b': 1},
-        {'c': 2, 'd': 3},
-        {'e': 4, 'f': 5},
-        {'g': 6, 'h': 7},
-        {'i': 8, 'j': 9},
+        {"a": 0, "b": 1},
+        {"c": 2, "d": 3},
+        {"e": 4, "f": 5},
+        {"g": 6, "h": 7},
+        {"i": 8, "j": 9},
     ]
-    result = merge(*all_dicts)
+    result = utils.merge(*all_dicts)
     assert result == {
-        'a': 0,
-        'b': 1,
-        'c': 2,
-        'd': 3,
-        'e': 4,
-        'f': 5,
-        'g': 6,
-        'h': 7,
-        'i': 8,
-        'j': 9,
+        "a": 0,
+        "b": 1,
+        "c": 2,
+        "d": 3,
+        "e": 4,
+        "f": 5,
+        "g": 6,
+        "h": 7,
+        "i": 8,
+        "j": 9,
     }
 
 
 def test_merge_overwrites_keys_with_subsequent_values():
-    first_dict = {'a': 1, 'b': 2}
-    second_dict = {'b': 3, 'c': 4}
-    third_dict = {'c': 5, 'd': 6}
-    fourth_dict = {'d': 7}
-    result = merge(first_dict, second_dict, third_dict, fourth_dict)
-    assert result == {'a': 1, 'b': 3, 'c': 5, 'd': 7}
+    first_dict = {"a": 1, "b": 2}
+    second_dict = {"b": 3, "c": 4}
+    third_dict = {"c": 5, "d": 6}
+    fourth_dict = {"d": 7}
+    result = utils.merge(first_dict, second_dict, third_dict, fourth_dict)
+    assert result == {"a": 1, "b": 3, "c": 5, "d": 7}
 
 
 def test_merge_combined_two_dictionaries():
-    first_dict = {'a': 1, 'b': 2}
-    second_dict = {'c': 3, 'd': 4}
-    result = merge(first_dict, second_dict)
-    assert result == {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    first_dict = {"a": 1, "b": 2}
+    second_dict = {"c": 3, "d": 4}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {"a": 1, "b": 2, "c": 3, "d": 4}
 
 
 def test_merge_returns_first_dictionary_if_second_is_none():
-    first_dict = {'a': 1, 'b': 2}
+    first_dict = {"a": 1, "b": 2}
     second_dict = None
-    result = merge(first_dict, second_dict)
-    assert result == {'a': 1, 'b': 2}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {"a": 1, "b": 2}
 
 
 def test_merge_returns_second_dictionary_if_first_is_none():
     first_dict = None
-    second_dict = {'c': 3, 'd': 4}
-    result = merge(first_dict, second_dict)
-    assert result == {'c': 3, 'd': 4}
+    second_dict = {"c": 3, "d": 4}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {"c": 3, "d": 4}
+
+
+def test_remap_keys_returns_new_dictionary():
+    data = {"first": 1, "second": 2, "third": 3}
+    mapper = {"first": "one", "second": "two", "third": "three"}
+    result = utils.remap_keys(data, mapper)
+    assert result == {"one": 1, "two": 2, "three": 3}
+
+
+def test_remove_null_returns_values_which_are_not_none():
+    data = {"a": 0, "b": 1, "c": None, "d": 3}
+    result = utils.remove_null(data)
+    assert list(result.keys()) == ["a", "b", "d"]
+
+
+def test_remove_null_returns_values_which_are_not_provided():
+    data = {"a": 0, "b": 1, "c": None, "d": 3}
+    result = utils.remove_null(data, null_values=[0])
+    assert list(result.keys()) == ["b", "d"]

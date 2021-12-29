@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/abstracts/manager.py
 """Abstract manager class interface.
 
 This module defines an abstract manager class which provides an interface for
@@ -25,22 +26,34 @@ class AbstractManager(abc.ABC):
 
     """
 
-    endpoint: AbstractEndpoint
     model = AbstractModel
+    endpoint: AbstractEndpoint
     objects: Set[AbstractModel]
 
     def __hash__(self) -> int:
-        return hash(self.endpoint)
+        return hash((self.model, self.endpoint))
 
     def __repr__(self) -> str:
-        return '<{cls!s} endpoint={endpoint!s} model={model!s}>'.format(
+        return "<{cls!s} endpoint={endpoint!s} model={model!s}>".format(
             cls=self.__class__.__name__,
             endpoint=self.endpoint,
             model=self.model.__class__.__name__,
         )
 
     @abc.abstractmethod
-    def create(self, obj: AbstractModel) -> None:
+    def add(self, obj: AbstractModel) -> None:
+        """
+        Abstract method for adding an object.
+
+        Args:
+            obj: Instance of an abstract model subclass.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _create(self, obj: AbstractModel) -> None:
         """
         Abstract method for creating an object.
 
@@ -84,9 +97,9 @@ class AbstractManager(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, obj: AbstractModel, *args, **kwargs) -> AbstractModel:
+    def _update(self, obj: AbstractModel, *args, **kwargs) -> AbstractModel:
         """
-        Abstract method for updating objects.
+        Abstract method for updating an object.
 
         Args:
             obj: Instance of an abstract model subclass.
@@ -107,6 +120,24 @@ class AbstractManager(abc.ABC):
 
         Args:
             obj: Instance of an abstract model subclass.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def commit(self) -> None:
+        """
+        Abstract method for committing changes to objects.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def rollback(self) -> None:
+        """
+        Abstract method for rolling back changes to objects.
 
         """
 

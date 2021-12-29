@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/decorators/pagination.py
 
 # Standard Library Imports
 import functools
@@ -36,16 +37,16 @@ def pagination(func) -> Callable:
 
         completed = False
         state = {
-            'params': kwargs.pop('params', None),
-            'data': kwargs.pop('data', None)
+            "params": kwargs.pop("params", None),
+            "data": kwargs.pop("data", None),
         }
 
         while not completed:
-            if state.get('params'):
-                kwargs.update({'params': state.get('params')})
+            if state.get("params"):
+                kwargs.update({"params": state.get("params")})
 
-            if state.get('data'):
-                kwargs.update({'data': state.get('data')})
+            if state.get("data"):
+                kwargs.update({"data": state.get("data")})
 
             response = func(*args, **kwargs)
             yield response

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/decorators/json.py
 
 # Standard Library Imports
 import functools
+import json
 import logging
 from typing import Callable, Dict, List, Union
 
@@ -11,6 +13,9 @@ from requests import Response
 
 # Initialize logger.
 log = logging.getLogger(__name__)
+
+# Define constants.
+APPLICATION_JSON = "application/json"
 
 
 def json_response(func: Callable) -> Callable:
@@ -37,13 +42,19 @@ def json_response(func: Callable) -> Callable:
         """
 
         response = func(*args, **kwargs)  # type: Response
+        if response.status_code == 204:  # No content
+            return response
 
-        log.debug("Parsing JSON response...")
-        return (
-            response.json()
-            if "application/json" in response.headers.get("Content-Type")
-            else response
-        )
+        if not APPLICATION_JSON in response.headers.get("Content-Type"):
+            return response
+
+        try:
+            log.debug("Parsing JSON response...")
+            return response.json()
+
+        except json.JSONDecodeError as error:
+            log.error(error)
+            return response
 
     functools.update_wrapper(wrapper, func)
     return wrapper

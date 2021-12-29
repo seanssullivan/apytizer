@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/abstracts/model.py
 """Abstract model class interface.
 
 This module defines an abstract model class which provides an interface
@@ -9,16 +10,24 @@ for subclasses to implement.
 # Standard Library Imports
 from __future__ import annotations
 import abc
-from typing import Mapping
+from typing import Mapping, Union
+
+# Local Imports
+from .state import AbstractState
 
 
 class AbstractModel(abc.ABC):
     """
     Represents an abstract model.
 
+    Attributes:
+        reference: Unique reference to model.
+        state: Local state of model.
+
     """
 
-    state: Mapping
+    reference: Union[int, str]
+    state: AbstractState
 
     @abc.abstractmethod
     def __eq__(self, other: AbstractModel) -> bool:
@@ -27,6 +36,18 @@ class AbstractModel(abc.ABC):
 
         Returns:
             Whether models are equal.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __hash__(self) -> str:
+        """
+        Abstract method for returning the hash value of a model.
+
+        Returns:
+            Hash value.
 
         """
 
@@ -68,7 +89,25 @@ class AbstractModel(abc.ABC):
     @abc.abstractmethod
     def update(self, __m: Mapping = None, **kwargs) -> None:
         """
-        Abstract method for updating model state.
+        Abstract method for updating state of model.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def rollback(self) -> None:
+        """
+        Abstract method for rolling back changes to state of model.
+
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def save(self) -> None:
+        """
+        Abstract method for saving changes to state of model.
 
         """
 

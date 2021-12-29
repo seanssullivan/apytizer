@@ -4,7 +4,7 @@
 from typing import Iterable, Tuple, Union
 
 
-def all_instance(
+def allinstance(
     __objs: Iterable, __class_or_tuple: Union[Tuple[type], type]
 ) -> bool:
     """

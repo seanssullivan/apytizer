@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/abstracts/api.py
 """Abstract API class interface.
 
 This module defines an abstract API class which provides an interface
@@ -27,14 +28,13 @@ class AbstractAPI(abc.ABC):
     auth: Union[AuthBase, Tuple]
 
     def __eq__(self, other: AbstractAPI) -> bool:
-        return other.url == self.url \
-            and other.auth == self.auth
+        return other.url == self.url and other.auth == self.auth
 
     def __hash__(self) -> int:
         return hash(self.url)
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__!s} url={self.url!s}>'
+        return f"<{self.__class__.__name__!s} url={self.url!s}>"
 
     @abc.abstractmethod
     def head(self, route: str, *args, **kwargs) -> Response:

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Basic endpoint class.
+# src/apytizer/base/endpoint.py
+"""Base endpoint class.
 
-This module defines a basic endpoint class implementation.
+This module defines a base endpoint class implementation.
 
 """
 
@@ -30,9 +31,9 @@ Headers = Dict[str, str]
 Parameters = Dict[str, Any]
 
 
-class BasicEndpoint(AbstractEndpoint):
+class BaseEndpoint(AbstractEndpoint):
     """
-    Class for interacting with an API endpoint.
+    Implements a base API endpoint.
 
     Args:
         path: Relative URL path for endpoint.
@@ -83,7 +84,7 @@ class BasicEndpoint(AbstractEndpoint):
         params: Parameters = None,
         methods: List[str] = None,
         cache: Cache = None,
-    ) -> BasicEndpoint:
+    ) -> BaseEndpoint:
         """
         Returns a new endpoint with the appended reference.
 
@@ -98,20 +99,20 @@ class BasicEndpoint(AbstractEndpoint):
             cache (optional): Mutable mapping for caching responses.
 
         Returns:
-            BasicEndpoint instance.
+            BaseEndpoint instance.
 
         Examples:
             Calling an instance of a basic endpoint returns a new endpoint
             with the appended reference string.
 
-            >>> endpoint = BasicEndpoint(api, 'base')
+            >>> endpoint = BaseEndpoint(api, 'base')
             >>> endpoint('ref').uri
             'api/base/ref'
 
         """
 
         if isinstance(ref, (int, str)):
-            endpoint = BasicEndpoint(
+            endpoint = BaseEndpoint(
                 self.api,
                 f"{self.path!s}/{ref!s}",
                 headers=headers,
@@ -124,7 +125,7 @@ class BasicEndpoint(AbstractEndpoint):
 
         return endpoint
 
-    def __getitem__(self, ref: Union[int, str]) -> BasicEndpoint:
+    def __getitem__(self, ref: Union[int, str]) -> BaseEndpoint:
         """
         Returns a new endpoint with the appended reference.
 
@@ -135,26 +136,26 @@ class BasicEndpoint(AbstractEndpoint):
             ref: Reference for a collection or nested resource.
 
         Returns:
-            BasicEndpoint instance.
+            BaseEndpoint instance.
 
         Examples:
             Getting an item from an instance of a basic endpoint returns a
             new endpoint with the appended reference string.
 
-            >>> endpoint = BasicEndpoint(api, 'base')
+            >>> endpoint = BaseEndpoint(api, 'base')
             >>> endpoint['ref'].uri
             'api/base/ref'
 
         """
 
         if isinstance(ref, (int, str)):
-            endpoint = BasicEndpoint(self.api, f"{self.path!s}/{ref!s}")
+            endpoint = BaseEndpoint(self.api, f"{self.path!s}/{ref!s}")
         else:
             raise TypeError
 
         return endpoint
 
-    def __add__(self, path: Union[int, str]) -> BasicEndpoint:
+    def __add__(self, path: Union[int, str]) -> BaseEndpoint:
         """
         Returns a new endpoint after combining both paths.
 
@@ -166,26 +167,26 @@ class BasicEndpoint(AbstractEndpoint):
             path: Value to append to the current path.
 
         Returns:
-            BasicEndpoint instance.
+            BaseEndpoint instance.
 
         Examples:
             Using an addition operator on an instance of a basic endpoint
             returns a new endpoint with the appended reference string.
 
-            >>> endpoint = BasicEndpoint(api, 'base') + 'ref'
+            >>> endpoint = BaseEndpoint(api, 'base') + 'ref'
             >>> endpoint.uri
             'api/base/ref'
 
         """
 
         if isinstance(path, (int, str)):
-            endpoint = BasicEndpoint(self.api, f"{self.path!s}/{path!s}")
+            endpoint = BaseEndpoint(self.api, f"{self.path!s}/{path!s}")
         else:
             raise TypeError
 
         return endpoint
 
-    def __truediv__(self, path: Union[int, str]) -> BasicEndpoint:
+    def __truediv__(self, path: Union[int, str]) -> BaseEndpoint:
         """
         Returns a new endpoint after combining both paths.
 
@@ -197,20 +198,20 @@ class BasicEndpoint(AbstractEndpoint):
             path: Value to append to the current path.
 
         Returns:
-            BasicEndpoint instance.
+            BaseEndpoint instance.
 
         Examples:
             Using a division operator on an instance of a basic endpoint
             returns a new endpoint with the appended reference string.
 
-            >>> endpoint = BasicEndpoint(api, 'base') / 'ref'
+            >>> endpoint = BaseEndpoint(api, 'base') / 'ref'
             >>> endpoint.uri
             'api/base/ref'
 
         """
 
         if isinstance(path, (int, str)):
-            endpoint = BasicEndpoint(self.api, f"{self.path!s}/{path!s}")
+            endpoint = BaseEndpoint(self.api, f"{self.path!s}/{path!s}")
         else:
             raise TypeError
 

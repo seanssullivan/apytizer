@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/decorators/connection.py
 
 # Standard Library Imports
 import functools
@@ -37,7 +38,7 @@ def confirm_connection(func) -> Callable:
         """
 
         try:
-            response = func(self, *args, **kwargs) # type: requests.Response
+            response = func(self, *args, **kwargs)  # type: requests.Response
 
         except requests.exceptions.ConnectionError as error:
             log.critical("Failed to establish a connection")

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Basic API class.
+# src/apytizer/base/api.py
+"""Base API class.
 
-This module defines a basic API class implementation.
+This module defines a base API class implementation.
 
 """
 
@@ -33,9 +34,9 @@ Parameters = Dict[str, Any]
 
 class BaseAPI(abstracts.AbstractAPI):
     """
-    Implements a basic API.
+    Implements a base API.
 
-    The BasicAPI class provides an interface for interacting with a REST API.
+    The BaseAPI class provides an interface for interacting with a REST API.
     It implements the standard HTTP methods (HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS and TRACE)
     as well as a `request` method for sending a custom HTTP request.
 
@@ -106,6 +107,11 @@ class BaseAPI(abstracts.AbstractAPI):
             headers=merge(self.headers, headers),
             params=merge(self.params, params),
             **kwargs,
+        )
+
+        log.debug(
+            "Received response with status code %(status)s",
+            {"status": response.status_code},
         )
         return response
 
@@ -476,18 +482,23 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         """
 
         uri = urljoin(self.url, route)
-        log.debug(
-            "Sending HTTP %(method)s request to %(uri)s",
-            {"method": method, "uri": uri},
-        )
-
         if self.session:
+            log.debug(
+                "Sending HTTP %(method)s request to %(uri)s",
+                {"method": method, "uri": uri},
+            )
+
             response = self.session.request(
                 method,
                 uri,
                 headers=merge(self.headers, headers),
                 params=merge(self.params, params),
                 **kwargs,
+            )
+
+            log.debug(
+                "Received response with status code %(status)s",
+                {"status": response.status_code},
             )
 
         else:

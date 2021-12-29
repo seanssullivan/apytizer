@@ -1,48 +1,70 @@
 # -*- coding: utf-8 -*-
-"""Basic model class.
+# src/apytizer/base/model.py
+"""Base model class.
 
-This module defines the implementation of a basic model class.
+This module defines the implementation of a base model class.
 
 """
 
 # Standard Library Imports
 from __future__ import annotations
-import collections
 import logging
-from typing import Any, Mapping
+from typing import Any, Mapping, Union
 
 # Local Imports
 from .. import abstracts
-from .. import utils
+from .state import BaseState
 
 
 # Initialize logger.
 log = logging.getLogger(__name__)
 
 
-class BasicModel(abstracts.AbstractModel):
+class BaseModel(abstracts.AbstractModel):
     """
-    Class for representing a basic object model.
+    Implements a base object model.
 
     Args:
         **kwargs: Data with which to set model state.
 
     """
 
-    state: collections.ChainMap
+    reference: Union[int, str]
+    state: BaseState
 
     def __init__(self, **kwargs):
-        self.state = collections.ChainMap({}, kwargs)
+        self.state = BaseState(kwargs)
 
     def __contains__(self, key: str) -> bool:
+        """
+        Check whether key exists in model state.
+
+        Args:
+            key: Key.
+
+        Returns:
+            Whether key exists.
+
+        """
+
         return key in self.state
 
     def __eq__(self, other: abstracts.AbstractModel) -> bool:
-        return (
-            dict(other) == dict(self)
-            if isinstance(other, self.__class__)
-            else False
-        )
+        """
+        Check whether two models are equal.
+
+        Args:
+            other: Another instance of a model.
+
+        Returns:
+            Whether models are equal.
+
+        """
+
+        return other.reference == self.reference
+
+    def __hash__(self) -> str:
+        return hash(self.reference)
 
     def __getattr__(self, name: str) -> Any:
         """
@@ -56,10 +78,13 @@ class BasicModel(abstracts.AbstractModel):
 
         """
 
+        if not isinstance(name, str):
+            raise TypeError("attribute name must be a string")
+
         attr = self.state.get(name)
         if not attr:
             cls = self.__class__.__name__
-            message = f"type object '{cls!s}' has no attribute '{attr!s}'"
+            message = f"type object '{cls!s}' has no attribute '{name!s}'"
             raise AttributeError(message)
 
         return attr
@@ -81,9 +106,9 @@ class BasicModel(abstracts.AbstractModel):
         """
 
         if not isinstance(key, str):
-            raise TypeError('argument must be a string')
+            raise TypeError("argument must be a string")
 
-        value = utils.deep_get(self.state, key)
+        value = self.state[key]
         return value
 
     def __iter__(self):
@@ -92,14 +117,18 @@ class BasicModel(abstracts.AbstractModel):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.state!s})"
 
-    def commit(self) -> None:
+    def rollback(self) -> None:
         """
-        Commits changes to local state.
+        Rollback changes to local state.
 
         """
 
-        if self.state.maps[0]:
-            self.state = self.state.new_child()
+        self.state.rollback()
+
+    def save(self) -> None:
+        """Save changes to local state."""
+
+        self.state.save()
 
     def update(self, __m: Mapping = None, **kwargs) -> None:
         """
@@ -111,18 +140,6 @@ class BasicModel(abstracts.AbstractModel):
 
         """
 
-        # TODO: Develop method for recursively updating nested dictionaries in local state.
-        if __m:
-            self.state.update(__m, **kwargs)
-        else:
-            self.state.update(**kwargs)
+        self.state.update(__m, **kwargs)
 
         return self
-
-    def rollback(self) -> None:
-        """
-        Rollback changes to local state.
-
-        """
-
-        self.state.clear()

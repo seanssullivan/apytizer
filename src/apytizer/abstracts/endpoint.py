@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/abstracts/endpoint.py
 """Abstract endpoint class interface.
 
 This module defines an abstract endpoint class which provides an interface
@@ -29,10 +30,10 @@ class AbstractEndpoint(abc.ABC):
         return hash(self.path)
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__!s} path={self.path!s}>'
+        return f"<{self.__class__.__name__!s} path={self.path!s}>"
 
     def __str__(self) -> str:
-        return f'{self.path!s}'
+        return f"{self.path!s}"
 
     @abc.abstractmethod
     def head(self, *args, **kwargs) -> Response:

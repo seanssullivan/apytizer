@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/decorators/__init__.py
 
 # pylint: skip-file
 

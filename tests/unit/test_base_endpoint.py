@@ -9,14 +9,14 @@ from unittest.mock import Mock
 import pytest
 
 # Local Imports
-from src.apytizer.base import BasicEndpoint
+from src.apytizer.base import BaseEndpoint
 
 
 @pytest.fixture
 def mock_api():
     mock = Mock()
-    mock.url = 'testing/'
-    mock.headers = {'Content-Type': 'application/json'}
+    mock.url = "testing/"
+    mock.headers = {"Content-Type": "application/json"}
     mock.head = Mock()
     mock.get = Mock()
     mock.post = Mock()
@@ -32,48 +32,44 @@ def mock_api():
 # Tests for Endpoint
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_uri_contains_base_and_path(mock_api):
-    test_endpoint = BasicEndpoint(mock_api, 'test')
-    assert test_endpoint.uri == 'testing/test'
+    test_endpoint = BaseEndpoint(mock_api, "test")
+    assert test_endpoint.uri == "testing/test"
 
 
 # --------------------------------------------------------------------------------
 # Tests for HEAD Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_head_method_when_response_is_ok(mock_api):
     mock_api.head.return_value.ok = True
-    mock_api.head.return_value.headers = {
-        'Content-Type': 'application/json'
-    }
+    mock_api.head.return_value.headers = {"Content-Type": "application/json"}
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.head()
 
-    assert response.headers == {
-        'Content-Type': 'application/json'
-    }
+    assert response.headers == {"Content-Type": "application/json"}
     mock_api.head.assert_called_once_with(
-        'test',
-        headers={'Accept': 'application/json'},
+        "test",
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_head_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'POST', 'PUT', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "POST", "PUT", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.head()
 
     assert not mock_api.head.called
@@ -84,11 +80,11 @@ def test_endpoint_head_response_is_cached(mock_api):
 
     mock_cache = {}
 
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        cache=mock_cache
+        "test",
+        headers={"Accept": "application/json"},
+        cache=mock_cache,
     )
 
     first_response = test_endpoint.head()
@@ -96,18 +92,14 @@ def test_endpoint_head_response_is_cached(mock_api):
 
     assert first_response == second_response
     assert mock_api.head.call_count == 1
-    assert mock_cache == {
-        ('HEAD',): mock_api.head.return_value
-    }
+    assert mock_cache == {("HEAD",): mock_api.head.return_value}
 
 
 def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
     mock_api.head.return_value.ok = True
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     first_response = test_endpoint.head()
@@ -121,41 +113,37 @@ def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
 # Tests for GET Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_get_method_when_response_is_ok(mock_api):
     mock_api.get.return_value.ok = True
     mock_api.get.return_value.json.return_value = {
-        'name': 'example',
-        'status': 'testing'
+        "name": "example",
+        "status": "testing",
     }
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.get()
 
-    assert response.json() == {
-        'name': 'example',
-        'status': 'testing'
-    }
+    assert response.json() == {"name": "example", "status": "testing"}
     mock_api.get.assert_called_once_with(
-        'test',
-        headers={'Accept': 'application/json'},
+        "test",
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_get_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['POST', 'PUT', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["POST", "PUT", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.get()
 
     assert not mock_api.get.called
@@ -166,11 +154,11 @@ def test_endpoint_get_response_is_cached(mock_api):
 
     mock_cache = {}
 
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        cache=mock_cache
+        "test",
+        headers={"Accept": "application/json"},
+        cache=mock_cache,
     )
 
     first_response = test_endpoint.get()
@@ -178,18 +166,14 @@ def test_endpoint_get_response_is_cached(mock_api):
 
     assert first_response == second_response
     assert mock_api.get.call_count == 1
-    assert mock_cache == {
-        ('GET',): mock_api.get.return_value
-    }
+    assert mock_cache == {("GET",): mock_api.get.return_value}
 
 
 def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
     mock_api.get.return_value.ok = True
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     first_response = test_endpoint.get()
@@ -203,42 +187,37 @@ def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
 # Tests for POST Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_post_method_when_response_is_ok(mock_api):
     mock_api.post.return_value.ok = True
-    mock_api.post.return_value.text = 'created'
+    mock_api.post.return_value.text = "created"
 
-    data = {
-        'id': 1,
-        'name': 'Test',
-        'completed': False
-    }
+    data = {"id": 1, "name": "Test", "completed": False}
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.post(data=data)
 
-    assert response.text == 'created'
+    assert response.text == "created"
     mock_api.post.assert_called_once_with(
-        'test',
+        "test",
         data=data,
-        headers={'Accept': 'application/json'},
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_post_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'PUT', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "PUT", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.post({})
 
     assert not mock_api.post.called
@@ -248,41 +227,37 @@ def test_endpoint_post_method_when_not_allowed(mock_api):
 # Tests for PUT Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_put_method_when_response_is_ok(mock_api):
     mock_api.put.return_value.ok = True
-    mock_api.put.return_value.text = 'success'
+    mock_api.put.return_value.text = "success"
 
-    data = {
-        'name': 'Test',
-        'completed': False
-    }
+    data = {"name": "Test", "completed": False}
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.put(data=data)
 
-    assert response.text == 'success'
+    assert response.text == "success"
     mock_api.put.assert_called_once_with(
-        'test',
+        "test",
         data=data,
-        headers={'Accept': 'application/json'},
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_put_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'POST', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "POST", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.put({})
 
     assert not mock_api.put.called
@@ -292,41 +267,37 @@ def test_endpoint_put_method_when_not_allowed(mock_api):
 # Tests for PATCH Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_patch_method_when_response_is_ok(mock_api):
     mock_api.patch.return_value.ok = True
-    mock_api.patch.return_value.text = 'success'
+    mock_api.patch.return_value.text = "success"
 
-    data = {
-        'name': 'Test',
-        'completed': False
-    }
+    data = {"name": "Test", "completed": False}
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.patch(data=data)
 
-    assert response.text == 'success'
+    assert response.text == "success"
     mock_api.patch.assert_called_once_with(
-        'test',
+        "test",
         data=data,
-        headers={'Accept': 'application/json'},
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_patch_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'POST', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "POST", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.patch({})
 
     assert not mock_api.patch.called
@@ -336,35 +307,34 @@ def test_endpoint_patch_method_when_not_allowed(mock_api):
 # Tests for DELETE Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_delete_method_when_response_is_ok(mock_api):
     mock_api.delete.return_value.ok = True
-    mock_api.delete.return_value.text = 'success'
+    mock_api.delete.return_value.text = "success"
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.delete()
 
-    assert response.text == 'success'
+    assert response.text == "success"
     mock_api.delete.assert_called_once_with(
-        'test',
-        headers={'Accept': 'application/json'},
+        "test",
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_delete_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'POST', 'PUT']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "POST", "PUT"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.delete()
 
     assert not mock_api.delete.called
@@ -374,82 +344,75 @@ def test_endpoint_delete_method_when_not_allowed(mock_api):
 # Tests for OPTIONS Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_options_method_when_response_is_ok(mock_api):
     mock_api.options.return_value.ok = True
     mock_api.options.return_value.headers = {
-        'Allow': ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE']
+        "Allow": ["OPTIONS", "GET", "POST", "PUT", "DELETE"]
     }
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.options()
 
     assert response.headers == {
-        'Allow': ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE']
+        "Allow": ["OPTIONS", "GET", "POST", "PUT", "DELETE"]
     }
     mock_api.options.assert_called_once_with(
-        'test',
-        headers={'Accept': 'application/json'},
+        "test",
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_options_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'POST', 'PUT', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "POST", "PUT", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.options()
 
     assert not mock_api.options.called
-
 
 
 # --------------------------------------------------------------------------------
 # Tests for TRACE Method
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint_trace_method_when_response_is_ok(mock_api):
     mock_api.trace.return_value.ok = True
-    mock_api.trace.return_value.headers = {
-        'Content-Type': 'application/json'
-    }
+    mock_api.trace.return_value.headers = {"Content-Type": "application/json"}
 
-    test_endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'}
+    test_endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}
     )
 
     response = test_endpoint.trace()
 
-    assert response.headers == {
-        'Content-Type': 'application/json'
-    }
+    assert response.headers == {"Content-Type": "application/json"}
     mock_api.trace.assert_called_once_with(
-        'test',
-        headers={'Accept': 'application/json'},
+        "test",
+        headers={"Accept": "application/json"},
         params=None,
     )
 
 
 def test_endpoint_trace_method_when_not_allowed(mock_api):
-    test_endpoint = BasicEndpoint(
+    test_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET', 'POST', 'PUT', 'DELETE']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET", "POST", "PUT", "DELETE"],
     )
 
-    with pytest.raises(NotImplementedError, match=''):
+    with pytest.raises(NotImplementedError, match=""):
         test_endpoint.trace()
 
     assert not mock_api.trace.called
@@ -459,147 +422,144 @@ def test_endpoint_trace_method_when_not_allowed(mock_api):
 # Tests for Magic Methods
 # --------------------------------------------------------------------------------
 
+
 def test_endpoint__call__returns_new_endpoint(mock_api):
-    initial_endpoint = BasicEndpoint(
+    initial_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET"],
     )
-    assert initial_endpoint.path == 'test'
+    assert initial_endpoint.path == "test"
 
     extended_endpoint = initial_endpoint(1)
-    assert isinstance(extended_endpoint, BasicEndpoint)
-    assert extended_endpoint.path == 'test/1'
+    assert isinstance(extended_endpoint, BaseEndpoint)
+    assert extended_endpoint.path == "test/1"
 
-    final_endpoint = extended_endpoint('stuff')
-    assert isinstance(final_endpoint, BasicEndpoint)
-    assert final_endpoint.path == 'test/1/stuff'
+    final_endpoint = extended_endpoint("stuff")
+    assert isinstance(final_endpoint, BaseEndpoint)
+    assert final_endpoint.path == "test/1/stuff"
 
     assert not mock_api.called
 
 
-def test_endpoint__call_raises_type_error_when_passed_invalid_argument(mock_api):
-    endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=[]
+def test_endpoint__call_raises_type_error_when_passed_invalid_argument(
+    mock_api,
+):
+    endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
     )
 
     with pytest.raises(TypeError):
-        endpoint(['stuff'])
+        endpoint(["stuff"])
 
     with pytest.raises(TypeError):
-        endpoint(('stuff', 'things'))
+        endpoint(("stuff", "things"))
 
     with pytest.raises(TypeError):
-        endpoint({'stuff': 'junk'})
+        endpoint({"stuff": "junk"})
 
 
 def test_endpoint__getitem__returns_new_endpoint(mock_api):
-    initial_endpoint = BasicEndpoint(
+    initial_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET"],
     )
-    assert initial_endpoint.path == 'test'
+    assert initial_endpoint.path == "test"
 
     extended_endpoint = initial_endpoint[1]
-    assert extended_endpoint.path == 'test/1'
+    assert extended_endpoint.path == "test/1"
 
-    final_endpoint = extended_endpoint['stuff']
-    assert final_endpoint.path == 'test/1/stuff'
+    final_endpoint = extended_endpoint["stuff"]
+    assert final_endpoint.path == "test/1/stuff"
 
     assert not mock_api.called
 
 
-def test_endpoint__getitem__raises_type_error_when_passed_invalid_argument(mock_api):
-    endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=[]
+def test_endpoint__getitem__raises_type_error_when_passed_invalid_argument(
+    mock_api,
+):
+    endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
     )
 
     with pytest.raises(TypeError):
-        endpoint[['stuff']]
+        endpoint[["stuff"]]
 
     with pytest.raises(TypeError):
-        endpoint[('stuff', 'things')]
+        endpoint[("stuff", "things")]
 
     with pytest.raises(TypeError):
-        endpoint[{'stuff': 'junk'}]
+        endpoint[{"stuff": "junk"}]
 
 
 def test_endpoint__add__returns_new_endpoint(mock_api):
-    initial_endpoint = BasicEndpoint(
+    initial_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET"],
     )
-    assert initial_endpoint.path == 'test'
+    assert initial_endpoint.path == "test"
 
     extended_endpoint = initial_endpoint + 1
-    assert extended_endpoint.path == 'test/1'
+    assert extended_endpoint.path == "test/1"
 
-    final_endpoint = extended_endpoint + 'stuff'
-    assert final_endpoint.path == 'test/1/stuff'
+    final_endpoint = extended_endpoint + "stuff"
+    assert final_endpoint.path == "test/1/stuff"
 
     assert not mock_api.called
 
 
-def test_endpoint__add__raises_type_error_when_passed_invalid_argument(mock_api):
-    endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=[]
+def test_endpoint__add__raises_type_error_when_passed_invalid_argument(
+    mock_api,
+):
+    endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
     )
 
     with pytest.raises(TypeError):
-        endpoint + ['stuff']
+        endpoint + ["stuff"]
 
     with pytest.raises(TypeError):
-        endpoint + ('stuff', 'things')
+        endpoint + ("stuff", "things")
 
     with pytest.raises(TypeError):
-        endpoint + {'stuff': 'junk'}
+        endpoint + {"stuff": "junk"}
 
 
 def test_endpoint__truediv__returns_new_endpoint(mock_api):
-    initial_endpoint = BasicEndpoint(
+    initial_endpoint = BaseEndpoint(
         mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=['GET']
+        "test",
+        headers={"Accept": "application/json"},
+        methods=["GET"],
     )
-    assert initial_endpoint.path == 'test'
+    assert initial_endpoint.path == "test"
 
     extended_endpoint = initial_endpoint / 1
-    assert extended_endpoint.path == 'test/1'
+    assert extended_endpoint.path == "test/1"
 
-    final_endpoint = extended_endpoint / 'stuff'
-    assert final_endpoint.path == 'test/1/stuff'
+    final_endpoint = extended_endpoint / "stuff"
+    assert final_endpoint.path == "test/1/stuff"
 
     assert not mock_api.called
 
 
-def test_endpoint__truediv__raises_type_error_when_passed_invalid_argument(mock_api):
-    endpoint = BasicEndpoint(
-        mock_api,
-        'test',
-        headers={'Accept': 'application/json'},
-        methods=[]
+def test_endpoint__truediv__raises_type_error_when_passed_invalid_argument(
+    mock_api,
+):
+    endpoint = BaseEndpoint(
+        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
     )
 
     with pytest.raises(TypeError):
-        endpoint / ['stuff']
+        endpoint / ["stuff"]
 
     with pytest.raises(TypeError):
-        endpoint / ('stuff', 'things')
+        endpoint / ("stuff", "things")
 
     with pytest.raises(TypeError):
-        endpoint / {'stuff': 'junk'}
+        endpoint / {"stuff": "junk"}

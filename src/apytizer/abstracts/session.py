@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/abstracts/session.py
 """Abstract session class interface.
 
 This module defines an abstract session class which provides an interface
