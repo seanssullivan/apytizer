@@ -8,6 +8,8 @@ from typing import Callable
 
 # Third-Party Imports
 import requests
+from requests.exceptions import ConnectionError
+from requests.exceptions import Timeout
 
 
 # Initialize logger.
@@ -15,8 +17,7 @@ log = logging.getLogger(__name__)
 
 
 def confirm_connection(func) -> Callable:
-    """
-    Confirms successful connection to API.
+    """Confirms successful connection to API.
 
     Args:
         func: Function to decorate.
@@ -28,26 +29,25 @@ def confirm_connection(func) -> Callable:
 
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs) -> requests.Response:
-        """
-        Wrapper applied to decorated function.
+        """Wrapper applied to decorated function.
 
         Args:
             *args: Positional arguments to pass to wrapped function.
             **kwargs: Keyword arguments to pass to wrapped function.
 
-        """
+        Returns:
+            Response.
 
+        """
         try:
             response = func(self, *args, **kwargs)  # type: requests.Response
 
-        except requests.exceptions.ConnectionError as error:
-            log.critical("Failed to establish a connection")
-            log.error(error)
+        except ConnectionError as error:
+            handle_connection_error(error)
             return error
 
-        except requests.exceptions.Timeout as error:
-            log.critical("request timed out")
-            log.error(error)
+        except Timeout as error:
+            handle_timeout_error(error)
             return error
 
         else:
@@ -59,3 +59,25 @@ def confirm_connection(func) -> Callable:
 
     functools.update_wrapper(wrapper, func)
     return wrapper
+
+
+def handle_connection_error(error: ConnectionError) -> None:
+    """Handle connection errors.
+
+    Args:
+        error: Connection error.
+
+    """
+    log.critical("Failed to establish a connection")
+    log.error(error)
+
+
+def handle_timeout_error(error: Timeout) -> None:
+    """Handle timeout errors.
+
+    Args:
+        error: Timeout error.
+
+    """
+    log.critical("request timed out")
+    log.error(error)

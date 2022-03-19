@@ -8,7 +8,7 @@ This module defines a base API class implementation.
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, MutableMapping, Tuple, Union, final
+from typing import Any, Dict, List, MutableMapping, Tuple, Union, final
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -27,18 +27,22 @@ from ..utils import merge
 log = logging.getLogger(__name__)
 
 # Define custom types.
+Authentication = Union[AuthBase, Tuple]
 Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
 
+# Define constants.
+PROTOCOLS = ["https", "http"]
+
 
 class BaseAPI(abstracts.AbstractAPI):
-    """
-    Implements a base API.
+    """Implements the base API.
 
     The BaseAPI class provides an interface for interacting with a REST API.
-    It implements the standard HTTP methods (HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS and TRACE)
-    as well as a `request` method for sending a custom HTTP request.
+    It implements the standard HTTP methods (HEAD, GET, POST, PUT, PATCH,
+    DELETE, OPTIONS and TRACE) as well as a `request` method for sending
+    custom HTTP requests.
 
     Args:
         url: Base URL for API.
@@ -47,15 +51,12 @@ class BaseAPI(abstracts.AbstractAPI):
         params (optional): Parameters to set globally for API.
         cache (optional): Mutable mapping for caching responses.
 
-    Attributes:
-        url: API URL.
-
     """
 
     def __init__(
         self,
         url: str,
-        auth: Union[AuthBase, Tuple] = None,
+        auth: Authentication = None,
         *,
         headers: Headers = None,
         params: Parameters = None,
@@ -67,6 +68,24 @@ class BaseAPI(abstracts.AbstractAPI):
         self.params = params
         self.cache = cache
 
+    @property
+    def auth(self) -> Union[AuthBase, Tuple]:
+        """Authentication for API requests.
+
+        Raises:
+            TypeError: when set to a value other than an AuthBase or tuple.
+
+        """
+        return self._auth
+
+    @auth.setter
+    def auth(self, value: Union[AuthBase, Tuple[str, str], None]) -> None:
+        if value and not isinstance(value, (AuthBase, tuple)):
+            message = f"expected either AuthBase or tuple, not {type(value)}"
+            raise TypeError(message)
+
+        self._auth = value
+
     @confirm_connection
     def request(
         self,
@@ -76,11 +95,10 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP request.
+        """Sends an HTTP request.
 
         Args:
-            method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
+            method: HTTP request method to use.
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
@@ -93,7 +111,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://docs.python-requests.org/en/latest/api/
 
         """
-
         uri = urljoin(self.url, route)
         log.debug(
             "Sending HTTP %(method)s request to %(uri)s",
@@ -104,8 +121,8 @@ class BaseAPI(abstracts.AbstractAPI):
             method,
             uri,
             auth=self.auth,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
 
@@ -123,8 +140,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP HEAD request.
+        """Sends an HTTP HEAD request.
 
         Args:
             route: API path to which the request will be sent.
@@ -139,7 +155,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
-
         response = self.request(
             "HEAD", route, headers=headers, params=params, **kwargs
         )
@@ -153,8 +168,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP GET request.
+        """Sends an HTTP GET request.
 
         Args:
             route: API path to which the request will be sent.
@@ -169,7 +183,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
-
         response = self.request(
             "GET", route, headers=headers, params=params, **kwargs
         )
@@ -183,8 +196,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP POST request.
+        """Sends an HTTP POST request.
 
         Args:
             route: API path to which the request will be sent.
@@ -199,7 +211,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
-
         response = self.request(
             "POST", route, headers=headers, params=params, **kwargs
         )
@@ -213,8 +224,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP PUT request.
+        """Sends an HTTP PUT request.
 
         Args:
             route: API path to which the request will be sent.
@@ -229,7 +239,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
-
         response = self.request(
             "PUT", route, headers=headers, params=params, **kwargs
         )
@@ -243,8 +252,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP PATCH request.
+        """Sends an HTTP PATCH request.
 
         Args:
             route: API path to which the request will be sent.
@@ -259,7 +267,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
-
         response = self.request(
             "PATCH", route, headers=headers, params=params, **kwargs
         )
@@ -273,8 +280,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP DELETE request.
+        """Sends an HTTP DELETE request.
 
         Args:
             route: API path to which the request will be sent.
@@ -289,7 +295,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
-
         response = self.request(
             "DELETE", route, headers=headers, params=params, **kwargs
         )
@@ -303,8 +308,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP OPTIONS request.
+        """Sends an HTTP OPTIONS request.
 
         Args:
             route: API path to which the request will be sent.
@@ -319,7 +323,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
-
         response = self.request(
             "OPTIONS", route, headers=headers, params=params, **kwargs
         )
@@ -333,8 +336,7 @@ class BaseAPI(abstracts.AbstractAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP TRACE request.
+        """Sends an HTTP TRACE request.
 
         Args:
             route: API path to which the request will be sent.
@@ -349,7 +351,6 @@ class BaseAPI(abstracts.AbstractAPI):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
-
         response = self.request(
             "TRACE", route, headers=headers, params=params, **kwargs
         )
@@ -357,22 +358,20 @@ class BaseAPI(abstracts.AbstractAPI):
 
 
 class SessionAPI(abstracts.AbstractSession, BaseAPI):
-    """
-    Implements a session-based API.
+    """Implements a session-based API.
 
     The SessionAPI class implements the same interface as the BasicAPI; however, it
     overrides the `request` method to use requests.Session. In addition, the class
     provides `start` and `stop` methods to allow manual control of the session.
 
-    The SessionAPI class can also be used as a context manager.
+    An instance of SessionAPI can also be used as a context manager.
 
     Args:
         url: Base URL for API.
-        auth: Authorization or credentials.
+        auth (optional): Authentication or credentials.
         headers (optional): Headers to set globally for API.
         params (optional): Parameters to set globally for API.
         adapter (optional): Instance of an HTTPAdapter.
-        session (optional): Instance of a requests.Session.
         cache (optional): Mutable mapping for caching responses.
 
     .. Requests Documentation:
@@ -383,12 +382,11 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
     def __init__(
         self,
         url: str,
-        auth: Union[AuthBase, Tuple] = None,
+        auth: Authentication = None,
         *,
         headers: Headers = None,
         params: Parameters = None,
         adapter: HTTPAdapter = None,
-        session: requests.Session = None,
         cache: MutableMapping = None,
     ):
         super().__init__(
@@ -399,60 +397,51 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
             cache=cache,
         )
         self.adapter = adapter
-        self.session = session
+        self.session = None  # type: requests.Session
 
     @final
     def __enter__(self):
-        """Starts the API session as a context manager."""
-
         self.start()
+        return self
 
     @final
     def __exit__(self, *args):
-        """Closes the API session as a context manager."""
-
         self.close()
 
-    def mount(self, adapter: HTTPAdapter) -> None:
+    @property
+    def adapter(self) -> HTTPAdapter:
+        """Adapter for API requests.
+
+        Raises:
+            TypeError: if set to value of type other than HTTPAdapter.
+
         """
-        Mount an adapter to the session.
+        return self._adapter
 
-        Args:
-            adapter: Instance of an HTTPAdapter.
+    @adapter.setter
+    def adapter(self, value: HTTPAdapter) -> None:
+        if value and not isinstance(value, HTTPAdapter):
+            message = f"expected HTTPAdapter, not {type(value)}"
+            raise TypeError(message)
 
-        """
-
-        self.session.mount("https://", adapter)
-        self.session.mount("http://", adapter)
+        self._adapter = value
 
     def start(self) -> None:
-        """Begins an API session."""
-
+        """Starts the session."""
         log.debug("Starting API session...")
 
-        # Create session
-        if not self.session:
-            self.session = requests.Session()
-
-        # Set session autherization
-        if self.auth and not self.session.auth:
-            self.session.auth = self.auth
-
-        # Add default headers to session
-        if self.headers:
-            self.session.headers.update(self.headers)
-
-        # Mount transport adapter to session
-        if self.adapter:
-            self.mount(self.adapter)
-
-        return self.session
+        factory = _RequestsSessionFactory()
+        self.session = factory.make_session(
+            self.adapter,
+            self.auth,
+            self.headers,
+        )
 
     def close(self, *args) -> None:
-        """Manually destroys the API session."""
-
+        """Destroys the session."""
         log.debug("Closing API session...")
         self.session.close()
+        self.session = None
 
     @confirm_connection
     def request(
@@ -463,11 +452,11 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         params: Parameters = None,
         **kwargs,
     ) -> requests.Response:
-        """
-        Sends an HTTP request.
+        """Sends an HTTP request.
 
         Args:
-            method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE, OPTIONS, or TRACE).
+            method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE,
+                OPTIONS, or TRACE).
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
@@ -480,7 +469,6 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
             https://docs.python-requests.org/en/latest/api/
 
         """
-
         uri = urljoin(self.url, route)
         if self.session:
             log.debug(
@@ -503,10 +491,99 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
 
         else:
             log.warning(
-                "Session not started: start() method not called before sending request"
+                "%(event)s: %(reason)s",
+                {
+                    "event": "Session not started",
+                    "reason": "start() was not called before sending request",
+                },
             )
             response = super().request(
-                method, uri, headers=headers, params=params, **kwargs
+                method,
+                uri,
+                headers=headers,
+                params=params,
+                **kwargs,
             )
 
         return response
+
+
+class _RequestsSessionBuilder:
+    """Implements a builder for requests sessions."""
+
+    _session: requests.Session
+
+    def __init__(self) -> None:
+        self.reset()
+
+    @property
+    def session(self) -> requests.Session:
+        """Constructed session."""
+        result = self._session
+        self.reset()
+        return result
+
+    def reset(self) -> None:
+        """Reset build cycle."""
+        self._session = requests.Session()
+
+    def include_adapter(
+        self,
+        adapter: HTTPAdapter,
+        *,
+        protocols: List[str] = PROTOCOLS,
+    ) -> None:
+        """Add adapter to session.
+
+        Args:
+            adapter: Adapter to mount to session.
+            protocols (optional): Protocols on which to mount adapter.
+
+        """
+        for protocol in protocols:
+            prefix = f"{protocol!s}://"
+            self._session.mount(prefix, adapter)
+
+    def include_auth(self, auth: Authentication) -> None:
+        """Add authentication to session."""
+        self._session.auth = auth
+
+    def include_default_headers(self, headers: Headers) -> None:
+        """Add default headers to session."""
+        self._session.headers.update(headers)
+
+
+class _RequestsSessionFactory:
+    """Implements a factory for requests sessions."""
+
+    def __init__(self) -> None:
+        self.builder = _RequestsSessionBuilder()
+
+    def make_session(
+        self,
+        adapter: HTTPAdapter = None,
+        auth: Authentication = None,
+        headers: Headers = None,
+    ) -> requests.Session:
+        """Make requests session.
+
+        Args:
+            adapter (optional): Instance of an HTTPAdapter.
+            auth (optional): Authentication or credentials.
+            headers (optional): Headers to set for all requests.
+
+        Returns:
+            Requests Session.
+
+        """
+        if adapter is not None:
+            self.builder.include_adapter(adapter)
+
+        if auth is not None:
+            self.builder.include_auth(auth)
+
+        if headers is not None:
+            self.builder.include_default_headers(headers)
+
+        result = self.builder.session
+        return result

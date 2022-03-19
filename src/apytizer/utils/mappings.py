@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/utils/mappings.py
 
 # Standard Library Imports
 import functools
@@ -9,8 +10,7 @@ from .typing import allinstance
 
 
 def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
-    """
-    Returns a value from a nested mapping object.
+    """Returns a value from a nested mapping object.
 
     Args:
         __m: Mapping object.
@@ -36,8 +36,7 @@ def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
 
 
 def deep_set(__m: MutableMapping, keys: str, value: Any) -> Dict[str, Any]:
-    """
-    Sets a key to the provided value in a nested mapping object.
+    """Sets a key to the provided value in a nested mapping object.
 
     Args:
         __m: Mapping object.
@@ -51,7 +50,6 @@ def deep_set(__m: MutableMapping, keys: str, value: Any) -> Dict[str, Any]:
         TypeError: when argument is not an instance of a mapping.
 
     """
-
     if not isinstance(__m, Mapping):
         raise TypeError("must be an instance of a mapping")
 
@@ -74,8 +72,7 @@ def deep_set(__m: MutableMapping, keys: str, value: Any) -> Dict[str, Any]:
 
 
 def iter_get(__iter: Iterable[Dict[str, Any]], key: str) -> List[Any]:
-    """
-    Get value for key from each mapping in an iterable object.
+    """Get value for key from each mapping in an iterable object.
 
     Args:
         __iter: Iterable object containing mappings.
@@ -86,7 +83,6 @@ def iter_get(__iter: Iterable[Dict[str, Any]], key: str) -> List[Any]:
         ValueError: when items are not all mappings.
 
     """
-
     if not isinstance(__iter, Iterable):
         raise TypeError("must be an iterable object")
 
@@ -98,8 +94,7 @@ def iter_get(__iter: Iterable[Dict[str, Any]], key: str) -> List[Any]:
 
 
 def pick(__m: Mapping, keys: List[str]) -> Dict[str, Any]:
-    """
-    Pick multiple values from a mapping.
+    """Pick multiple values from a mapping.
 
     Args:
         __m: Mapping object.
@@ -112,7 +107,6 @@ def pick(__m: Mapping, keys: List[str]) -> Dict[str, Any]:
         TypeError: when argument is not an instance of a mapping.
 
     """
-
     if not isinstance(__m, Mapping):
         raise TypeError("must be an instance of a mapping")
 
@@ -123,43 +117,90 @@ def pick(__m: Mapping, keys: List[str]) -> Dict[str, Any]:
     return results
 
 
-def merge(*args: Mapping) -> Dict:
-    """
-    Combines mapping objects into a single dictionary.
+def merge(*args: Mapping, overwrite: bool = False) -> Dict:
+    """Combines mapping objects into a single dictionary.
 
     Args:
         *args: Mapping objects to merge.
+        overwrite (optional): Overwrite existing keys. Default false.
 
     Returns:
         Merged dictionary.
 
     Raises:
         TypeError: when arguments are not all mappings.
+        ValueError: when keys conflict and overwrite is false.
 
     """
-
     if not allinstance(args, (Mapping, type(None))):
         raise TypeError("all arguments must be instances of mappings")
 
-    result = {
-        key: value
-        for mapping in args
-        if mapping
-        for key, value in mapping.items()
-    }
+    def _merge(a: Mapping, b: Mapping, path=None, overwrite=False) -> Mapping:
+        """Merge two mappings.
+
+        Args:
+            a: First mapping.
+            b: Second mapping.
+            path: Path of keys in nested mapping.
+            overwrite (optional): Overwrite existing keys. Default false.
+
+        Raises:
+            ValueError: when keys conflict and overwrite is false.
+
+        .. _Based On:
+            https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries.
+
+        """
+        __path = [] if path is None else path
+
+        for key in b:
+            if key in a:
+                if isinstance(a[key], dict) and isinstance(b[key], dict):
+                    a[key] = _merge(
+                        a[key],
+                        b[key],
+                        path=__path + [str(key)],
+                        overwrite=overwrite,
+                    )
+
+                elif isinstance(a[key], list) and isinstance(b[key], list):
+                    a[key] = [*a[key], *b[key]]
+
+                elif isinstance(a[key], set) and isinstance(b[key], set):
+                    a[key] = a[key].union(b[key])
+
+                elif overwrite:
+                    a[key] = b[key]
+
+                else:
+                    msg = "Conflict at {path}".format(
+                        path=".".join(k for k in [*__path, key] if k)
+                    )
+                    raise ValueError(msg)
+
+            else:
+                a[key] = b[key]
+
+        return a
+
+    result = functools.reduce(
+        lambda acc, cur: _merge(acc, cur, overwrite=overwrite) if cur else acc,
+        args,
+        {},
+    )
     return result if result else None
 
 
-def remap_keys(__m: Mapping, key_map: Dict[str, str]) -> Dict[str, Any]:
-    """
-    Remap mapping object to new keys.
-
-    Note:
-        Key-value pairs are dropped if not found in key map.
+def remap_keys(
+    __m: Mapping, key_map: Dict[str, str], remove: bool = False
+) -> Dict[str, Any]:
+    """Remap mapping object to new keys.
 
     Args:
         __m: Mapping object for which keys will be remapped.
         key_map: Dictionary mapping old keys to new ones.
+        remove (optional): Whether to drop key-value pairs if key is not found
+            in key map. Default `False`.
 
     Returns:
         Remapped dictionary.
@@ -168,18 +209,18 @@ def remap_keys(__m: Mapping, key_map: Dict[str, str]) -> Dict[str, Any]:
         TypeError: when argument is not an instance of a mapping.
 
     """
-
     if not isinstance(__m, Mapping):
         raise TypeError("must be an instance of a mapping")
 
     return {
-        key_map[key]: value for key, value in __m.items() if key in key_map
+        key_map.get(key, key): value
+        for key, value in __m.items()
+        if key in key_map or remove is False
     }
 
 
 def remove_null(__m: Mapping, null_values: List[Any] = None) -> Dict[str, Any]:
-    """
-    Remove all null values from a mapping.
+    """Remove all null values from a mapping.
 
     Args:
         __m: Mapping from which to remove null values.
@@ -192,7 +233,6 @@ def remove_null(__m: Mapping, null_values: List[Any] = None) -> Dict[str, Any]:
         TypeError: when argument is not an instance of a mapping.
 
     """
-
     if not isinstance(__m, Mapping):
         raise TypeError("must be an instance of a mapping")
 

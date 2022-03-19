@@ -16,8 +16,8 @@ from urllib.parse import urljoin
 import requests
 
 # Local Imports
-from ..abstracts.api import AbstractAPI
-from ..abstracts.endpoint import AbstractEndpoint
+from ..abstracts import AbstractAPI
+from ..abstracts import AbstractEndpoint
 from ..decorators.caching import cache_response
 from ..utils import merge
 
@@ -32,8 +32,7 @@ Parameters = Dict[str, Any]
 
 
 class BaseEndpoint(AbstractEndpoint):
-    """
-    Implements a base API endpoint.
+    """Implements a base API endpoint.
 
     Args:
         path: Relative URL path for endpoint.
@@ -69,12 +68,7 @@ class BaseEndpoint(AbstractEndpoint):
     @property
     def uri(self) -> str:
         """Retrieve the endpoint URI."""
-
         return urljoin(self.api.url, self.path)
-
-    @property
-    def url(self) -> str:
-        return self.uri
 
     def __call__(
         self,
@@ -85,8 +79,7 @@ class BaseEndpoint(AbstractEndpoint):
         methods: List[str] = None,
         cache: Cache = None,
     ) -> BaseEndpoint:
-        """
-        Returns a new endpoint with the appended reference.
+        """Returns a new endpoint with the appended reference.
 
         This method is a shortcut for accessing HTTP methods on a
         child endpoint or a nested resource.
@@ -110,7 +103,6 @@ class BaseEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
-
         if isinstance(ref, (int, str)):
             endpoint = BaseEndpoint(
                 self.api,
@@ -126,8 +118,7 @@ class BaseEndpoint(AbstractEndpoint):
         return endpoint
 
     def __getitem__(self, ref: Union[int, str]) -> BaseEndpoint:
-        """
-        Returns a new endpoint with the appended reference.
+        """Returns a new endpoint with the appended reference.
 
         This method is a shortcut for accessing HTTP methods on a
         child endpoint or a nested resource.
@@ -147,7 +138,6 @@ class BaseEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
-
         if isinstance(ref, (int, str)):
             endpoint = BaseEndpoint(self.api, f"{self.path!s}/{ref!s}")
         else:
@@ -156,8 +146,7 @@ class BaseEndpoint(AbstractEndpoint):
         return endpoint
 
     def __add__(self, path: Union[int, str]) -> BaseEndpoint:
-        """
-        Returns a new endpoint after combining both paths.
+        """Returns a new endpoint after combining both paths.
 
         This is a method for quickly accessing HTTP methods for
         child endpoints or nested resources. It behaves the same
@@ -178,7 +167,6 @@ class BaseEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
-
         if isinstance(path, (int, str)):
             endpoint = BaseEndpoint(self.api, f"{self.path!s}/{path!s}")
         else:
@@ -187,8 +175,7 @@ class BaseEndpoint(AbstractEndpoint):
         return endpoint
 
     def __truediv__(self, path: Union[int, str]) -> BaseEndpoint:
-        """
-        Returns a new endpoint after combining both paths.
+        """Returns a new endpoint after combining both paths.
 
         This is a method for quickly accessing HTTP methods for
         child endpoints or nested resources. It behaves the same
@@ -209,7 +196,6 @@ class BaseEndpoint(AbstractEndpoint):
             'api/base/ref'
 
         """
-
         if isinstance(path, (int, str)):
             endpoint = BaseEndpoint(self.api, f"{self.path!s}/{path!s}")
         else:
@@ -221,8 +207,7 @@ class BaseEndpoint(AbstractEndpoint):
     def head(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP HEAD request to API endpoint.
+        """Sends an HTTP HEAD request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -236,14 +221,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
-
         if self.methods and "HEAD" not in self.methods:
             raise NotImplementedError
 
         response = self.api.head(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -252,8 +236,7 @@ class BaseEndpoint(AbstractEndpoint):
     def get(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP GET request to API endpoint.
+        """Sends an HTTP GET request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -267,14 +250,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
-
         if self.methods and "GET" not in self.methods:
             raise NotImplementedError
 
         response = self.api.get(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -283,8 +265,7 @@ class BaseEndpoint(AbstractEndpoint):
     def post(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP POST request to API endpoint.
+        """Sends an HTTP POST request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -298,14 +279,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
-
         if self.methods and "POST" not in self.methods:
             raise NotImplementedError
 
         response = self.api.post(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -314,8 +294,7 @@ class BaseEndpoint(AbstractEndpoint):
     def put(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP PUT request to API endpoint.
+        """Sends an HTTP PUT request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -329,14 +308,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
-
         if self.methods and "PUT" not in self.methods:
             raise NotImplementedError
 
         response = self.api.put(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -345,8 +323,7 @@ class BaseEndpoint(AbstractEndpoint):
     def patch(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP PATCH request to API endpoint.
+        """Sends an HTTP PATCH request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -360,14 +337,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
-
         if self.methods and "PATCH" not in self.methods:
             raise NotImplementedError
 
         response = self.api.patch(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -376,8 +352,7 @@ class BaseEndpoint(AbstractEndpoint):
     def delete(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP DELETE request to API endpoint.
+        """Sends an HTTP DELETE request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -391,14 +366,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
-
         if self.methods and "DELETE" not in self.methods:
             raise NotImplementedError
 
         response = self.api.delete(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -407,8 +381,7 @@ class BaseEndpoint(AbstractEndpoint):
     def options(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP OPTIONS request to API endpoint.
+        """Sends an HTTP OPTIONS request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -422,14 +395,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
-
         if self.methods and "OPTIONS" not in self.methods:
             raise NotImplementedError
 
         response = self.api.options(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response
@@ -438,8 +410,7 @@ class BaseEndpoint(AbstractEndpoint):
     def trace(
         self, headers: Headers = None, params: Parameters = None, **kwargs
     ) -> requests.Response:
-        """
-        Sends an HTTP TRACE request to API endpoint.
+        """Sends an HTTP TRACE request to API endpoint.
 
         Args:
             headers (optional): Request headers (overrides global headers).
@@ -453,14 +424,13 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
-
         if self.methods and "TRACE" not in self.methods:
             raise NotImplementedError
 
         response = self.api.trace(
             self.path,
-            headers=merge(self.headers, headers),
-            params=merge(self.params, params),
+            headers=merge(self.headers, headers, overwrite=True),
+            params=merge(self.params, params, overwrite=True),
             **kwargs,
         )
         return response

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Local Imports
-from src.apytizer import utils
+from apytizer import utils
 
 
 def test_deep_get_returns_value():
@@ -72,20 +72,39 @@ def test_merge_combines_multiple_dictionaries():
     }
 
 
+def test_merge_combines_nested_dictionaries():
+    first_dict = {"first": {"a": 1, "b": 2}, "second": {"e": 5, "f": 6}}
+    second_dict = {"first": {"c": 3, "d": 4}, "second": {"g": 7, "h": 8}}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {
+        "first": {"a": 1, "b": 2, "c": 3, "d": 4},
+        "second": {"e": 5, "f": 6, "g": 7, "h": 8},
+    }
+
+
+def test_merge_combines_list_values():
+    first_dict = {"a": [1], "b": [3]}
+    second_dict = {"a": [2], "b": [4]}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {"a": [1, 2], "b": [3, 4]}
+
+
+def test_merge_combines_set_values():
+    first_dict = {"a": {1, 2}, "b": {4, 5}}
+    second_dict = {"a": {2, 3}, "b": {5, 6}}
+    result = utils.merge(first_dict, second_dict)
+    assert result == {"a": {1, 2, 3}, "b": {4, 5, 6}}
+
+
 def test_merge_overwrites_keys_with_subsequent_values():
     first_dict = {"a": 1, "b": 2}
     second_dict = {"b": 3, "c": 4}
     third_dict = {"c": 5, "d": 6}
     fourth_dict = {"d": 7}
-    result = utils.merge(first_dict, second_dict, third_dict, fourth_dict)
+    result = utils.merge(
+        first_dict, second_dict, third_dict, fourth_dict, overwrite=True
+    )
     assert result == {"a": 1, "b": 3, "c": 5, "d": 7}
-
-
-def test_merge_combined_two_dictionaries():
-    first_dict = {"a": 1, "b": 2}
-    second_dict = {"c": 3, "d": 4}
-    result = utils.merge(first_dict, second_dict)
-    assert result == {"a": 1, "b": 2, "c": 3, "d": 4}
 
 
 def test_merge_returns_first_dictionary_if_second_is_none():

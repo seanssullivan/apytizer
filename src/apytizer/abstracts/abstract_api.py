@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/abstracts/api.py
+# src/apytizer/abstracts/abstract_api.py
 """Abstract API class interface.
 
 This module defines an abstract API class which provides an interface
@@ -19,13 +19,9 @@ from requests.auth import AuthBase
 
 
 class AbstractAPI(abc.ABC):
-    """
-    Represents an abstract API.
-
-    """
+    """Represents an abstract API."""
 
     url: str
-    auth: Union[AuthBase, Tuple]
 
     def __eq__(self, other: AbstractAPI) -> bool:
         return other.url == self.url and other.auth == self.auth
@@ -36,15 +32,20 @@ class AbstractAPI(abc.ABC):
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__!s} url={self.url!s}>"
 
+    @property
+    @abc.abstractmethod
+    def auth(self) -> Union[AuthBase, Tuple[str, str], None]:
+        """Authentication for API requests."""
+        raise NotImplementedError
+
     @abc.abstractmethod
     def head(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP HEAD request.
+        """Abstract method for sending an HTTP HEAD request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -53,18 +54,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def get(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP GET request.
+        """Abstract method for sending an HTTP GET request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -73,18 +72,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def post(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP POST request.
+        """Abstract method for sending an HTTP POST request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -93,18 +90,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def put(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP PUT request.
+        """Abstract method for sending an HTTP PUT request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -113,18 +108,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def patch(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP PATCH request.
+        """Abstract method for sending an HTTP PATCH request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -133,18 +126,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP DELETE request.
+        """Abstract method for sending an HTTP DELETE request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -153,18 +144,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def options(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP OPTIONS request.
+        """Abstract method for sending an HTTP OPTIONS request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -173,18 +162,16 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def trace(self, route: str, *args, **kwargs) -> Response:
-        """
-        Abstract method for sending an HTTP TRACE request.
+        """Abstract method for sending an HTTP TRACE request.
 
         Args:
             route: API path to which the request will be sent.
-            *args
-            **kwargs
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Response object.
@@ -193,5 +180,4 @@ class AbstractAPI(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
-
         raise NotImplementedError

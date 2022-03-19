@@ -4,7 +4,7 @@
 import pytest
 
 # Local Imports
-from src.apytizer.base import BaseModel
+from apytizer.base import BaseModel
 
 
 def test_model_returns_true_when_key_in_state():

@@ -9,31 +9,22 @@ from unittest.mock import Mock
 import pytest
 
 # Local Imports
-from src.apytizer.base import BaseEndpoint
+from apytizer.base import BaseAPI
+from apytizer.base import BaseEndpoint
 
 
 @pytest.fixture
 def mock_api():
-    mock = Mock()
+    mock = Mock(BaseAPI)
     mock.url = "testing/"
     mock.headers = {"Content-Type": "application/json"}
-    mock.head = Mock()
-    mock.get = Mock()
-    mock.post = Mock()
-    mock.put = Mock()
-    mock.patch = Mock()
-    mock.delete = Mock()
-    mock.options = Mock()
-    mock.trace = Mock()
     return mock
 
 
 # --------------------------------------------------------------------------------
 # Tests for Endpoint
 # --------------------------------------------------------------------------------
-
-
-def test_endpoint_uri_contains_base_and_path(mock_api):
+def test_endpoint_uri_contains_base_url_and_path(mock_api):
     test_endpoint = BaseEndpoint(mock_api, "test")
     assert test_endpoint.uri == "testing/test"
 
@@ -41,8 +32,6 @@ def test_endpoint_uri_contains_base_and_path(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for HEAD Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_head_method_when_response_is_ok(mock_api):
     mock_api.head.return_value.ok = True
     mock_api.head.return_value.headers = {"Content-Type": "application/json"}
@@ -92,7 +81,7 @@ def test_endpoint_head_response_is_cached(mock_api):
 
     assert first_response == second_response
     assert mock_api.head.call_count == 1
-    assert mock_cache == {("HEAD",): mock_api.head.return_value}
+    assert mock_cache == {("HEAD", test_endpoint): mock_api.head.return_value}
 
 
 def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
@@ -112,8 +101,6 @@ def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for GET Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_get_method_when_response_is_ok(mock_api):
     mock_api.get.return_value.ok = True
     mock_api.get.return_value.json.return_value = {
@@ -166,7 +153,7 @@ def test_endpoint_get_response_is_cached(mock_api):
 
     assert first_response == second_response
     assert mock_api.get.call_count == 1
-    assert mock_cache == {("GET",): mock_api.get.return_value}
+    assert mock_cache == {("GET", test_endpoint): mock_api.get.return_value}
 
 
 def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
@@ -186,8 +173,6 @@ def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for POST Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_post_method_when_response_is_ok(mock_api):
     mock_api.post.return_value.ok = True
     mock_api.post.return_value.text = "created"
@@ -226,8 +211,6 @@ def test_endpoint_post_method_when_not_allowed(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for PUT Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_put_method_when_response_is_ok(mock_api):
     mock_api.put.return_value.ok = True
     mock_api.put.return_value.text = "success"
@@ -266,8 +249,6 @@ def test_endpoint_put_method_when_not_allowed(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for PATCH Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_patch_method_when_response_is_ok(mock_api):
     mock_api.patch.return_value.ok = True
     mock_api.patch.return_value.text = "success"
@@ -306,8 +287,6 @@ def test_endpoint_patch_method_when_not_allowed(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for DELETE Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_delete_method_when_response_is_ok(mock_api):
     mock_api.delete.return_value.ok = True
     mock_api.delete.return_value.text = "success"
@@ -343,8 +322,6 @@ def test_endpoint_delete_method_when_not_allowed(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for OPTIONS Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_options_method_when_response_is_ok(mock_api):
     mock_api.options.return_value.ok = True
     mock_api.options.return_value.headers = {
@@ -384,8 +361,6 @@ def test_endpoint_options_method_when_not_allowed(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for TRACE Method
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint_trace_method_when_response_is_ok(mock_api):
     mock_api.trace.return_value.ok = True
     mock_api.trace.return_value.headers = {"Content-Type": "application/json"}
@@ -421,8 +396,6 @@ def test_endpoint_trace_method_when_not_allowed(mock_api):
 # --------------------------------------------------------------------------------
 # Tests for Magic Methods
 # --------------------------------------------------------------------------------
-
-
 def test_endpoint__call__returns_new_endpoint(mock_api):
     initial_endpoint = BaseEndpoint(
         mock_api,

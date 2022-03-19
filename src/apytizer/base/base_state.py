@@ -16,10 +16,7 @@ from .. import abstracts, utils
 
 
 class BaseState(abstracts.AbstractState):
-    """
-    Implements a base local state.
-
-    """
+    """Implements a base local state."""
 
     def __init__(
         self,
@@ -29,31 +26,9 @@ class BaseState(abstracts.AbstractState):
         self._state = collections.ChainMap(base or {}, default or {})
 
     def __contains__(self, key: str) -> bool:
-        """
-        Check whether key exists in state.
-
-        Args:
-            key: Key.
-
-        Returns:
-            Whether key exists.
-
-        """
-
         return key in self._state
 
     def __eq__(self, other: abstracts.AbstractState) -> bool:
-        """
-        Check whether two states are equal.
-
-        Args:
-            other: Another instance of a state.
-
-        Returns:
-            Whether states are equal.
-
-        """
-
         return (
             dict(other) == dict(self)
             if isinstance(other, self.__class__)
@@ -61,17 +36,6 @@ class BaseState(abstracts.AbstractState):
         )
 
     def __getitem__(self, key: str) -> Any:
-        """
-        Get item from state.
-
-        Args:
-            key: Key.
-
-        Returns:
-            Value of item.
-
-        """
-
         if not isinstance(key, str):
             raise TypeError(f"key must be str, not {type(key)}")
 
@@ -79,32 +43,17 @@ class BaseState(abstracts.AbstractState):
         return result
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """
-        Set item in state.
-
-        Args:
-            key: Key.
-            value: Value.
-
-        """
-
         if not isinstance(key, str):
             raise TypeError(f"key must be str, not {type(key)}")
 
         self._state[key] = value
 
     def __iter__(self) -> Generator:
-        """
-        Abstract method for iterating over key-value pairs in state.
-
-        """
-
         yield from self._state.items()
 
     @property
     def updates(self) -> Dict[str, Any]:
         """Unsaved changes to state."""
-
         return {
             key: value
             for key, value in self._state.maps[0].items()
@@ -112,8 +61,7 @@ class BaseState(abstracts.AbstractState):
         }
 
     def get(self, key: str) -> Any:
-        """
-        Get an item from state.
+        """Get an item from state.
 
         Args:
             key: Key.
@@ -122,35 +70,29 @@ class BaseState(abstracts.AbstractState):
             Value of key in state.
 
         """
-
         result = self._state.get(key)
         return result
 
     def items(self) -> Any:
         """Get items from state."""
-
         results = self._state.items()
         return results
 
     def update(self, __m: Mapping = None, **kwargs) -> None:
-        """
-        Update state.
+        """Update state.
 
         Args:
             __m: Mapping.
             **kwargs: Keyword arguments.
 
         """
-
         self._state.update(__m or {}, **kwargs)
 
     def rollback(self) -> None:
         """Roll back changes to state."""
-
         self._state.clear()
 
     def save(self) -> None:
         """Save changes to state."""
-
         if self._state.maps[0]:
             self._state = self._state.new_child()

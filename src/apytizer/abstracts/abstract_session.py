@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/abstracts/session.py
+# src/apytizer/abstracts/abstract_session.py
 """Abstract session class interface.
 
 This module defines an abstract session class which provides an interface
@@ -17,22 +17,18 @@ class AbstractSession(abc.ABC):
 
     def __enter__(self):
         """Starts the session as a context manager."""
-
         self.start()
 
     def __exit__(self, *args):
         """Closes the session as context manager."""
-
         self.close(*args)
 
     @abc.abstractmethod
     def start(self):
         """Starts the session."""
-
         raise NotImplementedError
 
     @abc.abstractmethod
     def close(self):
         """Closes the session."""
-
         raise NotImplementedError

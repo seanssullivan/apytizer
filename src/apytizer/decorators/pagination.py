@@ -12,7 +12,8 @@ log = logging.getLogger(__name__)
 
 
 def pagination(func) -> Callable:
-    """
+    """Decorator for handling paginated results.
+
     Args:
         func: Decorated function.
 
@@ -23,8 +24,7 @@ def pagination(func) -> Callable:
 
     @functools.wraps(func)
     def wrapper(*args, reducer: Callable, callback: Callable, **kwargs):
-        """
-        Wrapper applied to decorated function.
+        """Wrapper applied to decorated function.
 
         Args:
             reducer (Callable): Function to update state with pagination metadata.

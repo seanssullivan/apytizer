@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
 
-# pylint: skip-file
-
-from .transport import TransportAdapter
+# Local Imports
+from .transport_adapter import TransportAdapter

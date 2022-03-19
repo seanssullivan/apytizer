@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/adapters/transport.py
+# src/apytizer/adapters/transport_adapter.py
 """Transport Adapter.
 
 This module defines a transport adapter class: an implementation of an
@@ -9,6 +9,7 @@ provides default values for rate limiting and request timeout.
 """
 
 # Standard Library Imports
+from http import HTTPStatus
 from urllib3.util import Retry
 
 # Third-Party Imports
@@ -17,9 +18,13 @@ from requests import Response
 from requests.adapters import HTTPAdapter
 
 
+# Define constants.
+DEFAULT_RATE_LIMIT = 1
+NUMBER_OF_RETRIES = 10
+
+
 class TransportAdapter(HTTPAdapter):
-    """
-    Implementation of a transport adaptor.
+    """Implementation of a transport adaptor.
 
     Transport adapters define methods for interacting with HTTP services,
     enabling the use of per-service configurations.
@@ -30,8 +35,15 @@ class TransportAdapter(HTTPAdapter):
         kwargs.setdefault(
             "max_retries",
             Retry(
-                total=10,
-                status_forcelist=[413, 429, 500, 502, 503, 504],
+                total=NUMBER_OF_RETRIES,
+                status_forcelist=[
+                    HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                    HTTPStatus.TOO_MANY_REQUESTS,
+                    HTTPStatus.INTERNAL_SERVER_ERROR,
+                    HTTPStatus.BAD_GATEWAY,
+                    HTTPStatus.SERVICE_UNAVAILABLE,
+                    HTTPStatus.GATEWAY_TIMEOUT,
+                ],
                 allowed_methods=[
                     "HEAD",
                     "GET",
@@ -42,7 +54,7 @@ class TransportAdapter(HTTPAdapter):
                     "OPTIONS",
                     "TRACE",
                 ],
-                backoff_factor=kwargs.pop("rate_limit", 1),
+                backoff_factor=kwargs.pop("rate_limit", DEFAULT_RATE_LIMIT),
             ),
         )
         self.timeout = kwargs.pop("timeout", 5)

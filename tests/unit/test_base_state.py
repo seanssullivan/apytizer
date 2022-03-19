@@ -6,7 +6,7 @@
 import pytest
 
 # Local Imports
-from src.apytizer.base import BaseState
+from apytizer.base import BaseState
 
 
 def test_state_returns_true_when_key_in_state():

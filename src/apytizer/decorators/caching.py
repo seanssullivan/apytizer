@@ -19,8 +19,7 @@ log = logging.getLogger(__name__)
 
 
 def cache_response(func: Callable) -> Callable:
-    """
-    Decorator function for handling caching.
+    """Decorator function for handling caching.
 
     Args:
         func: Decorated function.
@@ -30,15 +29,15 @@ def cache_response(func: Callable) -> Callable:
 
     """
 
-    @functools.wraps(func)
-    @cachedmethod(
+    cached_func = cachedmethod(
         operator.attrgetter("cache"),
         key=generate_key(func.__name__.upper()),
-    )
+    )(func)
+
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """Wrapper applied to decorated function."""
-
-        return func(*args, **kwargs)
+        return cached_func(*args, **kwargs)
 
     functools.update_wrapper(wrapper, func)
     return wrapper
