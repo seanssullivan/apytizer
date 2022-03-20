@@ -18,9 +18,12 @@ from requests.auth import AuthBase
 
 # Local Imports
 from .. import abstracts
-from ..decorators.caching import cache_response
-from ..decorators.connection import confirm_connection
+from ..decorators import cache_response
+from ..decorators import confirm_connection
+from ..http_methods import HTTPMethod
 from ..utils import merge
+
+__all__ = ["BaseAPI", "SessionAPI"]
 
 
 # Initialize logger.
@@ -89,7 +92,7 @@ class BaseAPI(abstracts.AbstractAPI):
     @confirm_connection
     def request(
         self,
-        method: str,
+        method: HTTPMethod,
         route: str,
         headers: Headers = None,
         params: Parameters = None,
@@ -114,11 +117,11 @@ class BaseAPI(abstracts.AbstractAPI):
         uri = urljoin(self.url, route)
         log.debug(
             "Sending HTTP %(method)s request to %(uri)s",
-            {"method": method, "uri": uri},
+            {"method": method.name, "uri": uri},
         )
 
         response = requests.request(
-            method,
+            method.name,
             uri,
             auth=self.auth,
             headers=merge(self.headers, headers, overwrite=True),
@@ -156,7 +159,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "HEAD", route, headers=headers, params=params, **kwargs
+            HTTPMethod.HEAD,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -184,7 +191,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "GET", route, headers=headers, params=params, **kwargs
+            HTTPMethod.GET,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -212,7 +223,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "POST", route, headers=headers, params=params, **kwargs
+            HTTPMethod.POST,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -240,7 +255,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "PUT", route, headers=headers, params=params, **kwargs
+            HTTPMethod.PUT,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -268,7 +287,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "PATCH", route, headers=headers, params=params, **kwargs
+            HTTPMethod.PATCH,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -296,7 +319,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "DELETE", route, headers=headers, params=params, **kwargs
+            HTTPMethod.DELETE,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -324,7 +351,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "OPTIONS", route, headers=headers, params=params, **kwargs
+            HTTPMethod.OPTIONS,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -352,7 +383,11 @@ class BaseAPI(abstracts.AbstractAPI):
 
         """
         response = self.request(
-            "TRACE", route, headers=headers, params=params, **kwargs
+            HTTPMethod.TRACE,
+            route,
+            headers=headers,
+            params=params,
+            **kwargs,
         )
         return response
 
@@ -446,7 +481,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
     @confirm_connection
     def request(
         self,
-        method: str,
+        method: HTTPMethod,
         route: str,
         headers: Headers = None,
         params: Parameters = None,
@@ -455,8 +490,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         """Sends an HTTP request.
 
         Args:
-            method: HTTP request method to use (HEAD, GET, POST, PUT, DELETE,
-                OPTIONS, or TRACE).
+            method: HTTP request method to use.
             route: API path to which the request will be sent.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
@@ -473,11 +507,11 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         if self.session:
             log.debug(
                 "Sending HTTP %(method)s request to %(uri)s",
-                {"method": method, "uri": uri},
+                {"method": method.name, "uri": uri},
             )
 
             response = self.session.request(
-                method,
+                method.name,
                 uri,
                 headers=merge(self.headers, headers),
                 params=merge(self.params, params),

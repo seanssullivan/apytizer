@@ -11,6 +11,8 @@ for subclasses to implement.
 from __future__ import annotations
 import abc
 
+__all__ = ["AbstractSession"]
+
 
 class AbstractSession(abc.ABC):
     """Represents an abstract session."""

@@ -17,6 +17,8 @@ from typing import Tuple, Union
 from requests import Response
 from requests.auth import AuthBase
 
+__all__ = ["AbstractAPI"]
+
 
 class AbstractAPI(abc.ABC):
     """Represents an abstract API."""

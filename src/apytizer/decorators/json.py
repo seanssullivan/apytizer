@@ -10,6 +10,8 @@ from typing import Callable, Dict, List, Union
 # Third-Party Importd
 from requests import Response
 
+__all__ = ["json_response"]
+
 
 # Initialize logger.
 log = logging.getLogger(__name__)
@@ -50,14 +52,14 @@ def json_response(func: Callable) -> Callable:
         if APPLICATION_JSON not in content_type:
             return response
 
-        result = parse_json_response(response)
+        result = _parse_json_response(response)
         return result
 
     functools.update_wrapper(wrapper, func)
     return wrapper
 
 
-def parse_json_response(response: Response) -> Union[Dict, List, Response]:
+def _parse_json_response(response: Response) -> Union[Dict, List, Response]:
     """Parse JSON response.
 
     Args:
@@ -72,11 +74,11 @@ def parse_json_response(response: Response) -> Union[Dict, List, Response]:
         return response.json()
 
     except json.JSONDecodeError as error:
-        handle_decode_error(error)
+        _handle_decode_error(error)
         return response
 
 
-def handle_decode_error(error: json.JSONDecodeError) -> None:
+def _handle_decode_error(error: json.JSONDecodeError) -> None:
     """Handle decode errors.
 
     Args:

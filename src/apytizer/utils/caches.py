@@ -3,6 +3,8 @@
 # Third-Party Imports
 from cachetools.keys import hashkey
 
+__all__ = ["generate_key"]
+
 
 def generate_key(*tags):
     """Generates a hashable key for caching values."""

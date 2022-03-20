@@ -18,8 +18,10 @@ import requests
 # Local Imports
 from ..abstracts import AbstractAPI
 from ..abstracts import AbstractEndpoint
-from ..decorators.caching import cache_response
+from ..decorators import cache_response
 from ..utils import merge
+
+__all__ = ["BaseEndpoint"]
 
 
 # Initialize logger.
@@ -59,7 +61,7 @@ class BaseEndpoint(AbstractEndpoint):
         cache: Cache = None,
     ):
         self.api = api
-        self.path = path if path[0] != "/" else path[1:]
+        self.path = path[1:] if path.startswith("/") else path
         self.headers = headers
         self.params = params
         self.methods = methods

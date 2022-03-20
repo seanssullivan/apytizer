@@ -12,6 +12,8 @@ from __future__ import annotations
 import abc
 from typing import Any, Generator, Mapping
 
+__all__ = ["AbstractState"]
+
 
 class AbstractState(abc.ABC):
     """Represents an abstract state."""

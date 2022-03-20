@@ -19,6 +19,8 @@ from typing import List, Set
 from .abstract_endpoint import AbstractEndpoint
 from .abstract_model import AbstractModel
 
+__all__ = ["AbstractManager"]
+
 
 class AbstractManager(abc.ABC):
     """Represents an abstract manager."""

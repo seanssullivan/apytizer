@@ -3,6 +3,8 @@
 # Standard Library Imports
 from typing import Iterable, Tuple, Union
 
+__all__ = ["allinstance"]
+
 
 def allinstance(
     __objs: Iterable, __class_or_tuple: Union[Tuple[type], type]

@@ -17,6 +17,8 @@ from requests import PreparedRequest
 from requests import Response
 from requests.adapters import HTTPAdapter
 
+__all__ = ["TransportAdapter"]
+
 
 # Define constants.
 DEFAULT_RATE_LIMIT = 1

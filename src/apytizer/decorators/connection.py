@@ -11,6 +11,8 @@ import requests
 from requests.exceptions import ConnectionError
 from requests.exceptions import Timeout
 
+__all__ = ["confirm_connection"]
+
 
 # Initialize logger.
 log = logging.getLogger(__name__)
@@ -43,11 +45,11 @@ def confirm_connection(func) -> Callable:
             response = func(self, *args, **kwargs)  # type: requests.Response
 
         except ConnectionError as error:
-            handle_connection_error(error)
+            _handle_connection_error(error)
             return error
 
         except Timeout as error:
-            handle_timeout_error(error)
+            _handle_timeout_error(error)
             return error
 
         else:
@@ -61,7 +63,7 @@ def confirm_connection(func) -> Callable:
     return wrapper
 
 
-def handle_connection_error(error: ConnectionError) -> None:
+def _handle_connection_error(error: ConnectionError) -> None:
     """Handle connection errors.
 
     Args:
@@ -72,7 +74,7 @@ def handle_connection_error(error: ConnectionError) -> None:
     log.error(error)
 
 
-def handle_timeout_error(error: Timeout) -> None:
+def _handle_timeout_error(error: Timeout) -> None:
     """Handle timeout errors.
 
     Args:
