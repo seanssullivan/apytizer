@@ -49,7 +49,7 @@ def json_response(func: Callable) -> Callable:
             return response
 
         content_type = response.headers.get(CONTENT_TYPE)
-        if APPLICATION_JSON not in content_type:
+        if not content_type or APPLICATION_JSON not in content_type:
             return response
 
         result = _parse_json_response(response)

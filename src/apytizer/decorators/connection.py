@@ -4,11 +4,12 @@
 # Standard Library Imports
 import functools
 import logging
-from typing import Callable
+from typing import Callable, Union
 
 # Third-Party Imports
 import requests
 from requests.exceptions import ConnectionError
+from requests.exceptions import RequestException
 from requests.exceptions import Timeout
 
 __all__ = ["confirm_connection"]
@@ -30,7 +31,9 @@ def confirm_connection(func) -> Callable:
     """
 
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs) -> requests.Response:
+    def wrapper(
+        self, *args, **kwargs
+    ) -> Union[requests.Response, RequestException]:
         """Wrapper applied to decorated function.
 
         Args:

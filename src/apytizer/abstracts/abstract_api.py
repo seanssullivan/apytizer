@@ -25,8 +25,12 @@ class AbstractAPI(abc.ABC):
 
     url: str
 
-    def __eq__(self, other: AbstractAPI) -> bool:
-        return other.url == self.url and other.auth == self.auth
+    def __eq__(self, other: object) -> bool:
+        return (
+            other.url == self.url and other.auth == self.auth
+            if isinstance(other, AbstractAPI)
+            else False
+        )
 
     def __hash__(self) -> int:
         return hash(self.url)

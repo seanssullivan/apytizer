@@ -31,7 +31,7 @@ class AbstractModel(abc.ABC):
     state: AbstractState
 
     @abc.abstractmethod
-    def __eq__(self, other: AbstractModel) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Abstract method for determining whether model is equal to another.
 
         Returns:
@@ -41,7 +41,7 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __hash__(self) -> str:
+    def __hash__(self) -> int:
         """Abstract method for returning the hash value of a model.
 
         Returns:

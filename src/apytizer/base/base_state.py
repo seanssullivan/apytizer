@@ -30,10 +30,10 @@ class BaseState(abstracts.AbstractState):
     def __contains__(self, key: str) -> bool:
         return key in self._state
 
-    def __eq__(self, other: abstracts.AbstractState) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             dict(other) == dict(self)
-            if isinstance(other, self.__class__)
+            if isinstance(other, BaseState)
             else False
         )
 

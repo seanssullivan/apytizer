@@ -8,7 +8,8 @@ This module defines a base API class implementation.
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, List, MutableMapping, Tuple, Union, final
+from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from typing import final
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -30,7 +31,7 @@ __all__ = ["BaseAPI", "SessionAPI"]
 log = logging.getLogger(__name__)
 
 # Define custom types.
-Authentication = Union[AuthBase, Tuple]
+Authentication = Union[AuthBase, Tuple[str, str]]
 Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
@@ -59,11 +60,11 @@ class BaseAPI(abstracts.AbstractAPI):
     def __init__(
         self,
         url: str,
-        auth: Authentication = None,
+        auth: Optional[Authentication] = None,
         *,
-        headers: Headers = None,
-        params: Parameters = None,
-        cache: Cache = None,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        cache: Optional[Cache] = None,
     ):
         self.url = url + "/" if url[-1] != "/" else url
         self.auth = auth
@@ -72,7 +73,7 @@ class BaseAPI(abstracts.AbstractAPI):
         self.cache = cache
 
     @property
-    def auth(self) -> Union[AuthBase, Tuple]:
+    def auth(self) -> Optional[Authentication]:
         """Authentication for API requests.
 
         Raises:
@@ -82,7 +83,7 @@ class BaseAPI(abstracts.AbstractAPI):
         return self._auth
 
     @auth.setter
-    def auth(self, value: Union[AuthBase, Tuple[str, str], None]) -> None:
+    def auth(self, value: Optional[Authentication]) -> None:
         if value and not isinstance(value, (AuthBase, tuple)):
             message = f"expected either AuthBase or tuple, not {type(value)}"
             raise TypeError(message)
@@ -417,12 +418,12 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
     def __init__(
         self,
         url: str,
-        auth: Authentication = None,
+        auth: Optional[Authentication] = None,
         *,
-        headers: Headers = None,
-        params: Parameters = None,
-        adapter: HTTPAdapter = None,
-        cache: MutableMapping = None,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        adapter: Optional[HTTPAdapter] = None,
+        cache: Optional[MutableMapping] = None,
     ):
         super().__init__(
             url,
@@ -432,7 +433,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
             cache=cache,
         )
         self.adapter = adapter
-        self.session = None  # type: requests.Session
+        self.session = None  # type: Optional[requests.Session]
 
     @final
     def __enter__(self):
@@ -444,7 +445,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         self.close()
 
     @property
-    def adapter(self) -> HTTPAdapter:
+    def adapter(self) -> Optional[HTTPAdapter]:
         """Adapter for API requests.
 
         Raises:
@@ -454,7 +455,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         return self._adapter
 
     @adapter.setter
-    def adapter(self, value: HTTPAdapter) -> None:
+    def adapter(self, value: Optional[HTTPAdapter]) -> None:
         if value and not isinstance(value, HTTPAdapter):
             message = f"expected HTTPAdapter, not {type(value)}"
             raise TypeError(message)
@@ -475,8 +476,10 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
     def close(self, *args) -> None:
         """Destroys the session."""
         log.debug("Closing API session...")
-        self.session.close()
-        self.session = None
+
+        if self.session is not None:
+            self.session.close()
+            self.session = None
 
     @confirm_connection
     def request(

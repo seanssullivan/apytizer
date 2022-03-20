@@ -64,6 +64,8 @@ class BaseManager(abstracts.AbstractManager):
 
         Args:
             ref: Reference to object.
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
 
         Returns:
             Object.

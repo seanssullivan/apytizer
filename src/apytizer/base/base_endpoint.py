@@ -9,7 +9,7 @@ This module defines a base endpoint class implementation.
 # Standard Library Imports
 from __future__ import annotations
 import logging
-from typing import Any, Dict, List, MutableMapping, Union
+from typing import Any, Dict, Iterable, MutableMapping, Optional, Union
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -19,6 +19,7 @@ import requests
 from ..abstracts import AbstractAPI
 from ..abstracts import AbstractEndpoint
 from ..decorators import cache_response
+from ..http_methods import HTTPMethod
 from ..utils import merge
 
 __all__ = ["BaseEndpoint"]
@@ -28,9 +29,22 @@ __all__ = ["BaseEndpoint"]
 log = logging.getLogger(__name__)
 
 # Define custom types.
+AllowedMethods = Iterable[HTTPMethod]
 Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
+
+# Define constants.
+DEFAULT_METHODS = (
+    HTTPMethod.HEAD,
+    HTTPMethod.GET,
+    HTTPMethod.POST,
+    HTTPMethod.PUT,
+    HTTPMethod.PATCH,
+    HTTPMethod.DELETE,
+    HTTPMethod.OPTIONS,
+    HTTPMethod.TRACE,
+)
 
 
 class BaseEndpoint(AbstractEndpoint):
@@ -57,15 +71,24 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Headers = None,
         params: Parameters = None,
-        methods: List[str] = None,
+        methods: Optional[AllowedMethods] = None,
         cache: Cache = None,
     ):
         self.api = api
-        self.path = path[1:] if path.startswith("/") else path
+        self.path = path
         self.headers = headers
         self.params = params
-        self.methods = methods
+        self.methods = set(methods) if methods else DEFAULT_METHODS
         self.cache = cache
+
+    @property
+    def path(self) -> str:
+        """Relative URL path."""
+        return self._path
+
+    @path.setter
+    def path(self, path: str) -> None:
+        self._path = path[1:] if path.startswith("/") else path
 
     @property
     def uri(self) -> str:
@@ -76,10 +99,10 @@ class BaseEndpoint(AbstractEndpoint):
         self,
         ref: Union[int, str],
         *,
-        headers: Headers = None,
-        params: Parameters = None,
-        methods: List[str] = None,
-        cache: Cache = None,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        methods: Optional[AllowedMethods] = None,
+        cache: Optional[Cache] = None,
     ) -> BaseEndpoint:
         """Returns a new endpoint with the appended reference.
 
@@ -223,7 +246,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 
         """
-        if self.methods and "HEAD" not in self.methods:
+        if HTTPMethod.HEAD not in self.methods:
             raise NotImplementedError
 
         response = self.api.head(
@@ -252,7 +275,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 
         """
-        if self.methods and "GET" not in self.methods:
+        if HTTPMethod.GET not in self.methods:
             raise NotImplementedError
 
         response = self.api.get(
@@ -281,7 +304,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
         """
-        if self.methods and "POST" not in self.methods:
+        if HTTPMethod.POST not in self.methods:
             raise NotImplementedError
 
         response = self.api.post(
@@ -310,7 +333,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 
         """
-        if self.methods and "PUT" not in self.methods:
+        if HTTPMethod.PUT not in self.methods:
             raise NotImplementedError
 
         response = self.api.put(
@@ -339,7 +362,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 
         """
-        if self.methods and "PATCH" not in self.methods:
+        if HTTPMethod.PATCH not in self.methods:
             raise NotImplementedError
 
         response = self.api.patch(
@@ -368,7 +391,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 
         """
-        if self.methods and "DELETE" not in self.methods:
+        if HTTPMethod.DELETE not in self.methods:
             raise NotImplementedError
 
         response = self.api.delete(
@@ -397,7 +420,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
 
         """
-        if self.methods and "OPTIONS" not in self.methods:
+        if HTTPMethod.OPTIONS not in self.methods:
             raise NotImplementedError
 
         response = self.api.options(
@@ -426,7 +449,7 @@ class BaseEndpoint(AbstractEndpoint):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
-        if self.methods and "TRACE" not in self.methods:
+        if HTTPMethod.TRACE not in self.methods:
             raise NotImplementedError
 
         response = self.api.trace(

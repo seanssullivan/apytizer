@@ -13,7 +13,7 @@ methods represents a standard create, read, update or delete (CRUD) operation.
 
 # Standard Library Imports
 import abc
-from typing import List, Set
+from typing import Any, List, Set
 
 # Local Imports
 from .abstract_endpoint import AbstractEndpoint
@@ -64,13 +64,14 @@ class AbstractManager(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, *args, **kwargs) -> AbstractModel:
+    def get(self, ref: Any, *args, **kwargs) -> AbstractModel:
         """Abstract method for retrieving an object.
 
         If the object is not found in local state, a request is send to the
         associated endpoint.
 
         Args:
+            ref: Reference to object.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 

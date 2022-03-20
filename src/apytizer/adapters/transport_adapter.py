@@ -62,6 +62,6 @@ class TransportAdapter(HTTPAdapter):
         self.timeout = kwargs.pop("timeout", 5)
         super().__init__(*args, **kwargs)
 
-    def send(self, request: PreparedRequest, **kwargs) -> Response:
+    def send(self, request: PreparedRequest, *args, **kwargs) -> Response:
         kwargs.setdefault("timeout", self.timeout)
-        return super().send(request, **kwargs)
+        return super().send(request, *args, **kwargs)

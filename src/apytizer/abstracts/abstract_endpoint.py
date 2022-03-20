@@ -25,8 +25,6 @@ class AbstractEndpoint(abc.ABC):
 
     """
 
-    path: str
-
     def __hash__(self) -> int:
         return hash(self.path)
 
@@ -35,6 +33,11 @@ class AbstractEndpoint(abc.ABC):
 
     def __str__(self) -> str:
         return f"{self.path!s}"
+
+    @property
+    @abc.abstractmethod
+    def path(self) -> str:
+        raise NotImplementedError
 
     @abc.abstractmethod
     def head(self, *args, **kwargs) -> Response:

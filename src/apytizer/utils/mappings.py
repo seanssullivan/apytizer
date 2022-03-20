@@ -3,7 +3,7 @@
 
 # Standard Library Imports
 import functools
-from typing import Any, Dict, Iterable, List, Mapping, MutableMapping
+from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional
 
 # Local Imports
 from .typing import allinstance
@@ -45,7 +45,9 @@ def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
     return value
 
 
-def deep_set(__m: MutableMapping, keys: str, value: Any) -> Dict[str, Any]:
+def deep_set(
+    __m: MutableMapping, keys: str, value: Any
+) -> MutableMapping[str, Any]:
     """Sets a key to the provided value in a nested mapping object.
 
     Args:
@@ -63,17 +65,15 @@ def deep_set(__m: MutableMapping, keys: str, value: Any) -> Dict[str, Any]:
     if not isinstance(__m, Mapping):
         raise TypeError("must be an instance of a mapping")
 
-    if isinstance(keys, str):
-        keys = keys.split(".")
+    __keys = keys.split(".")
+    __key = __keys[0]
 
-    key = keys[0]
+    if len(__keys) == 1:
+        __m[__key] = value
 
-    if len(keys) == 1:
-        __m[key] = value
-
-    elif len(keys) > 1:
-        __m.setdefault(key, {})
-        __m[key] = deep_set(__m[key], keys[1:], value)
+    elif len(__keys) > 1:
+        __m.setdefault(__key, {})
+        __m[__key] = deep_set(__m[__key], ".".join(__keys[1:]), value)
 
     else:
         raise KeyError(keys)
@@ -127,7 +127,9 @@ def pick(__m: Mapping, keys: List[str]) -> Dict[str, Any]:
     return results
 
 
-def merge(*args: Mapping, overwrite: bool = False) -> Dict:
+def merge(
+    *args: Optional[Mapping], overwrite: bool = False
+) -> Optional[MutableMapping]:
     """Combines mapping objects into a single dictionary.
 
     Args:
@@ -145,7 +147,9 @@ def merge(*args: Mapping, overwrite: bool = False) -> Dict:
     if not allinstance(args, (Mapping, type(None))):
         raise TypeError("all arguments must be instances of mappings")
 
-    def _merge(a: Mapping, b: Mapping, path=None, overwrite=False) -> Mapping:
+    def _merge(
+        a: MutableMapping, b: Mapping, path=None, overwrite=False
+    ) -> MutableMapping:
         """Merge two mappings.
 
         Args:
@@ -197,7 +201,7 @@ def merge(*args: Mapping, overwrite: bool = False) -> Dict:
         lambda acc, cur: _merge(acc, cur, overwrite=overwrite) if cur else acc,
         args,
         {},
-    )
+    )  # type: MutableMapping
     return result if result else None
 
 

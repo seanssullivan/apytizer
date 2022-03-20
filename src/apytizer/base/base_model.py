@@ -39,14 +39,14 @@ class BaseModel(abstracts.AbstractModel):
     def __contains__(self, key: str) -> bool:
         return key in self.state
 
-    def __eq__(self, other: abstracts.AbstractModel) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             other.reference == self.reference
             if isinstance(other, BaseModel)
             else False
         )
 
-    def __hash__(self) -> str:
+    def __hash__(self) -> int:
         return hash(self.reference)
 
     def __getattr__(self, name: str) -> Any:
@@ -85,7 +85,6 @@ class BaseModel(abstracts.AbstractModel):
 
         """
         self.state.update(__m, **kwargs)
-        return self
 
     def rollback(self) -> None:
         """Rollback changes to local state."""

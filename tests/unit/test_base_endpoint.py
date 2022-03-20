@@ -11,6 +11,7 @@ import pytest
 # Local Imports
 from apytizer.base import BaseAPI
 from apytizer.base import BaseEndpoint
+from apytizer.http_methods import HTTPMethod
 
 
 @pytest.fixture
@@ -55,7 +56,12 @@ def test_endpoint_head_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "POST", "PUT", "DELETE"],
+        methods=[
+            HTTPMethod.GET,
+            HTTPMethod.POST,
+            HTTPMethod.PUT,
+            HTTPMethod.DELETE,
+        ],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -81,7 +87,9 @@ def test_endpoint_head_response_is_cached(mock_api):
 
     assert first_response == second_response
     assert mock_api.head.call_count == 1
-    assert mock_cache == {("HEAD", test_endpoint): mock_api.head.return_value}
+    assert mock_cache == {
+        (HTTPMethod.HEAD.name, test_endpoint): mock_api.head.return_value
+    }
 
 
 def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
@@ -127,7 +135,7 @@ def test_endpoint_get_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["POST", "PUT", "DELETE"],
+        methods=[HTTPMethod.POST, HTTPMethod.PUT, HTTPMethod.DELETE],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -153,7 +161,9 @@ def test_endpoint_get_response_is_cached(mock_api):
 
     assert first_response == second_response
     assert mock_api.get.call_count == 1
-    assert mock_cache == {("GET", test_endpoint): mock_api.get.return_value}
+    assert mock_cache == {
+        (HTTPMethod.GET.name, test_endpoint): mock_api.get.return_value
+    }
 
 
 def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
@@ -199,7 +209,7 @@ def test_endpoint_post_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "PUT", "DELETE"],
+        methods=[HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -237,7 +247,7 @@ def test_endpoint_put_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "POST", "DELETE"],
+        methods=[HTTPMethod.GET, HTTPMethod.POST, HTTPMethod.DELETE],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -275,7 +285,7 @@ def test_endpoint_patch_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "POST", "DELETE"],
+        methods=[HTTPMethod.GET, HTTPMethod.POST, HTTPMethod.DELETE],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -310,7 +320,7 @@ def test_endpoint_delete_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "POST", "PUT"],
+        methods=[HTTPMethod.GET, HTTPMethod.POST, HTTPMethod.PUT],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -349,7 +359,12 @@ def test_endpoint_options_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "POST", "PUT", "DELETE"],
+        methods=[
+            HTTPMethod.GET,
+            HTTPMethod.POST,
+            HTTPMethod.PUT,
+            HTTPMethod.DELETE,
+        ],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -384,7 +399,12 @@ def test_endpoint_trace_method_when_not_allowed(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET", "POST", "PUT", "DELETE"],
+        methods=[
+            HTTPMethod.GET,
+            HTTPMethod.POST,
+            HTTPMethod.PUT,
+            HTTPMethod.DELETE,
+        ],
     )
 
     with pytest.raises(NotImplementedError, match=""):
@@ -401,7 +421,7 @@ def test_endpoint__call__returns_new_endpoint(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET"],
+        methods=[HTTPMethod.GET],
     )
     assert initial_endpoint.path == "test"
 
@@ -438,7 +458,7 @@ def test_endpoint__getitem__returns_new_endpoint(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET"],
+        methods=[HTTPMethod.GET],
     )
     assert initial_endpoint.path == "test"
 
@@ -473,7 +493,7 @@ def test_endpoint__add__returns_new_endpoint(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET"],
+        methods=[HTTPMethod.GET],
     )
     assert initial_endpoint.path == "test"
 
@@ -508,7 +528,7 @@ def test_endpoint__truediv__returns_new_endpoint(mock_api):
         mock_api,
         "test",
         headers={"Accept": "application/json"},
-        methods=["GET"],
+        methods=[HTTPMethod.GET],
     )
     assert initial_endpoint.path == "test"
 
