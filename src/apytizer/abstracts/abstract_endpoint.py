@@ -9,35 +9,38 @@ a standard HTTP request method.
 """
 
 # Standard Library Imports
+from __future__ import annotations
 import abc
+from collections.abc import MutableSet, Set
+from typing import Iterable
 
 # Third-Party Imports
 from requests import Response
 
-__all__ = ["AbstractEndpoint"]
+__all__ = ["AbstractEndpoint", "AbstractEndpointCollection"]
 
 
 class AbstractEndpoint(abc.ABC):
-    """Represents an abstract endpoint.
-
-    Attributes:
-        path: Relative path to API endpoint.
-
-    """
-
-    def __hash__(self) -> int:
-        return hash(self.path)
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__!s} path={self.path!s}>"
-
-    def __str__(self) -> str:
-        return f"{self.path!s}"
+    """Represents an abstract endpoint."""
 
     @property
     @abc.abstractmethod
     def path(self) -> str:
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def __eq__(self, other: object) -> bool:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __hash__(self) -> int:
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__!s} path={self.path!s}>"
+
+    def __str__(self) -> str:
+        return self.path
 
     @abc.abstractmethod
     def head(self, *args, **kwargs) -> Response:
@@ -189,4 +192,43 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
+        raise NotImplementedError
+
+
+class AbstractEndpointCollection(MutableSet):
+    """Represents an abstract collection of endpoints."""
+
+    @abc.abstractmethod
+    def add(self, __child: AbstractEndpoint) -> None:
+        """Add child endpoint."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def clear(self) -> None:
+        """Clear child endpoints."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def discard(self, __child: AbstractEndpoint) -> None:
+        """Discard child endpoint."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, ref: str) -> AbstractEndpoint:
+        """Get child endpoint."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def pop(self, name: str) -> AbstractEndpoint:
+        """Pop child endpoint."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def remove(self, __child: AbstractEndpoint) -> None:
+        """Remove child endpoint."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def update(self, *children: Iterable[AbstractEndpoint]) -> None:
+        """Update children."""
         raise NotImplementedError

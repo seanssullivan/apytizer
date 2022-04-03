@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/base/endpoint.py
+# src/apytizer/endpoints/base_endpoint.py
 """Base endpoint class.
 
-This module defines a base endpoint class implementation.
+This module defines the base endpoint class implementation.
 
 """
 
@@ -16,13 +16,12 @@ from urllib.parse import urljoin
 import requests
 
 # Local Imports
-from ..abstracts import AbstractAPI
-from ..abstracts import AbstractEndpoint
+from .. import abstracts
 from ..decorators import cache_response
 from ..http_methods import HTTPMethod
 from ..utils import merge
 
-__all__ = ["BaseEndpoint"]
+__all__ = ["BaseEndpoint", "DEFAULT_METHODS"]
 
 
 # Initialize logger.
@@ -47,38 +46,40 @@ DEFAULT_METHODS = (
 )
 
 
-class BaseEndpoint(AbstractEndpoint):
-    """Implements a base API endpoint.
+class BaseEndpoint(abstracts.AbstractEndpoint):
+    """Base class from which all endpoint implementations are derived.
 
     Args:
-        path: Relative URL path for endpoint.
+        api: API instance.
+        path: Relative path to endpoint.
+        methods (optional): List of HTTP methods accepted by endpoint.
         headers (optional): Headers to set globally for endpoint.
         params (optional): Parameters to set globally for endpoint.
-        methods (optional): List of HTTP methods accepted by endpoint.
         cache (optional): Mutable mapping for caching responses.
 
     Attributes:
         api: Instance of an API subclass.
-        path: Relative path to API endpoint.
-        uri: Endpoint URL.
+
+    Raises:
+        TypeError: if path argument is not type 'str'.
 
     """
 
     def __init__(
         self,
-        api: AbstractAPI,
-        path: str,
+        api: abstracts.AbstractAPI,
+        path: Union[int, str],
         *,
-        headers: Headers = None,
-        params: Parameters = None,
-        methods: Optional[AllowedMethods] = None,
-        cache: Cache = None,
+        methods: Optional[AllowedMethods] = DEFAULT_METHODS,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        cache: Optional[Cache] = None,
     ):
         self.api = api
-        self.path = path
+        self.path = str(path)
+        self.methods = set(methods)
         self.headers = headers
         self.params = params
-        self.methods = set(methods) if methods else DEFAULT_METHODS
         self.cache = cache
 
     @property
@@ -88,149 +89,33 @@ class BaseEndpoint(AbstractEndpoint):
 
     @path.setter
     def path(self, path: str) -> None:
-        self._path = path[1:] if path.startswith("/") else path
+        if not isinstance(path, str):
+            message = f"expected type 'str', got {type(path)} instead"
+            raise TypeError(message)
+
+        self._path = path.strip("/")
 
     @property
     def uri(self) -> str:
         """Retrieve the endpoint URI."""
         return urljoin(self.api.url, self.path)
 
-    def __call__(
-        self,
-        ref: Union[int, str],
-        *,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
-        methods: Optional[AllowedMethods] = None,
-        cache: Optional[Cache] = None,
-    ) -> BaseEndpoint:
-        """Returns a new endpoint with the appended reference.
+    def __eq__(self, other: object) -> bool:
+        return (
+            other.path == self.path
+            if isinstance(other, BaseEndpoint)
+            else False
+        )
 
-        This method is a shortcut for accessing HTTP methods on a
-        child endpoint or a nested resource.
-
-        Args:
-            ref: Reference for a collection or nested resource.
-            headers (optional) : Headers to set globally for endpoint.
-            params (optional) : Parameters to set globally for endpoint.
-            methods (optional): List of HTTP methods accepted by endpoint.
-            cache (optional): Mutable mapping for caching responses.
-
-        Returns:
-            BaseEndpoint instance.
-
-        Examples:
-            Calling an instance of a basic endpoint returns a new endpoint
-            with the appended reference string.
-
-            >>> endpoint = BaseEndpoint(api, 'base')
-            >>> endpoint('ref').uri
-            'api/base/ref'
-
-        """
-        if isinstance(ref, (int, str)):
-            endpoint = BaseEndpoint(
-                self.api,
-                f"{self.path!s}/{ref!s}",
-                headers=headers,
-                params=params,
-                methods=methods,
-                cache=cache,
-            )
-        else:
-            raise TypeError
-
-        return endpoint
-
-    def __getitem__(self, ref: Union[int, str]) -> BaseEndpoint:
-        """Returns a new endpoint with the appended reference.
-
-        This method is a shortcut for accessing HTTP methods on a
-        child endpoint or a nested resource.
-
-        Args:
-            ref: Reference for a collection or nested resource.
-
-        Returns:
-            BaseEndpoint instance.
-
-        Examples:
-            Getting an item from an instance of a basic endpoint returns a
-            new endpoint with the appended reference string.
-
-            >>> endpoint = BaseEndpoint(api, 'base')
-            >>> endpoint['ref'].uri
-            'api/base/ref'
-
-        """
-        if isinstance(ref, (int, str)):
-            endpoint = BaseEndpoint(self.api, f"{self.path!s}/{ref!s}")
-        else:
-            raise TypeError
-
-        return endpoint
-
-    def __add__(self, path: Union[int, str]) -> BaseEndpoint:
-        """Returns a new endpoint after combining both paths.
-
-        This is a method for quickly accessing HTTP methods for
-        child endpoints or nested resources. It behaves the same
-        as the __truediv__ method.
-
-        Args:
-            path: Value to append to the current path.
-
-        Returns:
-            BaseEndpoint instance.
-
-        Examples:
-            Using an addition operator on an instance of a basic endpoint
-            returns a new endpoint with the appended reference string.
-
-            >>> endpoint = BaseEndpoint(api, 'base') + 'ref'
-            >>> endpoint.uri
-            'api/base/ref'
-
-        """
-        if isinstance(path, (int, str)):
-            endpoint = BaseEndpoint(self.api, f"{self.path!s}/{path!s}")
-        else:
-            raise TypeError
-
-        return endpoint
-
-    def __truediv__(self, path: Union[int, str]) -> BaseEndpoint:
-        """Returns a new endpoint after combining both paths.
-
-        This is a method for quickly accessing HTTP methods for
-        child endpoints or nested resources. It behaves the same
-        as the __add__ method.
-
-        Args:
-            path: Value to append to the current path.
-
-        Returns:
-            BaseEndpoint instance.
-
-        Examples:
-            Using a division operator on an instance of a basic endpoint
-            returns a new endpoint with the appended reference string.
-
-            >>> endpoint = BaseEndpoint(api, 'base') / 'ref'
-            >>> endpoint.uri
-            'api/base/ref'
-
-        """
-        if isinstance(path, (int, str)):
-            endpoint = BaseEndpoint(self.api, f"{self.path!s}/{path!s}")
-        else:
-            raise TypeError
-
-        return endpoint
+    def __hash__(self) -> int:
+        return hash(self.path)
 
     @cache_response
     def head(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP HEAD request to API endpoint.
 
@@ -259,7 +144,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def get(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP GET request to API endpoint.
 
@@ -288,7 +176,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def post(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP POST request to API endpoint.
 
@@ -317,7 +208,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def put(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP PUT request to API endpoint.
 
@@ -346,7 +240,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def patch(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP PATCH request to API endpoint.
 
@@ -375,7 +272,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def delete(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP DELETE request to API endpoint.
 
@@ -404,7 +304,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def options(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP OPTIONS request to API endpoint.
 
@@ -433,7 +336,10 @@ class BaseEndpoint(AbstractEndpoint):
 
     @cache_response
     def trace(
-        self, headers: Headers = None, params: Parameters = None, **kwargs
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        **kwargs,
     ) -> requests.Response:
         """Sends an HTTP TRACE request to API endpoint.
 

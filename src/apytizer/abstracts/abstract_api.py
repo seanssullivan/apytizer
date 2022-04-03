@@ -44,6 +44,12 @@ class AbstractAPI(abc.ABC):
         """Authentication for API requests."""
         raise NotImplementedError
 
+    @property
+    @abc.abstractmethod
+    def url(self) -> str:
+        """URL of API."""
+        raise NotImplementedError
+
     @abc.abstractmethod
     def head(self, route: str, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP HEAD request.

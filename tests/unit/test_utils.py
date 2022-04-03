@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+# Standard Library Imports
+from unittest import mock
+
 # Local Imports
 from apytizer import utils
 
@@ -40,6 +43,12 @@ def test_iter_get_returns_nested_values():
     ]
     results = utils.iter_get(data, "current.value")
     assert results == [1, 2, 3]
+
+
+def test_iter_setattr_sets_values():
+    objs = [mock.Mock(), mock.Mock(), mock.Mock()]
+    results = utils.iter_setattr(objs, "test", "success")
+    assert all(result.test == "success" for result in results)
 
 
 def test_merge_combines_dictionaries():

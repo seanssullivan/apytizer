@@ -4,7 +4,7 @@
 from http import HTTPStatus
 
 # Local Imports
-from apytizer.base import BaseAPI
+from apytizer.apis import BaseAPI
 
 
 # --------------------------------------------------------------------------------

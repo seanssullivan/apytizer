@@ -8,9 +8,9 @@ import requests
 from requests.adapters import HTTPAdapter
 
 # Local Imports
-from apytizer.base import SessionAPI
-from apytizer.base.base_api import _RequestsSessionBuilder
-from apytizer.base.base_api import _RequestsSessionFactory
+from apytizer.apis import SessionAPI
+from apytizer.apis.session_api import _RequestsSessionBuilder
+from apytizer.apis.session_api import _RequestsSessionFactory
 
 
 # --------------------------------------------------------------------------------
@@ -58,6 +58,7 @@ def test_session_start_method_mounts_adapter():
     result = api.session.adapters
     api.close()
 
+    print(result)
     assert result["https://"] is mock_adapter
     assert result["http://"] is mock_adapter
 

@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
+def deep_get(__m: Mapping, keys: str, default: Any = None, /) -> Any:
     """Returns a value from a nested mapping object.
 
     Args:
@@ -39,14 +39,15 @@ def deep_get(__m: Mapping, keys: str, default: Any = None) -> Any:
         return data.get(key, default) if data else None
 
     if not isinstance(__m, Mapping):
-        raise TypeError("must be an instance of a mapping")
+        message = f"must be an instance of a mapping, not {type(__m)}"
+        raise TypeError(message)
 
     value = functools.reduce(_get, keys.split("."), __m)
     return value
 
 
 def deep_set(
-    __m: MutableMapping, keys: str, value: Any
+    __m: MutableMapping, keys: str, value: Any, /
 ) -> MutableMapping[str, Any]:
     """Sets a key to the provided value in a nested mapping object.
 
@@ -63,7 +64,8 @@ def deep_set(
 
     """
     if not isinstance(__m, Mapping):
-        raise TypeError("must be an instance of a mapping")
+        message = f"must be an instance of a mapping, not {type(__m)}"
+        raise TypeError(message)
 
     __keys = keys.split(".")
     __key = __keys[0]
@@ -73,6 +75,10 @@ def deep_set(
 
     elif len(__keys) > 1:
         __m.setdefault(__key, {})
+
+        if __m.get(__key) is None:
+            __m[__key] = {}
+
         __m[__key] = deep_set(__m[__key], ".".join(__keys[1:]), value)
 
     else:
@@ -81,7 +87,7 @@ def deep_set(
     return __m
 
 
-def iter_get(__iter: Iterable[Dict[str, Any]], key: str) -> List[Any]:
+def iter_get(__iter: Iterable[Dict[str, Any]], key: str, /) -> List[Any]:
     """Get value for key from each mapping in an iterable object.
 
     Args:
@@ -90,7 +96,7 @@ def iter_get(__iter: Iterable[Dict[str, Any]], key: str) -> List[Any]:
 
     Raises:
         TypeError: when argument is not an iterable object.
-        ValueError: when items are not all mappings.
+        ValueError: when not all items are mappings.
 
     """
     if not isinstance(__iter, Iterable):

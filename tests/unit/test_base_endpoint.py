@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# pylint: disable=protected-access
-
 # Standard Library Imports
 from unittest.mock import Mock
 
@@ -9,8 +7,8 @@ from unittest.mock import Mock
 import pytest
 
 # Local Imports
-from apytizer.base import BaseAPI
-from apytizer.base import BaseEndpoint
+from apytizer.apis import BaseAPI
+from apytizer.endpoints import BaseEndpoint
 from apytizer.http_methods import HTTPMethod
 
 
@@ -23,7 +21,7 @@ def mock_api():
 
 
 # --------------------------------------------------------------------------------
-# Tests for Endpoint
+# General Tests for Endpoint
 # --------------------------------------------------------------------------------
 def test_endpoint_uri_contains_base_url_and_path(mock_api):
     test_endpoint = BaseEndpoint(mock_api, "test")
@@ -411,148 +409,3 @@ def test_endpoint_trace_method_when_not_allowed(mock_api):
         test_endpoint.trace()
 
     assert not mock_api.trace.called
-
-
-# --------------------------------------------------------------------------------
-# Tests for Magic Methods
-# --------------------------------------------------------------------------------
-def test_endpoint__call__returns_new_endpoint(mock_api):
-    initial_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET],
-    )
-    assert initial_endpoint.path == "test"
-
-    extended_endpoint = initial_endpoint(1)
-    assert isinstance(extended_endpoint, BaseEndpoint)
-    assert extended_endpoint.path == "test/1"
-
-    final_endpoint = extended_endpoint("stuff")
-    assert isinstance(final_endpoint, BaseEndpoint)
-    assert final_endpoint.path == "test/1/stuff"
-
-    assert not mock_api.called
-
-
-def test_endpoint__call_raises_type_error_when_passed_invalid_argument(
-    mock_api,
-):
-    endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
-    )
-
-    with pytest.raises(TypeError):
-        endpoint(["stuff"])
-
-    with pytest.raises(TypeError):
-        endpoint(("stuff", "things"))
-
-    with pytest.raises(TypeError):
-        endpoint({"stuff": "junk"})
-
-
-def test_endpoint__getitem__returns_new_endpoint(mock_api):
-    initial_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET],
-    )
-    assert initial_endpoint.path == "test"
-
-    extended_endpoint = initial_endpoint[1]
-    assert extended_endpoint.path == "test/1"
-
-    final_endpoint = extended_endpoint["stuff"]
-    assert final_endpoint.path == "test/1/stuff"
-
-    assert not mock_api.called
-
-
-def test_endpoint__getitem__raises_type_error_when_passed_invalid_argument(
-    mock_api,
-):
-    endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
-    )
-
-    with pytest.raises(TypeError):
-        endpoint[["stuff"]]
-
-    with pytest.raises(TypeError):
-        endpoint[("stuff", "things")]
-
-    with pytest.raises(TypeError):
-        endpoint[{"stuff": "junk"}]
-
-
-def test_endpoint__add__returns_new_endpoint(mock_api):
-    initial_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET],
-    )
-    assert initial_endpoint.path == "test"
-
-    extended_endpoint = initial_endpoint + 1
-    assert extended_endpoint.path == "test/1"
-
-    final_endpoint = extended_endpoint + "stuff"
-    assert final_endpoint.path == "test/1/stuff"
-
-    assert not mock_api.called
-
-
-def test_endpoint__add__raises_type_error_when_passed_invalid_argument(
-    mock_api,
-):
-    endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
-    )
-
-    with pytest.raises(TypeError):
-        endpoint + ["stuff"]
-
-    with pytest.raises(TypeError):
-        endpoint + ("stuff", "things")
-
-    with pytest.raises(TypeError):
-        endpoint + {"stuff": "junk"}
-
-
-def test_endpoint__truediv__returns_new_endpoint(mock_api):
-    initial_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET],
-    )
-    assert initial_endpoint.path == "test"
-
-    extended_endpoint = initial_endpoint / 1
-    assert extended_endpoint.path == "test/1"
-
-    final_endpoint = extended_endpoint / "stuff"
-    assert final_endpoint.path == "test/1/stuff"
-
-    assert not mock_api.called
-
-
-def test_endpoint__truediv__raises_type_error_when_passed_invalid_argument(
-    mock_api,
-):
-    endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}, methods=[]
-    )
-
-    with pytest.raises(TypeError):
-        endpoint / ["stuff"]
-
-    with pytest.raises(TypeError):
-        endpoint / ("stuff", "things")
-
-    with pytest.raises(TypeError):
-        endpoint / {"stuff": "junk"}
