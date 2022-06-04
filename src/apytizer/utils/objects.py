@@ -33,8 +33,8 @@ def iter_getattr(__iter: Iterable[object], __name: str, /) -> List[Any]:
 
 
 def iter_setattr(
-    __iter: Iterable[Any], __name: str, __value: str, /
-) -> List[Any]:
+    __iter: Iterable[Any], __name: str, __value: Any, /
+) -> Iterable[Any]:
     """Sets the named attribute to the specified value on each object.
 
     Args:

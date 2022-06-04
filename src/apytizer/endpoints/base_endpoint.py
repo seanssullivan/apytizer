@@ -9,7 +9,7 @@ This module defines the base endpoint class implementation.
 # Standard Library Imports
 from __future__ import annotations
 import logging
-from typing import Any, Dict, Iterable, MutableMapping, Optional, Union
+from typing import Any, Collection, Dict, MutableMapping, Optional, Union
 from urllib.parse import urljoin
 
 # Third-Party Imports
@@ -19,16 +19,13 @@ import requests
 from .. import abstracts
 from ..decorators import cache_response
 from ..http_methods import HTTPMethod
-from ..utils import merge
+from ..utils import errors, merge
 
-__all__ = ["BaseEndpoint", "DEFAULT_METHODS"]
+__all__ = ["BaseEndpoint"]
 
-
-# Initialize logger.
-log = logging.getLogger(__name__)
 
 # Define custom types.
-AllowedMethods = Iterable[HTTPMethod]
+AllowedMethods = Collection[HTTPMethod]
 Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
@@ -44,6 +41,9 @@ DEFAULT_METHODS = (
     HTTPMethod.OPTIONS,
     HTTPMethod.TRACE,
 )
+
+# Initialize logger.
+log = logging.getLogger(__name__)
 
 
 class BaseEndpoint(abstracts.AbstractEndpoint):
@@ -70,7 +70,7 @@ class BaseEndpoint(abstracts.AbstractEndpoint):
         api: abstracts.AbstractAPI,
         path: Union[int, str],
         *,
-        methods: Optional[AllowedMethods] = DEFAULT_METHODS,
+        methods: AllowedMethods = DEFAULT_METHODS,
         headers: Optional[Headers] = None,
         params: Optional[Parameters] = None,
         cache: Optional[Cache] = None,
@@ -89,10 +89,7 @@ class BaseEndpoint(abstracts.AbstractEndpoint):
 
     @path.setter
     def path(self, path: str) -> None:
-        if not isinstance(path, str):
-            message = f"expected type 'str', got {type(path)} instead"
-            raise TypeError(message)
-
+        errors.raise_for_instance(path, str)
         self._path = path.strip("/")
 
     @property

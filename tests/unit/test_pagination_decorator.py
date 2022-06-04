@@ -6,7 +6,7 @@
 from unittest.mock import Mock
 
 # Local Imports
-from apytizer.decorators import pagination
+from apytizer.decorators import Pagination
 
 
 def test_pagination_repeats_request():
@@ -24,10 +24,9 @@ def test_pagination_repeats_request():
     }
     callback = lambda state, res: state.get("results") >= res.get("total")
 
-    wrapper = pagination(request)
-    results = [
-        response for response in wrapper(reducer=reducer, callback=callback)
-    ]
+    decorator = Pagination(reducer=reducer, callback=callback)
+    wrapper = decorator(request)
+    results = [response for response in wrapper()]
     assert request.called == True
     assert len(results) == 2
 
@@ -54,12 +53,9 @@ def test_pagination_updates_parameters():
     }
     callback = lambda state, res: state.get("results") >= res.get("total")
 
-    wrapper = pagination(request)
-    results = wrapper(
-        params={"startAt": 0},
-        reducer=reducer,
-        callback=callback,
-    )
+    decorator = Pagination(reducer=reducer, callback=callback)
+    wrapper = decorator(request)
+    results = wrapper(params={"startAt": 0})
 
     next(results)
     request.assert_called_with(params={"startAt": 0})
@@ -90,8 +86,9 @@ def test_pagination_updates_data():
     }
     callback = lambda state, res: state.get("results") >= res.get("total")
 
-    wrapper = pagination(request)
-    results = wrapper(data={"startAt": 0}, reducer=reducer, callback=callback)
+    decorator = Pagination(reducer=reducer, callback=callback)
+    wrapper = decorator(request)
+    results = wrapper(data={"startAt": 0})
 
     next(results)
     request.assert_called_with(data={"startAt": 0})

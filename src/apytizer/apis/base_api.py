@@ -20,7 +20,7 @@ from .. import abstracts
 from ..decorators import cache_response
 from ..decorators import confirm_connection
 from ..http_methods import HTTPMethod
-from ..utils import merge
+from ..utils import errors, merge
 
 __all__ = ["BaseAPI"]
 
@@ -79,10 +79,7 @@ class BaseAPI(abstracts.AbstractAPI):
 
     @auth.setter
     def auth(self, value: Optional[Authentication]) -> None:
-        if value and not isinstance(value, (AuthBase, tuple)):
-            message = f"expected either AuthBase or tuple, not {type(value)}"
-            raise TypeError(message)
-
+        errors.raise_for_instance(value, (AuthBase, tuple, type(None)))
         self._auth = value
 
     @property
@@ -92,10 +89,7 @@ class BaseAPI(abstracts.AbstractAPI):
 
     @url.setter
     def url(self, url: str) -> None:
-        if not isinstance(url, str):
-            message = f"expected type str, got {type(url)} instead"
-            raise TypeError(message)
-
+        errors.raise_for_instance(url, str)
         self._url = url + "/" if not url.endswith("/") else url
 
     @confirm_connection

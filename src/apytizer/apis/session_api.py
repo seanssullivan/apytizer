@@ -26,7 +26,7 @@ from .base_api import BaseAPI
 from ..decorators import confirm_connection
 from ..http_methods import HTTPMethod
 from ..protocols import Protocol
-from ..utils import merge
+from ..utils import errors, merge
 
 __all__ = ["SessionAPI"]
 
@@ -107,10 +107,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
 
     @adapter.setter
     def adapter(self, value: Optional[HTTPAdapter]) -> None:
-        if value and not isinstance(value, HTTPAdapter):
-            message = f"expected HTTPAdapter, not {type(value)}"
-            raise TypeError(message)
-
+        errors.raise_for_instance(value, (HTTPAdapter, type(None)))
         self._adapter = value
 
     def start(self) -> None:
@@ -196,6 +193,42 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         return response
 
 
+class _RequestsSessionFactory:
+    """Implements a factory for requests sessions."""
+
+    def __init__(self) -> None:
+        self.builder = _RequestsSessionBuilder()
+
+    def make_session(
+        self,
+        adapter: Optional[HTTPAdapter] = None,
+        auth: Optional[Authentication] = None,
+        headers: Optional[Headers] = None,
+    ) -> requests.Session:
+        """Make requests session.
+
+        Args:
+            adapter (optional): Instance of an HTTPAdapter.
+            auth (optional): Authentication or credentials.
+            headers (optional): Headers to set for all requests.
+
+        Returns:
+            Requests Session.
+
+        """
+        if adapter is not None:
+            self.builder.include_adapter(adapter)
+
+        if auth is not None:
+            self.builder.include_auth(auth)
+
+        if headers is not None:
+            self.builder.include_default_headers(headers)
+
+        result = self.builder.session
+        return result
+
+
 class _RequestsSessionBuilder:
     """Implements a builder for requests sessions."""
 
@@ -231,7 +264,7 @@ class _RequestsSessionBuilder:
         for protocol in protocols:
             log.debug(
                 "Mounting %(adapter)s adapter to %(protocol)s protocol",
-                {"adapter": adapter, "protoc0l": protocol.name},
+                {"adapter": adapter, "protocol": protocol.name},
             )
             prefix = f"{protocol.value!s}://"
             self._session.mount(prefix, adapter)
@@ -243,39 +276,3 @@ class _RequestsSessionBuilder:
     def include_default_headers(self, headers: Headers) -> None:
         """Add default headers to session."""
         self._session.headers.update(headers)
-
-
-class _RequestsSessionFactory:
-    """Implements a factory for requests sessions."""
-
-    def __init__(self) -> None:
-        self.builder = _RequestsSessionBuilder()
-
-    def make_session(
-        self,
-        adapter: Optional[HTTPAdapter] = None,
-        auth: Optional[Authentication] = None,
-        headers: Optional[Headers] = None,
-    ) -> requests.Session:
-        """Make requests session.
-
-        Args:
-            adapter (optional): Instance of an HTTPAdapter.
-            auth (optional): Authentication or credentials.
-            headers (optional): Headers to set for all requests.
-
-        Returns:
-            Requests Session.
-
-        """
-        if adapter is not None:
-            self.builder.include_adapter(adapter)
-
-        if auth is not None:
-            self.builder.include_auth(auth)
-
-        if headers is not None:
-            self.builder.include_default_headers(headers)
-
-        result = self.builder.session
-        return result

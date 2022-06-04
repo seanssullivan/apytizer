@@ -48,11 +48,11 @@ def confirm_connection(func) -> Callable:
             response = func(self, *args, **kwargs)  # type: requests.Response
 
         except ConnectionError as error:
-            _handle_connection_error(error)
+            handle_connection_error(error)
             return error
 
         except Timeout as error:
-            _handle_timeout_error(error)
+            handle_timeout_error(error)
             return error
 
         else:
@@ -66,7 +66,7 @@ def confirm_connection(func) -> Callable:
     return wrapper
 
 
-def _handle_connection_error(error: ConnectionError) -> None:
+def handle_connection_error(error: ConnectionError) -> None:
     """Handle connection errors.
 
     Args:
@@ -77,7 +77,7 @@ def _handle_connection_error(error: ConnectionError) -> None:
     log.error(error)
 
 
-def _handle_timeout_error(error: Timeout) -> None:
+def handle_timeout_error(error: Timeout) -> None:
     """Handle timeout errors.
 
     Args:

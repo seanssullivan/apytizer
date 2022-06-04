@@ -8,18 +8,25 @@ This module defines the composite endpoint class implementation.
 
 # Standard Library Imports
 from __future__ import annotations
+import collections
 import functools
 import logging
-from typing import Any, Dict, Iterable, Iterator, MutableMapping, Optional, Set
+from typing import Any, Collection, Dict, MutableMapping, Optional
 
 # Local Imports
 from .. import abstracts
 from .base_endpoint import BaseEndpoint, DEFAULT_METHODS
 from ..http_methods import HTTPMethod
-from ..utils import iter_setattr
+from ..utils import errors
 
 __all__ = ["CompositeEndpoint"]
 
+
+# Define custom types.
+AllowedMethods = Collection[HTTPMethod]
+Cache = MutableMapping
+Headers = Dict[str, str]
+Parameters = Dict[str, Any]
 
 # Initialize logger.
 log = logging.getLogger(__name__)
@@ -41,17 +48,17 @@ class CompositeEndpoint(BaseEndpoint):
 
     """
 
-    _parent: CompositeEndpoint = None
+    _parent: Optional[abstracts.AbstractEndpoint] = None
 
     def __init__(
         self,
         api: abstracts.AbstractAPI,
         name: str,
         *,
-        methods: Optional[Iterable[HTTPMethod]] = DEFAULT_METHODS,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        cache: Optional[MutableMapping] = None,
+        methods: AllowedMethods = DEFAULT_METHODS,
+        headers: Optional[Headers] = None,
+        params: Optional[Parameters] = None,
+        cache: Optional[Cache] = None,
     ):
         super().__init__(
             api,
@@ -61,7 +68,8 @@ class CompositeEndpoint(BaseEndpoint):
             params=params,
             cache=cache,
         )
-        self.children = _Children(self)
+        self.children = _Children()
+        self.children.context = self
 
     @property
     def name(self) -> str:
@@ -69,16 +77,13 @@ class CompositeEndpoint(BaseEndpoint):
         return self._path
 
     @property
-    def parent(self) -> CompositeEndpoint:
+    def parent(self) -> Optional[abstracts.AbstractEndpoint]:
         """Parent endpoint."""
         return self._parent
 
     @parent.setter
-    def parent(self, parent: BaseEndpoint) -> None:
-        if not isinstance(parent, CompositeEndpoint):
-            message = f"expected an endpoint, got {type(parent)} instead"
-            raise TypeError(message)
-
+    def parent(self, parent: abstracts.AbstractEndpoint) -> None:
+        errors.raise_for_instance(parent, CompositeEndpoint)
         self._parent = parent
 
     @parent.deleter
@@ -96,10 +101,7 @@ class CompositeEndpoint(BaseEndpoint):
 
     @path.setter
     def path(self, path: str) -> None:
-        if not isinstance(path, str):
-            message = f"expected type str, got {type(path)} instead"
-            raise TypeError(message)
-
+        errors.raise_for_instance(path, str)
         self._path = path.strip("/")
 
     def __eq__(self, other: object) -> bool:
@@ -113,183 +115,73 @@ class CompositeEndpoint(BaseEndpoint):
         return hash(self.path)
 
     @functools.singledispatchmethod
-    def __add__(self, __endpoint: Any) -> CompositeEndpoint:
+    def __add__(self, __endpoint: Any) -> abstracts.AbstractEndpoint:
         """Adds a child endpoint."""
         raise NotImplementedError
 
     @functools.singledispatchmethod
-    def __getattr__(self, __endpoint: str) -> CompositeEndpoint:
+    def __getattr__(self, __endpoint: str) -> abstracts.AbstractEndpoint:
         """Gets a child endpoint."""
         raise NotImplementedError
 
     @functools.singledispatchmethod
-    def __getitem__(self, __endpoint: Any) -> CompositeEndpoint:
+    def __getitem__(self, __endpoint: Any) -> abstracts.AbstractEndpoint:
         """Gets a child endpoint."""
         raise NotImplementedError
 
     @functools.singledispatchmethod
-    def __truediv__(self, __endpoint: Any) -> CompositeEndpoint:
+    def __truediv__(self, __endpoint: Any) -> abstracts.AbstractEndpoint:
         """Adds a child endpoint."""
         raise NotImplementedError
 
     @__add__.register
     @__truediv__.register
-    def _(self, __endpoint: BaseEndpoint) -> BaseEndpoint:
-        self._add_child(__endpoint)
+    def _add_child_endpoint(
+        self, __endpoint: abstracts.AbstractEndpoint
+    ) -> abstracts.AbstractEndpoint:
+        key = __endpoint.path
+        self.children[key] = __endpoint
         return __endpoint
-
-    @__add__.register
-    @__getitem__.register
-    @__truediv__.register
-    def _(self, __endpoint: int) -> BaseEndpoint:
-        result = self._get_child(str(__endpoint))
-        return result
 
     @__add__.register
     @__getattr__.register
     @__getitem__.register
     @__truediv__.register
-    def _(self, __endpoint: str) -> BaseEndpoint:
-        result = self._get_child(__endpoint)
+    def _get_child_endpoint(
+        self, __endpoint: str
+    ) -> abstracts.AbstractEndpoint:
+        result = self.children[__endpoint]
         return result
 
-    def _get_child(self, name: str, /) -> CompositeEndpoint:
-        """Get child endpoint.
 
-        Args:
-            name: Name of endpoint.
-
-        Returns:
-            Child endpoint.
-
-        """
-        endpoint = self.children.get(name) or self._make_child(name)
-        return endpoint
-
-    def _make_child(self, name: str, /) -> CompositeEndpoint:
-        """Make a child endpoint.
-
-        Args:
-            name: Name of endpoint.
-
-        Returns:
-            Child endpoint.
-
-        """
-        endpoint = CompositeEndpoint(self.api, name)
-        self._add_child(endpoint)
-        return endpoint
-
-    def _add_child(self, endpoint: CompositeEndpoint, /) -> None:
-        """Add endpoint as child.
-
-        Args:
-            endpoint: Endpoint to add as a child.
-
-        """
-        self.children.add(endpoint)
-
-
-class _Children(abstracts.AbstractEndpointCollection):
-    """Collection class for child endpoints.
-
-    Args:
-        __parent: Parent endpoint.
-        endpoints (optional): Iterable object containing child endpoints.
-            Default `None`.
-
-    Raises:
-        TypeError: if parent argument is not an endpoint.
-
-    """
-
-    _endpoints: Set[CompositeEndpoint]
-
-    def __init__(
-        self,
-        __parent: CompositeEndpoint,
-        endpoints: Optional[Iterable[CompositeEndpoint]] = None,
-    ) -> None:
-        __endpoints = (
-            iter_setattr(endpoints, "parent", __parent)
-            if endpoints is not None
-            else None
-        )
-
-        self._endpoints = set(__endpoints or [])
-        self.context = __parent
+class _Children(collections.UserDict):
+    """Collection class for child endpoints."""
 
     @property
-    def context(self) -> CompositeEndpoint:
+    def context(self) -> abstracts.AbstractEndpoint:
+        """Endpoint on which childen exist.
+
+        Raises:
+            TypeError: If provided context is not an endpoint.
+
+        """
         return self._context
 
     @context.setter
-    def context(self, context: BaseEndpoint) -> None:
-        if not isinstance(context, CompositeEndpoint):
-            message = f"expected an endpoint, got {type(context)} instead"
-            raise TypeError(message)
-
+    def context(self, context: abstracts.AbstractEndpoint) -> None:
+        errors.raise_for_instance(context, BaseEndpoint)
         self._context = context
 
-    def __contains__(self, item: object) -> bool:
-        return (
-            item in self._endpoints
-            if isinstance(item, abstracts.AbstractEndpoint)
-            else False
-        )
-
-    def __getitem__(self, key: str) -> abstracts.AbstractEndpoint:
-        return self.get(key)
-
-    def __len__(self) -> int:
-        return len(self._endpoints)
-
-    def __iter__(self) -> Iterator:
-        return iter(self._endpoints)
-
-    def add(self, __child: CompositeEndpoint, /) -> None:
-        """Add child endpoint."""
-        __child.parent = self.context
-        self._endpoints.add(__child)
-
-    def clear(self) -> None:
-        """Clear child endpoints."""
-        self._endpoints.clear()
-
-    def discard(self, __child: CompositeEndpoint, /) -> None:
-        """Discard child endpoint."""
-        self._endpoints.discard(__child)
-        if __child.parent is self.context:
-            del __child.parent
-
-    def get(self, ref: str) -> Optional[CompositeEndpoint]:
-        """Get child endpoint."""
-        try:
-            result = next(
-                child for child in self._endpoints if child.name == ref
-            )
-        except StopIteration:
-            return None
-        else:
-            return result
-
-    def pop(self, ref: str, /) -> abstracts.AbstractEndpoint:
-        """Pop endpoint from children."""
-        endpoint = self.get(ref)
-        if endpoint is not None:
-            self.remove(endpoint)
-
+    def __missing__(self, key: str) -> abstracts.AbstractEndpoint:
+        endpoint = CompositeEndpoint(self.context.api, key)
+        self.data[key] = endpoint
         return endpoint
 
-    def remove(self, __child: CompositeEndpoint, /) -> None:
-        """Remove child endpoint."""
-        self._endpoints.remove(__child)
-        del __child.parent
+    def __setitem__(self, key: str, item: abstracts.AbstractEndpoint) -> None:
+        setattr(item, "parent", self.context)
+        self.data[key] = item
 
-    def update(self, *children: CompositeEndpoint) -> None:
-        """Update children."""
-        children = [
-            iter_setattr(endpoints, "parent", self.context)
-            for endpoints in children
-        ]
-        self._endpoints.update(*children)
+    def __delitem__(self, key: str) -> None:
+        if key in self.data:
+            delattr(self.data[key], "parent")
+            del self.data[key]

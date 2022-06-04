@@ -7,7 +7,7 @@ __all__ = ["allinstance"]
 
 
 def allinstance(
-    __objs: Iterable, __class_or_tuple: Union[Tuple[Type[Any], ...], type]
+    __objs: Iterable, __class_or_tuple: Union[Tuple[Type[Any], ...], type], /
 ) -> bool:
     """Whether all elements of an iterable are instances of provided type(s).
 

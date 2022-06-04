@@ -51,10 +51,6 @@ class BaseModel(abstracts.AbstractModel):
         return hash(self.reference)
 
     def __getattr__(self, name: str) -> Any:
-        if not isinstance(name, str):
-            message = "attribute name must be a string"
-            raise TypeError(message)
-
         attr = self.state.get(name)
         if not attr:
             cls = self.__class__.__name__
@@ -64,10 +60,6 @@ class BaseModel(abstracts.AbstractModel):
         return attr
 
     def __getitem__(self, key: str) -> Any:
-        if not isinstance(key, str):
-            message = "argument must be a string"
-            raise TypeError(message)
-
         value = self.state[key]
         return value
 
@@ -117,29 +109,14 @@ class _State(abstracts.AbstractState):
         )
 
     def __getitem__(self, key: str) -> Any:
-        if not isinstance(key, str):
-            raise TypeError(f"key must be str, not {type(key)}")
-
         result = utils.deep_get(self._state, key)
         return result
 
     def __setitem__(self, key: str, value: Any) -> None:
-        if not isinstance(key, str):
-            raise TypeError(f"key must be str, not {type(key)}")
-
         self._state = utils.deep_set(self._state, key, value)
 
     def __iter__(self) -> Generator:
         yield from self._state.items()
-
-    @property
-    def updates(self) -> Dict[str, Any]:
-        """Unsaved changes to state."""
-        return {
-            key: value
-            for key, value in self._state.maps[0].items()
-            if value != self._state.parents.get(key)
-        }
 
     def get(self, key: str) -> Any:
         """Get an item from state.

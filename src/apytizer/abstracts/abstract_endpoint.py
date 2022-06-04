@@ -9,19 +9,21 @@ a standard HTTP request method.
 """
 
 # Standard Library Imports
-from __future__ import annotations
 import abc
-from collections.abc import MutableSet, Set
-from typing import Iterable
 
 # Third-Party Imports
 from requests import Response
 
-__all__ = ["AbstractEndpoint", "AbstractEndpointCollection"]
+# Local Imports
+from .abstract_api import AbstractAPI
+
+__all__ = ["AbstractEndpoint"]
 
 
 class AbstractEndpoint(abc.ABC):
     """Represents an abstract endpoint."""
+
+    api: AbstractAPI
 
     @property
     @abc.abstractmethod
@@ -192,43 +194,4 @@ class AbstractEndpoint(abc.ABC):
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
 
         """
-        raise NotImplementedError
-
-
-class AbstractEndpointCollection(MutableSet):
-    """Represents an abstract collection of endpoints."""
-
-    @abc.abstractmethod
-    def add(self, __child: AbstractEndpoint) -> None:
-        """Add child endpoint."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def clear(self) -> None:
-        """Clear child endpoints."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def discard(self, __child: AbstractEndpoint) -> None:
-        """Discard child endpoint."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get(self, ref: str) -> AbstractEndpoint:
-        """Get child endpoint."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def pop(self, name: str) -> AbstractEndpoint:
-        """Pop child endpoint."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def remove(self, __child: AbstractEndpoint) -> None:
-        """Remove child endpoint."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def update(self, *children: Iterable[AbstractEndpoint]) -> None:
-        """Update children."""
         raise NotImplementedError

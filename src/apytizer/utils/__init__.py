@@ -4,4 +4,5 @@
 from .caches import *
 from .mappings import *
 from .objects import *
+from .strings import *
 from .typing import *

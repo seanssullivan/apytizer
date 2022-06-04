@@ -23,8 +23,6 @@ __all__ = ["AbstractAPI"]
 class AbstractAPI(abc.ABC):
     """Represents an abstract API."""
 
-    url: str
-
     def __eq__(self, other: object) -> bool:
         return (
             other.url == self.url and other.auth == self.auth

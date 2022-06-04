@@ -4,57 +4,75 @@
 # Standard Library Imports
 import functools
 import logging
-from typing import Callable
+from typing import Any, Callable, Dict, Generator
 
-__all__ = ["pagination"]
+__all__ = ["Pagination"]
 
+
+# Define custom types.
+State = Dict[str, Any]
+Response = Dict[str, Any]
 
 # Initialize logger.
 log = logging.getLogger(__name__)
 
 
-def pagination(func) -> Callable:
-    """Decorator for handling paginated results.
+class Pagination:
+    """Implements pagination for requests to an API endpoint.
 
     Args:
-        func: Decorated function.
-
-    Returns:
-        Function wrapper.
+        reducer (Callable): Function to update state from response.
+        callback (Callable): Function which returns 'True' when request is
+            complete, otherwise returns 'False'. Stop condition must depend
+            on either state or response.
 
     """
 
-    @functools.wraps(func)
-    def wrapper(*args, reducer: Callable, callback: Callable, **kwargs):
-        """Wrapper applied to decorated function.
+    def __init__(
+        self,
+        reducer: Callable[[State, Response], State],
+        callback: Callable[[State, Response], bool],
+    ) -> None:
+        self.reducer = reducer
+        self.callback = callback
+
+    def __call__(self, func: Callable) -> Callable[..., Generator]:
+        """Wrap function to handle paginated results.
 
         Args:
-            reducer (Callable): Function to update state with pagination metadata.
-            callback (Callable): Function which returns True once request is completed.
-                Stop condition must depend on state or pagination metadata.
-            *args: Positional arguments to pass to wrapped function.
-            **kwargs: Keyword arguments to pass to wrapped function.
+            func: Decorated function.
+
+        Returns:
+            Function wrapper.
 
         """
 
-        completed = False
-        state = {
-            "params": kwargs.pop("params", None),
-            "data": kwargs.pop("data", None),
-        }
+        @functools.wraps(func)
+        def __wrapper(*args, **kwargs) -> Generator[Any, None, None]:
+            """Wrapper applied to decorated function.
 
-        while not completed:
-            if state.get("params"):
-                kwargs.update({"params": state.get("params")})
+            Args:
+                *args: Positional arguments to pass to wrapped function.
+                **kwargs: Keyword arguments to pass to wrapped function.
 
-            if state.get("data"):
-                kwargs.update({"data": state.get("data")})
+            """
+            completed = False
+            state = {
+                "params": kwargs.pop("params", None),
+                "data": kwargs.pop("data", None),
+            }
 
-            response = func(*args, **kwargs)
-            yield response
+            while not completed:
+                if state.get("params"):
+                    kwargs.update({"params": state.get("params")})
 
-            state = reducer(state, response)
-            completed = callback(state, response)
+                if state.get("data"):
+                    kwargs.update({"data": state.get("data")})
 
-    functools.update_wrapper(wrapper, func)
-    return wrapper
+                response = func(*args, **kwargs)
+                yield response
+
+                state = self.reducer(state, response)
+                completed = self.callback(state, response)
+
+        return __wrapper

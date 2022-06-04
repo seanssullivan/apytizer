@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/methods.py
+# src/apytizer/http_methods.py
 
 # Standard Library Imports
 from enum import Enum

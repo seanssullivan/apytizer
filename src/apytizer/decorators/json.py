@@ -3,6 +3,7 @@
 
 # Standard Library Imports
 import functools
+from http import HTTPStatus
 import json
 import logging
 from typing import Callable, Dict, List, Union
@@ -45,21 +46,21 @@ def json_response(func: Callable) -> Callable:
 
         """
         response = func(*args, **kwargs)  # type: Response
-        if response.status_code == 204:  # No content
+        if response.status_code == HTTPStatus.NO_CONTENT:
             return response
 
         content_type = response.headers.get(CONTENT_TYPE)
         if not content_type or APPLICATION_JSON not in content_type:
             return response
 
-        result = _parse_json_response(response)
+        result = parse_json_response(response)
         return result
 
     functools.update_wrapper(wrapper, func)
     return wrapper
 
 
-def _parse_json_response(response: Response) -> Union[Dict, List, Response]:
+def parse_json_response(response: Response) -> Union[Dict, List, Response]:
     """Parse JSON response.
 
     Args:
@@ -71,14 +72,17 @@ def _parse_json_response(response: Response) -> Union[Dict, List, Response]:
     """
     try:
         log.debug("Parsing JSON response...")
-        return response.json()
+        result = response.json()
 
     except json.JSONDecodeError as error:
-        _handle_decode_error(error)
+        handle_decode_error(error)
         return response
 
+    else:
+        return result
 
-def _handle_decode_error(error: json.JSONDecodeError) -> None:
+
+def handle_decode_error(error: json.JSONDecodeError) -> None:
     """Handle decode errors.
 
     Args:

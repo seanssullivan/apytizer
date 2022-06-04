@@ -40,15 +40,7 @@ class AbstractState(abc.ABC):
 
     @abc.abstractmethod
     def get(self, key: str) -> Any:
-        """Abstract method for getting an item from state.
-
-        Args:
-            key: Key.
-
-        Returns:
-            Value of item.
-
-        """
+        """Abstract method for getting an item from state."""
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -58,13 +50,7 @@ class AbstractState(abc.ABC):
 
     @abc.abstractmethod
     def update(self, __m: Mapping = None, **kwargs) -> None:
-        """Abstract method for updating state.
-
-        Args:
-            __m: Mapping.
-            **kwargs: Keyword arguments.
-
-        """
+        """Abstract method for updating state."""
         raise NotImplementedError
 
     @abc.abstractmethod
