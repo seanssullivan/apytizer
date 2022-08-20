@@ -1,32 +1,51 @@
 # -*- coding: utf-8 -*-
 
-# Standard Library Imports
-from unittest import mock
+# Third-Party Imports
+import pytest
 
 # Local Imports
 from apytizer import utils
 
 
 def test_deep_get_returns_value():
-    obj = {"first": "Success"}
-    result = utils.deep_get(obj, "first")
-    assert result == "Success"
+    dict_ = {"first": "success"}
+    result = utils.deep_get(dict_, "first")
+    assert result == "success"
 
 
-def test_deep_get_returns_value_from_nested_object():
-    obj = {"first": {"second": "Success"}}
-    result = utils.deep_get(obj, "first.second")
-    assert result == "Success"
+def test_deep_get_returns_value_from_nested_dictionary():
+    dict_ = {"first": {"second": "success"}}
+    result = utils.deep_get(dict_, "first.second")
+    assert result == "success"
 
 
-def test_deep_set_returns_mapping():
+def test_deep_set_returns_dictionary():
     result = utils.deep_set({}, "key", "test")
     assert isinstance(result, dict)
 
 
-def test_deep_set_updates_nested_object():
-    result = utils.deep_set({}, "parent.child", "test")
-    assert result == {"parent": {"child": "test"}}
+def test_deep_set_updates_nested_dictionary():
+    dict_ = {"parent": {"child": {"name": "failure"}}}
+    result = utils.deep_set(dict_, "parent.child.name", "success")
+    assert result == {"parent": {"child": {"name": "success"}}}
+
+
+def test_deep_set_creates_nested_dictionaries():
+    result = utils.deep_set({}, "parent.child.name", "success")
+    assert result == {"parent": {"child": {"name": "success"}}}
+
+
+def test_deep_set_replaces_none_with_dictionary():
+    dict_ = {"parent": {"child": None}}
+    result = utils.deep_set(dict_, "parent.child.name", "success")
+    assert result == {"parent": {"child": {"name": "success"}}}
+
+
+@pytest.mark.parametrize("value", ["test", 1.0, [1, 2, 3]])
+def test_raises_key_error(value):
+    dict_ = {"parent": {"child": value}}
+    with pytest.raises(KeyError, match="parent.child"):
+        utils.deep_set(dict_, "parent.child.name", "success")
 
 
 def test_iter_get_returns_values():
@@ -45,10 +64,28 @@ def test_iter_get_returns_nested_values():
     assert results == [1, 2, 3]
 
 
-def test_iter_setattr_sets_values():
-    objs = [mock.Mock(), mock.Mock(), mock.Mock()]
-    results = utils.iter_setattr(objs, "test", "success")
-    assert all(result.test == "success" for result in results)
+def test_iter_set_updates_mappings():
+    data = [{"value": 1}, {"value": 2}, {"value": 3}]
+    results = utils.iter_set(data, "value", "success")
+    assert results == [
+        {"value": "success"},
+        {"value": "success"},
+        {"value": "success"},
+    ]
+
+
+def test_iter_set_updates_nested_mappings():
+    data = [
+        {"data": {"value": 1}},
+        {"data": {"value": 2}},
+        {"data": {"value": 3}},
+    ]
+    results = utils.iter_set(data, "data.value", "success")
+    assert results == [
+        {"data": {"value": "success"}},
+        {"data": {"value": "success"}},
+        {"data": {"value": "success"}},
+    ]
 
 
 def test_merge_combines_dictionaries():
@@ -59,26 +96,9 @@ def test_merge_combines_dictionaries():
 
 
 def test_merge_combines_multiple_dictionaries():
-    all_dicts = [
-        {"a": 0, "b": 1},
-        {"c": 2, "d": 3},
-        {"e": 4, "f": 5},
-        {"g": 6, "h": 7},
-        {"i": 8, "j": 9},
-    ]
+    all_dicts = [{"a": 0, "b": 1}, {"c": 2, "d": 3}, {"e": 4, "f": 5}]
     result = utils.merge(*all_dicts)
-    assert result == {
-        "a": 0,
-        "b": 1,
-        "c": 2,
-        "d": 3,
-        "e": 4,
-        "f": 5,
-        "g": 6,
-        "h": 7,
-        "i": 8,
-        "j": 9,
-    }
+    assert result == {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5}
 
 
 def test_merge_combines_nested_dictionaries():
@@ -128,6 +148,18 @@ def test_merge_returns_second_dictionary_if_first_is_none():
     second_dict = {"c": 3, "d": 4}
     result = utils.merge(first_dict, second_dict)
     assert result == {"c": 3, "d": 4}
+
+
+def test_omit_removes_key_value_pairs():
+    data = {"first": 1, "second": 2, "third": 3}
+    result = utils.omit(data, ["first", "second"])
+    assert result == {"third": 3}
+
+
+def test_pick_returns_key_value_pairs():
+    data = {"first": 1, "second": 2, "third": 3}
+    result = utils.pick(data, ["first", "second"])
+    assert result == {"first": 1, "second": 2}
 
 
 def test_remap_keys_returns_new_dictionary():
