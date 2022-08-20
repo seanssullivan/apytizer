@@ -43,7 +43,7 @@ class AbstractManager(abc.ABC):
     def add(self, obj: AbstractModel) -> None:
         """Abstract method for adding an object.
 
-        This method adds an object to the the local state of the manager.
+        This method adds an object to the local state of the manager.
 
         Args:
             obj: Instance of an abstract model subclass.

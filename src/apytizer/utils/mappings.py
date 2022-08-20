@@ -12,6 +12,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Union,
 )
 
 # Local Imports
@@ -21,6 +22,8 @@ __all__ = [
     "deep_get",
     "deep_set",
     "iter_get",
+    "iter_set",
+    "omit",
     "pick",
     "merge",
     "remap_keys",
@@ -29,7 +32,7 @@ __all__ = [
 
 
 def deep_get(__m: Mapping, /, keys: str, default: Any = None) -> Any:
-    """Get a value from a nested mapping object.
+    """Get value from nested mapping object.
 
     Args:
         __m: Mapping object.
@@ -45,10 +48,25 @@ def deep_get(__m: Mapping, /, keys: str, default: Any = None) -> Any:
     """
 
     def _get(data: Mapping, key: str) -> Any:
-        return data.get(key, default) if data else None
+        """Get value of key from mapping.
+
+        Args:
+            data: Mapping object.
+            key: Key for which to get value.
+
+        Returns:
+            Value.
+
+        """
+        try:
+            result = data.get(key, default)
+        except AttributeError:  # if data is `None`
+            return None
+        else:
+            return result
 
     if not isinstance(__m, Mapping):
-        message = f"must be an instance of a mapping, not {type(__m)}"
+        message = f"expected mapping, got {type(__m)} instead"
         raise TypeError(message)
 
     if not isinstance(keys, str):
@@ -60,14 +78,14 @@ def deep_get(__m: Mapping, /, keys: str, default: Any = None) -> Any:
 
 
 def deep_set(
-    __m: MutableMapping, /, keys: str, value: Any
+    __m: MutableMapping, /, keys: Union[List[str], str], value: Any
 ) -> MutableMapping[str, Any]:
-    """Sets a key to the provided value in a nested mapping object.
+    """Sets key to value in nested mapping object.
 
     Args:
         __m: Mapping object.
-        keys: String of keys seperated by periods.
-        value: Value to which to set the key.
+        keys: Either list of keys, or string of keys seperated by periods.
+        value: Value to set for key.
 
     Returns:
         Updated mapping object.
@@ -77,27 +95,25 @@ def deep_set(
 
     """
     if not isinstance(__m, Mapping):
-        message = f"must be an instance of a mapping, not {type(__m)}"
+        message = f"expected mapping, got {type(__m)} instead"
         raise TypeError(message)
 
-    __keys = keys.split(".")
-    __key = __keys[0]
+    if isinstance(keys, str):
+        keys = keys.split(".")
 
-    if len(__keys) == 1:
-        __m[__key] = value
-
-    elif len(__keys) > 1:
-        __m.setdefault(__key, {})
-
-        if __m.get(__key) is None:
-            __m[__key] = {}
-
-        __m[__key] = deep_set(__m[__key], ".".join(__keys[1:]), value)
-
+    try:
+        key, remaining = keys[0], keys[1:]
+        __m[key] = (
+            deep_set(__m.get(key) or {}, remaining, value)
+            if len(remaining) >= 1
+            else value
+        )
+    except KeyError as error:
+        raise KeyError(f"{key}.{error.args[0]}") from error
+    except (IndexError, TypeError) as error:
+        raise KeyError(keys[0]) from error
     else:
-        raise KeyError(keys)
-
-    return __m
+        return __m
 
 
 def iter_get(__iter: Iterable[Dict[str, Any]], /, key: str) -> List[Any]:
@@ -116,9 +132,37 @@ def iter_get(__iter: Iterable[Dict[str, Any]], /, key: str) -> List[Any]:
         raise TypeError("must be an iterable object")
 
     if not allinstance(__iter, Mapping):
-        raise ValueError("all items within iterator must be mappings")
+        raise ValueError("iterable object must contain mappings")
 
     results = [deep_get(item, key) for item in __iter]
+    return results
+
+
+def iter_set(
+    __iter: Iterable[Dict[str, Any]], /, key: str, value: Any
+) -> List[Dict[str, Any]]:
+    """Set value of key on each mapping in an iterable object.
+
+    Args:
+        __iter: Iterable object containing mappings.
+        key: Key for which to set value.
+        value: Value to set.
+
+    Returns:
+        List of updated mapping objects.
+
+    Raises:
+        TypeError: when argument is not an iterable object.
+        ValueError: when not all items are mappings.
+
+    """
+    if not isinstance(__iter, Iterable):
+        raise TypeError("must be an iterable object")
+
+    if not allinstance(__iter, Mapping):
+        raise ValueError("iterable object must contain mappings")
+
+    results = [deep_set(item, key, value) for item in __iter]
     return results
 
 
@@ -142,15 +186,19 @@ def merge(
     if not allinstance(args, (Mapping, type(None))):
         raise TypeError("all arguments must be instances of mappings")
 
-    def _merge(
-        a: MutableMapping, b: Mapping, path=None, overwrite=False
-    ) -> MutableMapping:
-        """Merge two mappings.
+    def _merge_dictionaries(
+        first: dict,
+        second: dict,
+        /,
+        path: Optional[List[str]] = None,
+        overwrite: bool = False,
+    ) -> dict:
+        """Merge two dictionaries.
 
         Args:
-            a: First mapping.
-            b: Second mapping.
-            path: Path of keys in nested mapping.
+            first: First dictionary.
+            second: Second dictionary.
+            path: Path of keys in nested dictionary.
             overwrite (optional): Overwrite existing keys. Default `False`.
 
         Raises:
@@ -162,40 +210,44 @@ def merge(
         """
         __path = [] if path is None else path
 
-        for key in b:
-            if key in a:
-                if isinstance(a[key], dict) and isinstance(b[key], dict):
-                    a[key] = _merge(
-                        a[key],
-                        b[key],
-                        path=__path + [str(key)],
+        for key in second:
+            if key in first:
+                if allinstance((first[key], second[key]), dict):
+                    first[key] = _merge_dictionaries(
+                        first[key],
+                        second[key],
+                        path=[*__path, str(key)],
                         overwrite=overwrite,
                     )
 
-                elif isinstance(a[key], list) and isinstance(b[key], list):
-                    a[key] = [*a[key], *b[key]]
+                elif allinstance((first[key], second[key]), list):
+                    first[key] = _merge_lists(first[key], second[key])
 
-                elif isinstance(a[key], set) and isinstance(b[key], set):
-                    a[key] = a[key].union(b[key])
+                elif allinstance((first[key], second[key]), set):
+                    first[key] = _merge_sets(first[key], second[key])
 
-                elif overwrite:
-                    a[key] = b[key]
+                elif overwrite is True:
+                    first[key] = second[key]
 
                 else:
-                    msg = "Conflict at {path}".format(
-                        path=".".join(k for k in [*__path, key] if k)
-                    )
-                    raise ValueError(msg)
+                    path = ".".join(k for k in [*__path, key] if k)
+                    message = "Conflict at {path}".format(path=path)
+                    raise ValueError(message)
 
             else:
-                a[key] = b[key]
+                first[key] = second[key]
 
-        return a
+        return first
 
+    def _merge_lists(first: list, second: list) -> list:
+        return [*first, *second]
+
+    def _merge_sets(first: set, second: set) -> set:
+        return first.union(second)
+
+    func = functools.partial(_merge_dictionaries, overwrite=overwrite)
     result = functools.reduce(
-        lambda acc, cur: _merge(acc, cur, overwrite=overwrite) if cur else acc,
-        args,
-        {},
+        lambda acc, cur: func(acc, cur) if cur else acc, args, {}
     )  # type: MutableMapping
     return result if result else None
 
@@ -215,7 +267,8 @@ def omit(__m: Mapping, /, keys: Collection[str]) -> Dict[str, Any]:
 
     """
     if not isinstance(__m, Mapping):
-        raise TypeError("must be an instance of a mapping")
+        message = f"expected mapping, got {type(__m)} instead"
+        raise TypeError(message)
 
     # TODO: Add support for omitting key-value pairs from nested mappings.
     results = {key: __m[key] for key in __m if key not in keys}
@@ -237,7 +290,8 @@ def pick(__m: Mapping, /, keys: Collection[str]) -> Dict[str, Any]:
 
     """
     if not isinstance(__m, Mapping):
-        raise TypeError("must be an instance of a mapping")
+        message = f"expected mapping, got {type(__m)} instead"
+        raise TypeError(message)
 
     def _last(key: str) -> str:
         return key.split(".")[-1]
@@ -265,7 +319,8 @@ def remap_keys(
 
     """
     if not isinstance(__m, Mapping):
-        raise TypeError("must be an instance of a mapping")
+        message = f"expected mapping, got {type(__m)} instead"
+        raise TypeError(message)
 
     result = {
         key_map.get(key, key): value
@@ -292,7 +347,8 @@ def remove_null(
 
     """
     if not isinstance(__m, Mapping):
-        raise TypeError("must be an instance of a mapping")
+        message = f"expected mapping, got {type(__m)} instead"
+        raise TypeError(message)
 
     __nulls = null_values or []
 

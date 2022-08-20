@@ -34,13 +34,13 @@ __all__ = ["SessionAPI"]
 # Initialize logger.
 log = logging.getLogger(__name__)
 
-# Define custom types.
+# Custom types:
 Authentication = Union[AuthBase, Tuple[str, str]]
 Cache = MutableMapping
 Headers = Dict[str, str]
 Parameters = Dict[str, Any]
 
-# Define constants.
+# Constants:
 DEFAULT_PROTOCOLS = (Protocol.HTTP, Protocol.HTTPS)
 
 
@@ -110,10 +110,13 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         errors.raise_for_instance(value, (HTTPAdapter, type(None)))
         self._adapter = value
 
-    def start(self) -> None:
-        """Starts the session."""
-        log.debug("Starting API session...")
+    @adapter.deleter
+    def adapter(self) -> None:
+        self._adapter = None
 
+    def start(self) -> None:
+        """Starts session."""
+        log.debug("Starting API session...")
         factory = _RequestsSessionFactory()
         self.session = factory.make_session(
             self.adapter,
@@ -122,10 +125,9 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         )
 
     def close(self, *args) -> None:
-        """Destroys the session."""
-        log.debug("Closing API session...")
-
+        """Destroys session."""
         if self.session is not None:
+            log.debug("Closing API session...")
             self.session.close()
             self.session = None
 
@@ -138,7 +140,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
         params: Optional[Parameters] = None,
         **kwargs,
     ) -> requests.Response:
-        """Sends an HTTP request.
+        """Sends HTTP request.
 
         Args:
             method: HTTP request method to use.
@@ -194,7 +196,7 @@ class SessionAPI(abstracts.AbstractSession, BaseAPI):
 
 
 class _RequestsSessionFactory:
-    """Implements a factory for requests sessions."""
+    """Implements factory for requests sessions."""
 
     def __init__(self) -> None:
         self.builder = _RequestsSessionBuilder()
@@ -230,7 +232,7 @@ class _RequestsSessionFactory:
 
 
 class _RequestsSessionBuilder:
-    """Implements a builder for requests sessions."""
+    """Implements builder for requests sessions."""
 
     _session: requests.Session
 

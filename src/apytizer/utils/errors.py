@@ -7,6 +7,8 @@ from typing import Collection, Type, Union
 # Local Imports
 from .. import utils
 
+__all__ = ["raise_for_attribute", "raise_for_instance"]
+
 
 def raise_for_attribute(__obj: object, __attr: str, /) -> None:
     """Raise error if object does not contain expected attribute.

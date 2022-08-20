@@ -11,7 +11,7 @@ from typing import Callable
 from cachetools import cachedmethod
 
 # Local Imports
-from ..utils import generate_key
+from ..utils.caches import generate_key
 
 __all__ = ["cache_response"]
 

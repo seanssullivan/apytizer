@@ -17,6 +17,9 @@ from requests import PreparedRequest
 from requests import Response
 from requests.adapters import HTTPAdapter
 
+# Local Import
+from ..http_methods import HTTPMethod
+
 __all__ = ["TransportAdapter"]
 
 
@@ -76,16 +79,7 @@ def make_retry(rate_limit: int) -> Retry:
             HTTPStatus.SERVICE_UNAVAILABLE,
             HTTPStatus.GATEWAY_TIMEOUT,
         ],
-        allowed_methods=[
-            "HEAD",
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE",
-            "OPTIONS",
-            "TRACE",
-        ],
+        allowed_methods=[method.name for method in HTTPMethod],
         backoff_factor=rate_limit,
     )
     return result
