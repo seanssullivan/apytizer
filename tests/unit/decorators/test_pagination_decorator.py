@@ -1,59 +1,109 @@
 # -*- coding: utf-8 -*-
 
-# pylint: disable=protected-access
+# pylint: disable=redefined-outer-name
 
 # Standard Library Imports
+from typing import Callable
 from unittest.mock import Mock
 
+# Third-Party Imports
+import pytest
+
 # Local Imports
-from apytizer.decorators import Pagination
+try:
+    from apytizer.decorators import pagination
+    from apytizer import utils
+except ImportError:
+    from src.apytizer.decorators import pagination
+    from src.apytizer import utils
 
 
-def test_pagination_repeats_request():
-    request = Mock()
-    request.return_value = {"results": 1, "total": 2}
+@pytest.fixture
+def callback() -> Callable[[dict, dict], bool]:
+    """Callback fixture."""
 
-    reducer = lambda state, res: {
-        **state,
-        "results": (
-            state.get("results") + res.get("results")
-            if state.get("results")
-            else res.get("results")
-        ),
-        "total": res.get("total"),
-    }
-    callback = lambda state, res: state.get("results") >= res.get("total")
+    def _callback(state: dict, resp: dict) -> bool:
+        """Callback function.
 
-    decorator = Pagination(reducer=reducer, callback=callback)
+        Args:
+            state: State.
+            resp: Response.
+
+        Returns:
+            Whether pagination is complete.
+
+        """
+        results = state.get("results", 0)  # type: int
+        total = resp.get("total", 0)  # type: int
+        return results >= total
+
+    return _callback
+
+
+@pytest.fixture
+def reducer() -> Callable[[dict, dict], dict]:
+    """Reducer fixture."""
+
+    def _reducer(state: dict, resp: dict) -> bool:
+        """Reducer function.
+
+        Args:
+            state: State.
+            resp: Response.
+
+        Returns:
+            State.
+
+        """
+        kwargs = state.get("kwargs")  # type: dict
+        results = get_results(state, resp)
+        total = get_total(state, resp)
+
+        received_results = resp.get("results", 0)
+        result = {**state, "results": results, "total": total}
+        if "data" in kwargs and "startAt" in kwargs["data"]:
+            result["kwargs"] = {
+                "data": {
+                    "startAt": utils.deep_get(state, "kwargs.data.startAt", 0)
+                    + received_results
+                }
+            }
+
+        if "params" in kwargs and "startAt" in kwargs["params"]:
+            result["kwargs"] = {
+                "params": {
+                    "startAt": utils.deep_get(
+                        state, "kwargs.params.startAt", 0
+                    )
+                    + received_results
+                }
+            }
+        return result
+
+    return _reducer
+
+
+def test_pagination_repeats_request(
+    callback: Callable[[dict, dict], bool],
+    reducer: Callable[[dict, dict], dict],
+) -> None:
+    request = create_mock_request(response={"results": 1, "total": 2})
+    decorator = pagination(reducer=reducer, callback=callback)
+
     wrapper = decorator(request)
     results = [response for response in wrapper()]
+
     assert request.called == True
     assert len(results) == 2
 
 
-def test_pagination_updates_parameters():
-    request = Mock()
-    request.return_value = {"results": 1, "total": 2}
+def test_pagination_updates_parameters(
+    callback: Callable[[dict, dict], bool],
+    reducer: Callable[[dict, dict], dict],
+) -> None:
+    request = create_mock_request(response={"results": 1, "total": 2})
+    decorator = pagination(reducer=reducer, callback=callback)
 
-    reducer = lambda state, res: {
-        **state,
-        "results": (
-            state.get("results") + res.get("results")
-            if state.get("results")
-            else res.get("results")
-        ),
-        "total": res.get("total"),
-        "params": {
-            "startAt": (
-                state.get("params", {}).get("startAt") + res.get("results")
-                if state.get("params", {}).get("startAt")
-                else res.get("results")
-            )
-        },
-    }
-    callback = lambda state, res: state.get("results") >= res.get("total")
-
-    decorator = Pagination(reducer=reducer, callback=callback)
     wrapper = decorator(request)
     results = wrapper(params={"startAt": 0})
 
@@ -64,29 +114,13 @@ def test_pagination_updates_parameters():
     request.assert_called_with(params={"startAt": 1})
 
 
-def test_pagination_updates_data():
-    request = Mock()
-    request.return_value = {"results": 1, "total": 2}
+def test_pagination_updates_data(
+    callback: Callable[[dict, dict], bool],
+    reducer: Callable[[dict, dict], dict],
+) -> None:
+    request = create_mock_request(response={"results": 1, "total": 2})
+    decorator = pagination(reducer=reducer, callback=callback)
 
-    reducer = lambda state, res: {
-        **state,
-        "results": (
-            state.get("results") + res.get("results")
-            if state.get("results")
-            else res.get("results")
-        ),
-        "total": res.get("total"),
-        "data": {
-            "startAt": (
-                state.get("data", {}).get("startAt") + res.get("results")
-                if state.get("data", {}).get("startAt")
-                else res.get("results")
-            )
-        },
-    }
-    callback = lambda state, res: state.get("results") >= res.get("total")
-
-    decorator = Pagination(reducer=reducer, callback=callback)
     wrapper = decorator(request)
     results = wrapper(data={"startAt": 0})
 
@@ -95,3 +129,44 @@ def test_pagination_updates_data():
 
     next(results)
     request.assert_called_with(data={"startAt": 1})
+
+
+# ----------------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------------
+def create_mock_request(*, response: object) -> Mock:
+    mock_request = Mock()
+    mock_request.return_value = response
+    return mock_request
+
+
+def get_results(state: dict, resp: dict) -> int:
+    """Get number of results from state and response.
+
+    Args:
+        state: State.
+        resp: Response.
+
+    Returns:
+        Number of results.
+
+    """
+    from_state = state.get("results", 0)  # type: int
+    from_resp = resp.get("results", 0)  # type: int
+    result = from_state + from_resp if from_state else from_resp
+    return result
+
+
+def get_total(_, res: dict) -> int:
+    """Get total from state and response.
+
+    Args:
+        _: State.
+        res: Response.
+
+    Returns:
+        Total.
+
+    """
+    result = res.get("total", 0)  # type: int
+    return result

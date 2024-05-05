@@ -2,5 +2,5 @@
 # src/apytizer/endpoints/__init__.py
 
 # Local Imports
+from .abstract_endpoint import *
 from .base_endpoint import *
-from .composite_endpoint import *

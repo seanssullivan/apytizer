@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/abstracts/abstract_model.py
+# src/apytizer/models/abstract_model.py
 """Abstract model class interface.
 
 This module defines an abstract model class which provides an interface
@@ -10,25 +10,24 @@ for subclasses to implement.
 # Standard Library Imports
 from __future__ import annotations
 import abc
-from typing import Mapping, Union
+from typing import Mapping
+from typing import TYPE_CHECKING
 
 # Local Imports
-from .abstract_state import AbstractState
+if TYPE_CHECKING:
+    from ..managers import AbstractManager
 
 __all__ = ["AbstractModel"]
 
 
 class AbstractModel(abc.ABC):
-    """Represents an abstract model.
+    """Represents an abstract model."""
 
-    Attributes:
-        reference: Unique reference to model.
-        state: Local state of model.
-
-    """
-
-    reference: Union[int, str]
-    state: AbstractState
+    @property
+    @abc.abstractmethod
+    def manager(self) -> AbstractManager:
+        """Manager for model."""
+        raise NotImplementedError
 
     @abc.abstractmethod
     def __eq__(self, other: object) -> bool:

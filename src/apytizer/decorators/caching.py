@@ -3,24 +3,24 @@
 
 # Standard Library Imports
 import functools
-import logging
 import operator
 from typing import Callable
+from typing import TypeVar
 
 # Third-Party Imports
 from cachetools import cachedmethod
 
 # Local Imports
-from ..utils.caches import generate_key
+from ..utils.caching import generate_key
 
 __all__ = ["cache_response"]
 
 
-# Initialize logger.
-log = logging.getLogger(__name__)
+# Custom types
+T = TypeVar("T")
 
 
-def cache_response(func: Callable) -> Callable:
+def cache_response(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator function for handling caching.
 
     Args:
@@ -30,14 +30,13 @@ def cache_response(func: Callable) -> Callable:
         Wrapped function.
 
     """
-
     cached_func = cachedmethod(
         operator.attrgetter("cache"),
         key=generate_key(func.__name__.upper()),
     )(func)
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> T:
         """Wrapper applied to decorated function."""
         return cached_func(*args, **kwargs)
 

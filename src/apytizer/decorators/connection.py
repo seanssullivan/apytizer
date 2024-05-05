@@ -15,11 +15,12 @@ from requests.exceptions import Timeout
 __all__ = ["confirm_connection"]
 
 
-# Initialize logger.
-log = logging.getLogger(__name__)
+log = logging.getLogger("apytizer")
 
 
-def confirm_connection(func) -> Callable:
+def confirm_connection(
+    func: Callable[..., requests.Response],
+) -> Callable[..., Union[requests.Response, RequestException]]:
     """Confirms successful connection to API.
 
     Args:
@@ -56,10 +57,6 @@ def confirm_connection(func) -> Callable:
             return error
 
         else:
-            log.debug(
-                "Response received with status code %s",
-                response.status_code,
-            )
             return response
 
     functools.update_wrapper(wrapper, func)
@@ -73,7 +70,7 @@ def handle_connection_error(error: ConnectionError) -> None:
         error: Connection error.
 
     """
-    log.critical("Failed to establish a connection")
+    log.critical("failed to establish a connection")
     log.error(error)
 
 

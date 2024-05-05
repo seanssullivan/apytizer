@@ -1,155 +1,121 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/apis/base_api.py
-"""Base API class.
+# src/apytizer/connection/base_connection.py
+"""Base connection class.
 
-This module defines the base API class implementation.
+This module defines the base connection class implementation.
 
 """
 
 # Standard Library Imports
 import logging
-from typing import Any, Dict, MutableMapping, Optional, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+from typing import Union
+from typing import final
+from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
 # Third-Party Imports
 import requests
-from requests.auth import AuthBase
 
 # Local Imports
-from .. import abstracts
-from ..decorators import cache_response
+from .abstract_connection import AbstractConnection
 from ..decorators import confirm_connection
 from ..http_methods import HTTPMethod
-from ..utils import errors, merge
+from ..sessions import sessionmaker
+from .. import utils
 
-__all__ = ["BaseAPI"]
+if TYPE_CHECKING:
+    from ..engines import BaseEngine
 
-
-# Initialize logger.
-log = logging.getLogger(__name__)
-
-# Define custom types.
-Authentication = Union[AuthBase, Tuple[str, str]]
-Cache = MutableMapping
-Headers = Dict[str, str]
-Parameters = Dict[str, Any]
+__all__ = ["Connection", "DEFAULT_PATH"]
 
 
-class BaseAPI(abstracts.AbstractAPI):
-    """Base class from which all API implementations are derived.
+log = logging.getLogger("apytizer")
 
-    The BaseAPI class provides an interface for interacting with an API.
+# Constants:
+DEFAULT_PATH = "/"
+DEFAULT_SESSION_FACTORY = sessionmaker()
+
+
+class Connection(AbstractConnection):
+    """Implements a connection.
+
+    The connection class provides an interface for interacting with an API.
     It implements the standard HTTP methods (HEAD, GET, POST, PUT, PATCH,
     DELETE, OPTIONS and TRACE) as well as a `request` method for sending
     custom HTTP requests.
 
     Args:
-        url: Base URL for API.
-        auth (optional): Authorization or credentials.
-        headers (optional): Headers to set globally for API.
-        params (optional): Parameters to set globally for API.
-        cache (optional): Mutable mapping for caching responses.
+        engine: Engine.
+        session_factory (optional): Function for creating sessions.
 
     """
 
     def __init__(
         self,
-        url: str,
-        auth: Optional[Authentication] = None,
+        engine: "BaseEngine",
         *,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
-        cache: Optional[Cache] = None,
-    ):
-        self.url = url
-        self.auth = auth
-        self.headers = headers or {}
-        self.params = params or {}
-        self.cache = cache
+        session_factory: sessionmaker = DEFAULT_SESSION_FACTORY,
+    ) -> None:
+        self._engine = engine
+        self._session_factory = session_factory
+
+    @final
+    def __enter__(self) -> AbstractConnection:
+        """Starts connection as context manager."""
+        self.start()
+        return self
+
+    @final
+    def __exit__(self, *_) -> None:
+        """Ends connection as context manager."""
+        self.close()
+
+    def start(self) -> None:
+        """Start connection."""
+        self.session = self._session_factory(self._engine)
+        self.session.start()
+
+    def close(self) -> None:
+        """Close connection."""
+        if getattr(self, "session", None) is not None:
+            self.session.close()
 
     @property
-    def auth(self) -> Optional[Authentication]:
-        """Authentication for API requests.
+    def headers(self) -> Optional[Dict[str, str]]:
+        """Connection headers."""
+        return getattr(self._engine, "headers", None)
 
-        Raises:
-            TypeError: when set to a value other than an AuthBase or tuple.
+    @property
+    def params(self) -> Optional[Dict[str, Any]]:
+        """Connection parameters."""
+        return getattr(self._engine, "params", None)
 
-        """
-        return self._auth
-
-    @auth.setter
-    def auth(self, value: Optional[Authentication]) -> None:
-        errors.raise_for_instance(value, (AuthBase, tuple, type(None)))
-        self._auth = value
+    @property
+    def timeout(self) -> Optional[Union[float, Tuple[float, float]]]:
+        """Connection timeout."""
+        return getattr(self._engine, "timeout", None)
 
     @property
     def url(self) -> str:
-        """URL of API."""
-        return self._url
+        """Connection URL."""
+        return getattr(self._engine, "url")
 
-    @url.setter
-    def url(self, url: str) -> None:
-        errors.raise_for_instance(url, str)
-        self._url = url + "/" if not url.endswith("/") else url
-
-    @confirm_connection
-    def request(
-        self,
-        method: HTTPMethod,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
-        **kwargs,
-    ) -> requests.Response:
-        """Sends an HTTP request.
-
-        Args:
-            method: HTTP request method to use.
-            route: API path to which the request will be sent.
-            headers (optional): Request headers (overrides global headers).
-            params (optional): Request parameters (overrides global parameters).
-            **kwargs: Additional arguments to pass to request.
-
-        Returns:
-            Response object.
-
-        .. _Requests Documentation:
-            https://docs.python-requests.org/en/latest/api/
-
-        """
-        uri = urljoin(self.url, route)
-        log.debug(
-            "Sending HTTP %(method)s request to %(uri)s",
-            {"method": method.name, "uri": uri},
-        )
-
-        response = requests.request(
-            method.name,
-            uri,
-            auth=self.auth,
-            headers=merge(self.headers, headers, overwrite=True),
-            params=merge(self.params, params, overwrite=True),
-            **kwargs,
-        )
-
-        log.debug(
-            "Received response with status code %(status)s",
-            {"status": response.status_code},
-        )
-        return response
-
-    @cache_response
     def head(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP HEAD request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -170,18 +136,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def get(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP GET request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -202,18 +168,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def post(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP POST request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -234,18 +200,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def put(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP PUT request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -266,18 +232,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def patch(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP PATCH request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -298,18 +264,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def delete(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP DELETE request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -330,18 +296,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def options(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP OPTIONS request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -362,18 +328,18 @@ class BaseAPI(abstracts.AbstractAPI):
         )
         return response
 
-    @cache_response
     def trace(
         self,
-        route: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Parameters] = None,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> requests.Response:
         """Sends an HTTP TRACE request.
 
         Args:
-            route: API path to which the request will be sent.
+            route (optional): Route to which to send request. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -391,5 +357,63 @@ class BaseAPI(abstracts.AbstractAPI):
             headers=headers,
             params=params,
             **kwargs,
+        )
+        return response
+
+    def request(
+        self,
+        method: HTTPMethod,
+        /,
+        route: str = DEFAULT_PATH,
+        *,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> requests.Response:
+        """Sends an HTTP request.
+
+        Args:
+            method: HTTP request method to use.
+            route (optional): Route to which to send request. Default ``/``.
+            headers (optional): Request headers (overrides global headers).
+            params (optional): Request parameters (overrides global parameters).
+            **kwargs: Additional arguments to pass to request.
+
+        Returns:
+            Response object.
+
+        .. _Requests Documentation:
+            https://docs.python-requests.org/en/latest/api/
+
+        """
+        request = requests.Request(
+            method.name,
+            urljoin(self.url, route),
+            headers=utils.merge(self.headers, headers),
+            params=utils.merge(self.params, params),
+            **kwargs,
+        )
+        response = self.send(request)  # type: requests.Response
+        return response
+
+    @confirm_connection
+    def send(self, request: requests.Request) -> requests.Response:
+        """Sends an HTTP request to an API session.
+
+        Args:
+            request: Request to send with session.
+
+        Returns:
+            Response object.
+
+        """
+        log.debug(
+            "Sending HTTP %(method)s request to %(url)s",
+            {"method": request.method, "url": request.url},
+        )
+        response = self.session.send(request, timeout=self.timeout)
+        log.debug(
+            "Received response with status code %(status)s",
+            {"status": response.status_code},
         )
         return response

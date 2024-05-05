@@ -23,7 +23,7 @@ from ..http_methods import HTTPMethod
 __all__ = ["TransportAdapter"]
 
 
-# Constants
+# Constants:
 DEFAULT_RATE_LIMIT = 1
 DEFAULT_TIMEOUT = 5
 NUMBER_OF_RETRIES = 10
@@ -49,7 +49,7 @@ class TransportAdapter(HTTPAdapter):
         rate_limit: int = DEFAULT_RATE_LIMIT,
         timeout: int = DEFAULT_TIMEOUT,
         **kwargs,
-    ):
+    ) -> None:
         kwargs.setdefault("max_retries", make_retry(rate_limit))
         super().__init__(*args, **kwargs)
         self.timeout = timeout

@@ -9,6 +9,7 @@ import pytest
 
 @pytest.fixture
 def mock_request():
-    mock_patcher = patch("apytizer.apis.base_api.requests.request")
+    import_path = "apytizer.connections.base_connection.requests.request"
+    mock_patcher = patch(import_path)
     yield mock_patcher.start()
     mock_patcher.stop()

@@ -2,9 +2,10 @@
 # src/apytizer/utils/iterables.py
 
 # Standard Library Imports
-import functools
-import math
-from typing import Any, Iterable, List
+from typing import Any
+from typing import Iterable
+from typing import List
+from typing import SupportsIndex
 
 # Local Imports
 from .typing import allinstance
@@ -13,14 +14,14 @@ __all__ = ["deep_append", "deep_extend", "split_list"]
 
 
 def deep_append(
-    __obj: Iterable[list], /, index: int, value: Any
-) -> List[List[Any]]:
-    """Appends value to list within nested iterable object.
+    __obj: List[list], __index: SupportsIndex, __item: Any, /
+) -> List[list]:
+    """Appends value to a list within an iterable object.
 
     Args:
         __obj: Iterable object.
-        index: Index at which to nested list.
-        value: Value to append to nested list.
+        __index: Index at which to append item.
+        __item: Item to append to nested list.
 
     Returns:
         Updated iterable object.
@@ -29,27 +30,27 @@ def deep_append(
         TypeError: when argument does not support indexing.
 
     """
-    if not isinstance(__obj, Iterable):
-        message = f"'{type(__obj)}' object is not iterable"
+    if not isinstance(__obj, list):
+        message = f"expected type 'list', got {type(__obj)} instead"
         raise TypeError(message)
 
     if not allinstance(__obj, list):
-        raise ValueError("iterable object must only contain lists")
+        raise ValueError("must contain only lists")
 
-    __lst = __obj[index]  # type: list
-    __lst.append(value)
+    target = __obj[__index]  # type: list
+    target.append(__item)
     return __obj
 
 
 def deep_extend(
-    __obj: Iterable[list], /, index: int, values: List[Any]
-) -> List[List[Any]]:
+    __obj: List[list], __index: SupportsIndex, __items: list, /
+) -> List[list]:
     """Extends list within nested iterable object with provided values.
 
     Args:
         __obj: Iterable object.
-        index: Index at which to nested list.
-        values: Values with which to extend nested list.
+        __index: Index at which to extend list.
+        __items: Items with which to extend nested list.
 
     Returns:
         Updated iterable object.
@@ -58,15 +59,15 @@ def deep_extend(
         TypeError: when argument does not support indexing.
 
     """
-    if not isinstance(__obj, Iterable):
-        message = f"'{type(__obj)}' object is not iterable"
+    if not isinstance(__obj, list):
+        message = f"expected type 'list', got {type(__obj)} instead"
         raise TypeError(message)
 
     if not allinstance(__obj, list):
-        raise ValueError("iterable object must only contain lists")
+        raise ValueError("iterable object must contain only lists")
 
-    __lst = __obj[index]  # type: list
-    __lst.extend(values)
+    target = __obj[__index]  # type: List[Any]
+    target.extend(__items)
     return __obj
 
 
@@ -74,20 +75,15 @@ def split_list(__lst: List[Any], /, size: int) -> List[List[Any]]:
     """Split list into multiple groups of the same size.
 
     Args:
-        __lst: List to split.
+        __lst: List to split into groups.
         size: Maximum size of each group.
 
     Returns:
         Groups.
 
+    .. _Based On:
+        https://stackoverflow.com/questions/2231663/slicing-a-list-into-a-list-of-sub-lists
+
     """
-    num_groups = math.ceil(len(__lst) / size)
-    results = functools.reduce(
-        lambda acc, val: deep_append(acc, -1, val)
-        if len(acc[-1]) < size
-        else deep_append([*acc, []], -1, val),
-        __lst,
-        [[]],
-    )
-    assert len(results) == num_groups
+    results = [__lst[i : i + size] for i in range(0, len(__lst), size)]
     return results

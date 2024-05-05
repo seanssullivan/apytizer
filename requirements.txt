@@ -1,8 +1,2 @@
-cachetools
-coverage
-mypy
-pytest
-requests
-sphinx
-tox
-wheel
+# Requirements
+-r requirements/development.txt

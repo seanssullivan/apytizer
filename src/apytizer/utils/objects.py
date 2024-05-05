@@ -2,12 +2,63 @@
 # src/apytizer/utils/objects.py
 
 # Standard Library Imports
-from typing import Any, Iterable, List, Optional
+import collections
+import functools
+from typing import Any
+from typing import Iterable
+from typing import List
+from typing import Optional
 
 # Local Imports
 from .typing import allinstance
 
-__all__ = ["getattrs", "iter_getattr", "iter_setattr"]
+__all__ = [
+    "deep_getattr",
+    "deep_setattr",
+    "getattrs",
+    "setattrs",
+    "iter_getattr",
+    "iter_setattr",
+]
+
+
+def deep_getattr(__o: object, __name: Iterable, /) -> Any:
+    """Get value of attribute in nested object.
+
+    Args:
+        __o: Object on which to get attribute.
+        __name: Name of attribute from which to get value.
+
+    Returns:
+        Value of attribute in nested object.
+
+    """
+    if not isinstance(__name, Iterable):
+        message = f"'{type(__name)}' object is not iterable"
+        raise TypeError(message)
+
+    attrs = __name.split(".") if isinstance(__name, str) else __name
+    result = functools.reduce(lambda acc, cur: getattr(acc, cur), attrs, __o)
+    return result
+
+
+def deep_setattr(__o: object, __name: str, __value: Any, /) -> None:
+    """Sets attribute to value in nested object.
+
+    Args:
+        __o: Object on which to set attributes.
+        __name: Name of attribute to set on object.
+        __value: Value to set attribute on object.
+
+    Returns:
+        Updated object.
+
+    """
+    attrs = collections.deque(__name.split("."))
+    target = attrs.pop()
+
+    obj = functools.reduce(lambda acc, cur: getattr(acc, cur), attrs, __o)
+    setattr(obj, target, __value)
 
 
 def getattrs(
@@ -19,6 +70,7 @@ def getattrs(
         __o: Object from which to get attributes.
         __names: Names of attributes to get from object.
         __default (optional): Default value when attribute doesn't exist.
+            Default ``None``.
 
     Returns:
         Attributes.
@@ -28,9 +80,7 @@ def getattrs(
     return results
 
 
-def setattrs(
-    __o: object, __names: List[str], __values: List[Any], /
-) -> List[Any]:
+def setattrs(__o: object, __names: List[str], __values: List[Any], /) -> None:
     """Set named attributes on an object.
 
     Args:
@@ -42,11 +92,8 @@ def setattrs(
         Updated object.
 
     """
-    results = [
+    for __name, __value in zip(__names, __values):
         setattr(__o, __name, __value)
-        for __name, __value in zip(__names, __values)
-    ]
-    return results
 
 
 def iter_getattr(__iter: Iterable[object], __name: str, /) -> List[Any]:

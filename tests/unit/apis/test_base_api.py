@@ -1,657 +1,166 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
-from http import HTTPStatus
+from unittest.mock import Mock
+
+# Third-Party Imports
+import pytest
 
 # Local Imports
-from apytizer.apis import BaseAPI
+try:
+    from apytizer.apis import BaseWebAPI
+    from apytizer.endpoints import BaseEndpoint
+    from apytizer.engines import BaseEngine
+    from apytizer.routes import Route
+    from apytizer import errors
+except ImportError:
+    from src.apytizer.apis import BaseWebAPI
+    from src.apytizer.endpoints import BaseEndpoint
+    from src.apytizer.engines import BaseEngine
+    from src.apytizer.routes import Route
+    from src.apytizer import errors
+
+from ... import mocks
 
 
-# --------------------------------------------------------------------------------
-# Tests for HEAD Method
-# --------------------------------------------------------------------------------
-def test_api_head_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.headers = {"Content-Type": "application/json"}
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-    )
-
-    response = api.head("test")
-
-    mock_request.assert_called_once_with(
-        "HEAD",
-        "testing/test",
-        auth=("test_case", "token"),
-        headers=None,
-        params=None,
-    )
-    assert response.headers == {"Content-Type": "application/json"}
+# Constants:
+ALLOWED_METHODS = {
+    "HEAD",
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+    "TRACE",
+}
 
 
-def test_api_head_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/", auth=("test_case", "token"), cache=mock_cache
-    )
-
-    first_response = api.head("test")
-    second_response = api.head("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {("HEAD", api, "test"): mock_request.return_value}
+def test_raises_error_when_argument_is_not_type_engine() -> None:
+    with pytest.raises(TypeError):
+        BaseWebAPI("testing.com")
 
 
-def test_api_head_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(url="testing/", auth=("test_case", "token"))
-
-    first_response = api.head("test")
-    second_response = api.head("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
+def test_raises_error_when_endpoints_are_not_passed_as_dictionary() -> None:
+    with pytest.raises(TypeError):
+        BaseWebAPI(BaseEngine("testing.com"), "/failure")
 
 
-# --------------------------------------------------------------------------------
-# Tests for GET Method
-# --------------------------------------------------------------------------------
-def test_api_get_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.json.return_value = {
-        "name": "example",
-        "status": "testing",
+def test_apis_with_same_url_are_equal() -> None:
+    api1 = BaseWebAPI(BaseEngine("testing.com"))
+    api2 = BaseWebAPI(BaseEngine("testing.com"))
+    assert api1 == api2
+
+
+def test_apis_with_different_urls_are_not_equal() -> None:
+    api1 = BaseWebAPI(BaseEngine("first.com"))
+    api2 = BaseWebAPI(BaseEngine("second.com"))
+    assert api1 != api2
+
+
+@pytest.mark.parametrize("method", ALLOWED_METHODS)
+def test_calling_api_method_sends_request(
+    mock_engine: mocks.MockEngine, method: str
+) -> None:
+    with BaseWebAPI(mock_engine) as api:
+        getattr(api, method.lower())()
+        assert_method_called(api.connection, method)
+
+
+@pytest.mark.parametrize("method", ALLOWED_METHODS)
+def test_raises_error_when_connection_not_started(
+    mock_engine: mocks.MockEngine, method: str
+) -> None:
+    with pytest.raises(errors.ConnectionNotStarted):
+        api = BaseWebAPI(mock_engine)
+        getattr(api, method.lower())()
+
+
+def test_indexing_returns_endpoint() -> None:
+    api = BaseWebAPI(BaseEngine("testing.com"))
+    result = api["home"]
+    assert isinstance(result, BaseEndpoint)
+
+
+def test_slash_operator_returns_endpoint() -> None:
+    api = BaseWebAPI(BaseEngine("testing.com"))
+    result = api / "home"
+    assert isinstance(result, BaseEndpoint)
+
+
+def test_indexing_returns_custom_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
+
+    endpoints = {Route("test"): TestEndpoint}
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    result = api["test"]
+    assert isinstance(result, TestEndpoint)
+
+
+def test_slash_operator_returns_custom_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
+
+    endpoints = {Route("test"): TestEndpoint}
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    result = api / "test"
+    assert isinstance(result, TestEndpoint)
+
+
+def test_indexing_returns_endpoint_with_path_argument() -> None:
+    class TestEndpoint(BaseEndpoint): ...
+
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): TestEndpoint,
+        Route("test/failure"): BaseEndpoint,
     }
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={"Accept": "application/json"},
-    )
-
-    response = api.get("test")
-
-    mock_request.assert_called_once_with(
-        "GET",
-        "testing/test",
-        auth=("test_case", "token"),
-        headers={"Accept": "application/json"},
-        params=None,
-    )
-    assert response.json() == {"name": "example", "status": "testing"}
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    result = api["test/1"]
+    assert isinstance(result, TestEndpoint)
 
 
-def test_api_get_request_updates_headers(mock_request):
-    mock_request.return_value.ok = True
+def test_slash_operator_returns_endpoint_with_path_argument() -> None:
+    class TestEndpoint(BaseEndpoint): ...
 
-    api = BaseAPI(url="testing/", headers={"Accept": "application/json"})
-
-    api.get("test", headers={"Accept": "text/html"})
-
-    mock_request.assert_called_once_with(
-        "GET",
-        "testing/test",
-        auth=None,
-        headers={"Accept": "text/html"},
-        params=None,
-    )
-
-
-def test_api_get_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={"Accept": "application/json"},
-        cache=mock_cache,
-    )
-
-    first_response = api.get("test")
-    second_response = api.get("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {("GET", api, "test"): mock_request.return_value}
-
-
-def test_api_get_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={"Accept": "application/json"},
-    )
-
-    first_response = api.get("test")
-    second_response = api.get("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for POST Method
-# --------------------------------------------------------------------------------
-def test_api_post_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.status_code = 201
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    response = api.post("test", data=data)
-
-    mock_request.assert_called_once_with(
-        "POST",
-        "testing/test",
-        auth=("test_case", "token"),
-        data=data,
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        params=None,
-    )
-    assert response.status_code == HTTPStatus.CREATED
-
-
-def test_api_post_request_updates_headers(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(
-        url="testing/",
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    api.post(
-        "test",
-        headers={
-            "Accept": "application/xml",
-            "Content-Type": "application/xml",
-        },
-    )
-
-    mock_request.assert_called_once_with(
-        "POST",
-        "testing/test",
-        auth=None,
-        headers={
-            "Accept": "application/xml",
-            "Content-Type": "application/xml",
-        },
-        params=None,
-    )
-
-
-def test_api_post_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        cache=mock_cache,
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    first_response = api.post("test", data=data)
-    second_response = api.post("test", data=data)
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {
-        (
-            "POST",
-            api,
-            "test",
-            "data={'name': 'Test', 'completed': True}",
-        ): mock_request.return_value
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): TestEndpoint,
+        Route("test/failure"): BaseEndpoint,
     }
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    result = api / "test/1"
+    assert isinstance(result, TestEndpoint)
 
 
-def test_api_post_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
+def test_indexing_returns_most_specific_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
 
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    first_response = api.post("test", data=data)
-    second_response = api.post("test", data=data)
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for PUT Method
-# --------------------------------------------------------------------------------
-def test_api_put_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.status_code = 204
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    response = api.put("test", data=data)
-
-    mock_request.assert_called_once_with(
-        "PUT",
-        "testing/test",
-        auth=("test_case", "token"),
-        data=data,
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        params=None,
-    )
-    assert response.status_code == HTTPStatus.NO_CONTENT
-
-
-def test_api_put_request_updates_headers(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(
-        url="testing/",
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    api.put(
-        "test",
-        headers={
-            "Accept": "application/xml",
-            "Content-Type": "application/xml",
-        },
-    )
-
-    mock_request.assert_called_once_with(
-        "PUT",
-        "testing/test",
-        auth=None,
-        headers={
-            "Accept": "application/xml",
-            "Content-Type": "application/xml",
-        },
-        params=None,
-    )
-
-
-def test_api_put_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        cache=mock_cache,
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    first_response = api.put("test", data=data)
-    second_response = api.put("test", data=data)
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {
-        (
-            "PUT",
-            api,
-            "test",
-            "data={'name': 'Test', 'completed': True}",
-        ): mock_request.return_value
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): BaseEndpoint,
+        Route("test/success"): TestEndpoint,
     }
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    result = api["test/success"]
+    assert isinstance(result, TestEndpoint)
 
 
-def test_api_put_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
+def test_slash_operator_returns_most_specific_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
 
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    first_response = api.put("test", data=data)
-    second_response = api.put("test", data=data)
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for PATCH Method
-# --------------------------------------------------------------------------------
-def test_api_patch_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.status_code = 204
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    response = api.patch("test", data=data)
-
-    mock_request.assert_called_once_with(
-        "PATCH",
-        "testing/test",
-        auth=("test_case", "token"),
-        data=data,
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        params=None,
-    )
-    assert response.status_code == HTTPStatus.NO_CONTENT
-
-
-def test_api_patch_request_updates_headers(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(
-        url="testing/",
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    api.patch(
-        "test",
-        headers={
-            "Accept": "application/xml",
-            "Content-Type": "application/xml",
-        },
-    )
-
-    mock_request.assert_called_once_with(
-        "PATCH",
-        "testing/test",
-        auth=None,
-        headers={
-            "Accept": "application/xml",
-            "Content-Type": "application/xml",
-        },
-        params=None,
-    )
-
-
-def test_api_patch_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        cache=mock_cache,
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    first_response = api.patch("test", data=data)
-    second_response = api.patch("test", data=data)
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {
-        (
-            "PATCH",
-            api,
-            "test",
-            "data={'name': 'Test', 'completed': True}",
-        ): mock_request.return_value
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): BaseEndpoint,
+        Route("test/success"): TestEndpoint,
     }
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    result = api / "test/success"
+    assert isinstance(result, TestEndpoint)
 
 
-def test_api_patch_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-    )
-
-    data = {"name": "Test", "completed": True}
-
-    first_response = api.patch("test", data=data)
-    second_response = api.patch("test", data=data)
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for DELETE Method
-# --------------------------------------------------------------------------------
-def test_api_delete_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.status_code = 204
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-    )
-
-    response = api.delete("test")
-
-    mock_request.assert_called_once_with(
-        "DELETE",
-        "testing/test",
-        auth=("test_case", "token"),
-        headers=None,
-        params=None,
-    )
-    assert response.status_code == HTTPStatus.NO_CONTENT
-
-
-def test_api_delete_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/", auth=("test_case", "token"), cache=mock_cache
-    )
-
-    first_response = api.delete("test")
-    second_response = api.delete("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {("DELETE", api, "test"): mock_request.return_value}
-
-
-def test_api_delete_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(url="testing/", auth=("test_case", "token"))
-
-    first_response = api.delete("test")
-    second_response = api.delete("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for OPTIONS Method
-# --------------------------------------------------------------------------------
-def test_api_options_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.headers = {
-        "Allow": ["OPTIONS", "GET", "POST", "PUT", "DELETE"]
-    }
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-    )
-
-    response = api.options("test")
-
-    mock_request.assert_called_once_with(
-        "OPTIONS",
-        "testing/test",
-        auth=("test_case", "token"),
-        headers=None,
-        params=None,
-    )
-    assert response.headers == {
-        "Allow": ["OPTIONS", "GET", "POST", "PUT", "DELETE"]
-    }
-
-
-def test_api_options_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/", auth=("test_case", "token"), cache=mock_cache
-    )
-
-    first_response = api.options("test")
-    second_response = api.options("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {("OPTIONS", api, "test"): mock_request.return_value}
-
-
-def test_api_options_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(url="testing/", auth=("test_case", "token"))
-
-    first_response = api.options("test")
-    second_response = api.options("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for TRACE Method
-# --------------------------------------------------------------------------------
-def test_api_trace_request_when_response_is_ok(mock_request):
-    mock_request.return_value.ok = True
-    mock_request.return_value.headers = {"Content-Type": "application/json"}
-
-    api = BaseAPI(
-        url="testing/",
-        auth=("test_case", "token"),
-    )
-
-    response = api.trace("test")
-
-    mock_request.assert_called_once_with(
-        "TRACE",
-        "testing/test",
-        auth=("test_case", "token"),
-        headers=None,
-        params=None,
-    )
-    assert response.headers == {"Content-Type": "application/json"}
-
-
-def test_api_trace_response_is_cached(mock_request):
-    mock_request.return_value.ok = True
-
-    mock_cache = {}
-
-    api = BaseAPI(
-        url="testing/", auth=("test_case", "token"), cache=mock_cache
-    )
-
-    first_response = api.trace("test")
-    second_response = api.trace("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 1
-    assert mock_cache == {("TRACE", api, "test"): mock_request.return_value}
-
-
-def test_api_trace_response_not_cached_when_cache_not_provided(mock_request):
-    mock_request.return_value.ok = True
-
-    api = BaseAPI(url="testing/", auth=("test_case", "token"))
-
-    first_response = api.trace("test")
-    second_response = api.trace("test")
-
-    assert first_response == second_response
-    assert mock_request.call_count == 2
+# ----------------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------------
+def assert_method_called(__connection: Mock, method: str) -> None:
+    func = getattr(__connection, method.lower())  # type: Mock
+    assert func.called

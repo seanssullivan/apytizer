@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Import
-from typing import Hashable, Tuple
+from typing import Callable
+from typing import Hashable
+from typing import Tuple
 
 # Third-Party Imports
 from cachetools.keys import hashkey
@@ -9,8 +11,13 @@ from cachetools.keys import hashkey
 __all__ = ["generate_key"]
 
 
-def generate_key(*tags):
-    """Generates a hashable key for caching values."""
+def generate_key(*tags: str) -> Callable[..., Tuple[Hashable, ...]]:
+    """Generates a hashable key for caching values.
+
+    Args:
+        *tags: Tags.
+
+    """
 
     def hash_parameters(*args, **kwargs) -> Tuple[Hashable, ...]:
         """Hashes function parameters."""

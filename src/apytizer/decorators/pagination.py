@@ -3,21 +3,18 @@
 
 # Standard Library Imports
 import functools
-import logging
-from typing import Any, Callable, Dict, Generator
+from typing import Callable
+from typing import Generator
+from typing import TypeVar
 
-__all__ = ["Pagination"]
-
-
-# Define custom types.
-State = Dict[str, Any]
-Response = Dict[str, Any]
-
-# Initialize logger.
-log = logging.getLogger(__name__)
+__all__ = ["pagination"]
 
 
-class Pagination:
+# Custom types
+T = TypeVar("T")
+
+
+class pagination:
     """Implements pagination for requests to an API endpoint.
 
     Args:
@@ -30,13 +27,15 @@ class Pagination:
 
     def __init__(
         self,
-        reducer: Callable[[State, Response], State],
-        callback: Callable[[State, Response], bool],
+        reducer: Callable[[dict, dict], dict],
+        callback: Callable[[dict, dict], bool],
     ) -> None:
-        self.reducer = reducer
-        self.callback = callback
+        self._reducer = reducer
+        self._callback = callback
 
-    def __call__(self, func: Callable) -> Callable[..., Generator]:
+    def __call__(
+        self, func: Callable[..., T]
+    ) -> Callable[..., Generator[T, None, None]]:
         """Wrap function to handle paginated results.
 
         Args:
@@ -48,7 +47,7 @@ class Pagination:
         """
 
         @functools.wraps(func)
-        def __wrapper(*args, **kwargs) -> Generator[Any, None, None]:
+        def wrapper(*args, **kwargs) -> Generator[T, None, None]:
             """Wrapper applied to decorated function.
 
             Args:
@@ -57,22 +56,14 @@ class Pagination:
 
             """
             completed = False
-            state = {
-                "params": kwargs.pop("params", None),
-                "data": kwargs.pop("data", None),
-            }
+            state = {"args": args, "kwargs": kwargs}
 
             while not completed:
-                if state.get("params"):
-                    kwargs.update({"params": state.get("params")})
-
-                if state.get("data"):
-                    kwargs.update({"data": state.get("data")})
-
-                response = func(*args, **kwargs)
+                response = func(*state["args"], **state["kwargs"])
                 yield response
 
-                state = self.reducer(state, response)
-                completed = self.callback(state, response)
+                state = self._reducer(state, response)
+                completed = self._callback(state, response)
 
-        return __wrapper
+        functools.update_wrapper(wrapper, func)
+        return wrapper

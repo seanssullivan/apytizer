@@ -1,59 +1,64 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/abstracts/abstract_api.py
-"""Abstract API class interface.
+# src/apytizer/endpoints/abstract_endpoint.py
+"""Abstract endpoint class.
 
-This module defines an abstract API class which provides an interface
+This module defines an abstract endpoint class which provides an interface
 for subclasses to implement. Each of the abstract methods represents
 a standard HTTP request method.
 
 """
 
 # Standard Library Imports
-from __future__ import annotations
 import abc
-from typing import Tuple, Union
+from typing import Optional
+from typing import TYPE_CHECKING
 
 # Third-Party Imports
 from requests import Response
-from requests.auth import AuthBase
 
-__all__ = ["AbstractAPI"]
+# Local Imports
+from ..connections import AbstractConnection
+
+if TYPE_CHECKING:
+    from ..apis import AbstractWebAPI
+
+__all__ = ["AbstractEndpoint"]
 
 
-class AbstractAPI(abc.ABC):
-    """Represents an abstract API."""
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            other.url == self.url and other.auth == self.auth
-            if isinstance(other, AbstractAPI)
-            else False
-        )
-
-    def __hash__(self) -> int:
-        return hash(self.url)
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__!s} url={self.url!s}>"
+class AbstractEndpoint(abc.ABC):
+    """Represents an abstract endpoint."""
 
     @property
     @abc.abstractmethod
-    def auth(self) -> Union[AuthBase, Tuple[str, str], None]:
-        """Authentication for API requests."""
+    def api(self) -> "AbstractWebAPI":
+        """API."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def connection(self) -> Optional[AbstractConnection]:
+        """Connection with which to make requests."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def path(self) -> str:
+        """Endpoint path."""
         raise NotImplementedError
 
     @property
     @abc.abstractmethod
     def url(self) -> str:
-        """URL of API."""
+        """Endpoint URL."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def head(self, route: str, *args, **kwargs) -> Response:
+    def head(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP HEAD request.
 
+        This method must call the `get` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -67,11 +72,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, route: str, *args, **kwargs) -> Response:
+    def get(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP GET request.
 
+        This method must call the `get` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -85,11 +91,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def post(self, route: str, *args, **kwargs) -> Response:
+    def post(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP POST request.
 
+        This method must call the `post` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -103,11 +110,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, route: str, *args, **kwargs) -> Response:
+    def put(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP PUT request.
 
+        This method must call the `put` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -121,11 +129,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def patch(self, route: str, *args, **kwargs) -> Response:
+    def patch(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP PATCH request.
 
+        This method must call the `patch` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -139,11 +148,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, route: str, *args, **kwargs) -> Response:
+    def delete(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP DELETE request.
 
+        This method must call the `delete` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -157,11 +167,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def options(self, route: str, *args, **kwargs) -> Response:
+    def options(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP OPTIONS request.
 
+        This method must call the `options` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
@@ -175,11 +186,12 @@ class AbstractAPI(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def trace(self, route: str, *args, **kwargs) -> Response:
+    def trace(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP TRACE request.
 
+        This method must call the `trace` method on the parent `API` instance.
+
         Args:
-            route: API path to which the request will be sent.
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 

@@ -4,19 +4,23 @@
 import pytest
 
 # Local Imports
-from apytizer.models import BaseModel
-from apytizer.models.base_model import _State
+try:
+    from apytizer.models import BaseModel
+    from apytizer.states import BaseState
+except ImportError:
+    from src.apytizer.models import BaseModel
+    from src.apytizer.states import BaseState
 
 
 # --------------------------------------------------------------------------------
-# Tests for BaseModel Class
+# Tests for Base Model
 # --------------------------------------------------------------------------------
-def test_model_returns_true_when_key_in_state():
+def test_model_returns_true_when_key_in_state() -> None:
     model = BaseModel(name="Test Model")
     assert "name" in model
 
 
-def test_model_is_iterable():
+def test_model_is_iterable() -> None:
     model = BaseModel(
         name="Test Model",
         description="For testing purposes only.",
@@ -29,12 +33,12 @@ def test_model_is_iterable():
     }
 
 
-def test_model_gets_attributes_from_state():
+def test_model_gets_attributes_from_state() -> None:
     model = BaseModel(name="Test Model", status="completed")
     assert model.status == "completed"
 
 
-def test_model_gets_nested_items_from_string_of_keys():
+def test_model_gets_nested_items_from_string_of_keys() -> None:
     model = BaseModel(
         name="Test Model",
         description="For testing purposes only.",
@@ -45,7 +49,7 @@ def test_model_gets_nested_items_from_string_of_keys():
     assert model["status.progress"] == "completed"
 
 
-def test_get_method_raises_type_error_when_passed_a_dictionary():
+def test_get_method_raises_type_error_when_passed_a_dictionary() -> None:
     model = BaseModel(
         name="Test Model",
         description="For testing purposes only.",
@@ -57,7 +61,7 @@ def test_get_method_raises_type_error_when_passed_a_dictionary():
         model[{"status": "progress"}]
 
 
-def test_update_method_changes_model_state():
+def test_update_method_changes_model_state() -> None:
     model = BaseModel(
         name="Test Model",
         description="For testing purposes only.",
@@ -68,27 +72,27 @@ def test_update_method_changes_model_state():
 
 
 # --------------------------------------------------------------------------------
-# Tests for _State Class
+# Tests for BaseState Class
 # --------------------------------------------------------------------------------
-def test_state_returns_true_when_key_in_state():
-    state = _State({"test": True})
+def test_state_returns_true_when_key_in_state() -> None:
+    state = BaseState({"test": True})
     assert "test" in state
 
 
-def test_models_are_equal_when_they_contain_same_state():
-    state_one = _State({"name": "Test State", "status": "incomplete"})
-    state_two = _State({"name": "Test State", "status": "incomplete"})
+def test_models_are_equal_when_they_contain_same_state() -> None:
+    state_one = BaseState({"name": "Test State", "status": "incomplete"})
+    state_two = BaseState({"name": "Test State", "status": "incomplete"})
     assert state_one == state_two
 
 
-def test_states_are_not_equal_when_they_contain_different_key_values():
-    state_one = _State({"name": "Test State", "status": "incomplete"})
-    state_two = _State({"name": "Test State", "status": "completed"})
+def test_states_are_not_equal_when_they_contain_different_key_values() -> None:
+    state_one = BaseState({"name": "Test State", "status": "incomplete"})
+    state_two = BaseState({"name": "Test State", "status": "completed"})
     assert state_one != state_two
 
 
-def test_state_is_iterable():
-    state = _State(
+def test_state_is_iterable() -> None:
+    state = BaseState(
         {
             "name": "Test State",
             "description": "For testing purposes only.",
@@ -102,8 +106,8 @@ def test_state_is_iterable():
     }
 
 
-def test_iterating_through_state_includes_updates():
-    state = _State(
+def test_iterating_through_state_includes_updates() -> None:
+    state = BaseState(
         {
             "name": "Test State",
             "description": "For testing purposes only.",
@@ -118,8 +122,8 @@ def test_iterating_through_state_includes_updates():
     }
 
 
-def test_gets_nested_items_from_string_of_keys():
-    state = _State(
+def test_gets_nested_items_from_string_of_keys() -> None:
+    state = BaseState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -131,8 +135,8 @@ def test_gets_nested_items_from_string_of_keys():
     assert state["status.progress"] == "completed"
 
 
-def test_getitem_method_raises_type_error_when_passed_a_dictionary():
-    state = _State(
+def test_getitem_method_raises_type_error_when_passed_a_dictionary() -> None:
+    state = BaseState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -145,8 +149,8 @@ def test_getitem_method_raises_type_error_when_passed_a_dictionary():
         state[{"status": "progress"}]
 
 
-def test_sets_nested_items_from_string_of_keys():
-    state = _State(
+def test_sets_nested_items_from_string_of_keys() -> None:
+    state = BaseState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -163,8 +167,8 @@ def test_sets_nested_items_from_string_of_keys():
     }
 
 
-def test_update_method_changes_state():
-    state = _State(
+def test_update_method_changes_state() -> None:
+    state = BaseState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -175,20 +179,20 @@ def test_update_method_changes_state():
     assert state["status"] == "completed"
 
 
-def test_update_does_not_overwrite_default_context():
+def test_update_does_not_overwrite_default_context() -> None:
     data = {
         "name": "Test Model",
         "description": "For testing purposes only.",
         "status": "in progress",
     }
-    state = _State(default=data)
+    state = BaseState(default=data)
     state.update({"status": "completed"})
     assert state._state.maps[0] == {"status": "completed"}
     assert state._state.maps[-1] == data
 
 
-def test_save_adds_new_context_to_state():
-    state = _State(
+def test_save_adds_new_context_to_state() -> None:
+    state = BaseState(
         default={
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -201,13 +205,13 @@ def test_save_adds_new_context_to_state():
     assert state._state.maps[1] == {"status": "completed"}
 
 
-def test_save_does_not_add_a_context_when_there_are_no_updates():
+def test_save_does_not_add_a_context_when_there_are_no_updates() -> None:
     data = {
         "name": "Test Model",
         "description": "For testing purposes only.",
         "status": "in progress",
     }
-    state = _State(default=data)
+    state = BaseState(default=data)
     assert not state._state.maps[0]
 
     state.save()

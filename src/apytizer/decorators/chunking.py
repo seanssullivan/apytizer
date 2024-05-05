@@ -3,8 +3,11 @@
 
 # Standard Library Imports
 import functools
-import logging
-from typing import Any, Callable, Dict, Iterable, List, Union
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Iterable
+from typing import Union
 
 # Third-Party Imports
 from requests import Response
@@ -13,10 +16,6 @@ from requests import Response
 from .. import utils
 
 __all__ = ["chunked_request"]
-
-
-# Initiate logger.
-log = logging.getLogger(__name__)
 
 
 def chunked_request(max_size: int) -> Callable:
@@ -30,7 +29,9 @@ def chunked_request(max_size: int) -> Callable:
 
     """
 
-    def decorator(func: Callable[[list], Union[dict, Response]]) -> Callable:
+    def decorator(
+        func: Callable[[list], Union[dict, Response]]
+    ) -> Callable[..., Union[dict, Response]]:
         """Decorator function for handling chunking.
 
         Args:
@@ -74,8 +75,8 @@ def chunked_request(max_size: int) -> Callable:
 
 
 def update_results(
-    results: Dict[str, List[Any]],
-    response: Dict[str, List[Any]],
+    results: Dict[str, list],
+    response: Dict[str, list],
 ) -> Dict[str, Any]:
     """Update results with response data.
 

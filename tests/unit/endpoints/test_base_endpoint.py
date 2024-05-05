@@ -7,405 +7,196 @@ from unittest.mock import Mock
 import pytest
 
 # Local Imports
-from apytizer.apis import BaseAPI
-from apytizer.endpoints import BaseEndpoint
-from apytizer.http_methods import HTTPMethod
+try:
+    from apytizer.apis import BaseWebAPI
+    from apytizer.endpoints import BaseEndpoint
+    from apytizer.engines import BaseEngine
+    from apytizer.http_methods import HTTPMethod
+    from apytizer.routes import Route
+    from apytizer import errors
+except ImportError:
+    from src.apytizer.apis import BaseWebAPI
+    from src.apytizer.endpoints import BaseEndpoint
+    from src.apytizer.engines import BaseEngine
+    from src.apytizer.http_methods import HTTPMethod
+    from src.apytizer.routes import Route
+    from src.apytizer import errors
+
+from ... import mocks
 
 
-@pytest.fixture
-def mock_api():
-    mock = Mock(BaseAPI)
-    mock.url = "testing/"
-    mock.headers = {"Content-Type": "application/json"}
-    return mock
+# Constants:
+ALLOWED_METHODS = {
+    "HEAD",
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+    "TRACE",
+}
 
 
-# --------------------------------------------------------------------------------
-# General Tests for Endpoint
-# --------------------------------------------------------------------------------
-def test_endpoint_uri_contains_base_url_and_path(mock_api):
-    test_endpoint = BaseEndpoint(mock_api, "test")
-    assert test_endpoint.uri == "testing/test"
+# ----------------------------------------------------------------------------
+# Tests for Base Endpoint
+# ----------------------------------------------------------------------------
+def test_url_contains_base_and_path(mock_api: mocks.MockAPI) -> None:
+    endpoint = BaseEndpoint(mock_api, "test")
+    assert endpoint.url == mock_api.url + "test"
 
 
-# --------------------------------------------------------------------------------
-# Tests for HEAD Method
-# --------------------------------------------------------------------------------
-def test_endpoint_head_method_when_response_is_ok(mock_api):
-    mock_api.head.return_value.ok = True
-    mock_api.head.return_value.headers = {"Content-Type": "application/json"}
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.head()
-
-    assert response.headers == {"Content-Type": "application/json"}
-    mock_api.head.assert_called_once_with(
-        "test",
-        headers={"Accept": "application/json"},
-        params=None,
-    )
+@pytest.mark.parametrize("method", ALLOWED_METHODS)
+def test_endpoint_method_sends_request(
+    mock_api: mocks.MockAPI, method: str
+) -> None:
+    endpoint = BaseEndpoint(mock_api, "test")
+    getattr(endpoint, method.lower())()
+    assert_method_called(mock_api, method)
 
 
-def test_endpoint_head_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[
-            HTTPMethod.GET,
-            HTTPMethod.POST,
-            HTTPMethod.PUT,
-            HTTPMethod.DELETE,
-        ],
-    )
+@pytest.mark.parametrize("method", ALLOWED_METHODS)
+def test_endpoint_raises_error_when_method_not_allowed(
+    mock_api: mocks.MockAPI, method: str
+) -> None:
+    allowed_methods = [HTTPMethod(m) for m in ALLOWED_METHODS if m != method]
+    endpoint = BaseEndpoint(mock_api, "test", methods=allowed_methods)
 
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.head()
+    with pytest.raises(errors.MethodNotAllowed):
+        getattr(endpoint, method.lower())()
 
-    assert not mock_api.head.called
+    assert_method_not_called(mock_api, method)
 
 
-def test_endpoint_head_response_is_cached(mock_api):
-    mock_api.head.return_value.ok = True
+@pytest.mark.parametrize("method", ALLOWED_METHODS)
+def test_endpoint_caches_response_when_cache_provided(
+    mock_api: mocks.MockAPI, method: str
+) -> None:
+    endpoint = BaseEndpoint(mock_api, "test", cache={})
 
-    mock_cache = {}
+    getattr(endpoint, method.lower())()
+    getattr(endpoint, method.lower())()
 
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        cache=mock_cache,
-    )
+    assert_method_call_count(mock_api, method, 1)
 
-    first_response = test_endpoint.head()
-    second_response = test_endpoint.head()
 
-    assert first_response == second_response
-    assert mock_api.head.call_count == 1
-    assert mock_cache == {
-        (HTTPMethod.HEAD.name, test_endpoint): mock_api.head.return_value
+@pytest.mark.parametrize("method", ALLOWED_METHODS)
+def test_endpoint_does_not_cache_response_when_no_cache_provided(
+    mock_api: mocks.MockAPI, method: str
+) -> None:
+    endpoint = BaseEndpoint(mock_api, "test")
+
+    getattr(endpoint, method.lower())()
+    getattr(endpoint, method.lower())()
+
+    assert_method_call_count(mock_api, method, 2)
+
+
+def test_indexing_returns_endpoint() -> None:
+    api = BaseWebAPI(BaseEngine("testing.com"))
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint["success"]
+    assert isinstance(result, BaseEndpoint)
+
+
+def test_slash_operator_returns_endpoint() -> None:
+    api = BaseWebAPI(BaseEngine("testing.com"))
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint / "success"
+    assert isinstance(result, BaseEndpoint)
+
+
+def test_indexing_returns_custom_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
+
+    endpoints = {Route("test/success"): TestEndpoint}
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint["success"]
+    assert isinstance(result, TestEndpoint)
+
+
+def test_slash_operator_returns_custom_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
+
+    endpoints = {Route("test/success"): TestEndpoint}
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint / "success"
+    assert isinstance(result, TestEndpoint)
+
+
+def test_indexing_returns_endpoint_with_path_argument() -> None:
+    class TestEndpoint(BaseEndpoint): ...
+
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): TestEndpoint,
+        Route("test/failure"): BaseEndpoint,
     }
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint["1"]
+    assert isinstance(result, TestEndpoint)
 
 
-def test_endpoint_head_response_not_cached_when_cache_not_provided(mock_api):
-    mock_api.head.return_value.ok = True
+def test_slash_operator_returns_endpoint_with_path_argument() -> None:
+    class TestEndpoint(BaseEndpoint): ...
 
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    first_response = test_endpoint.head()
-    second_response = test_endpoint.head()
-
-    assert first_response == second_response
-    assert mock_api.head.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for GET Method
-# --------------------------------------------------------------------------------
-def test_endpoint_get_method_when_response_is_ok(mock_api):
-    mock_api.get.return_value.ok = True
-    mock_api.get.return_value.json.return_value = {
-        "name": "example",
-        "status": "testing",
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): TestEndpoint,
+        Route("test/failure"): BaseEndpoint,
     }
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.get()
-
-    assert response.json() == {"name": "example", "status": "testing"}
-    mock_api.get.assert_called_once_with(
-        "test",
-        headers={"Accept": "application/json"},
-        params=None,
-    )
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint / "1"
+    assert isinstance(result, TestEndpoint)
 
 
-def test_endpoint_get_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.POST, HTTPMethod.PUT, HTTPMethod.DELETE],
-    )
+def test_indexing_returns_most_specific_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
 
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.get()
-
-    assert not mock_api.get.called
-
-
-def test_endpoint_get_response_is_cached(mock_api):
-    mock_api.get.return_value.ok = True
-
-    mock_cache = {}
-
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        cache=mock_cache,
-    )
-
-    first_response = test_endpoint.get()
-    second_response = test_endpoint.get()
-
-    assert first_response == second_response
-    assert mock_api.get.call_count == 1
-    assert mock_cache == {
-        (HTTPMethod.GET.name, test_endpoint): mock_api.get.return_value
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): BaseEndpoint,
+        Route("test/success"): TestEndpoint,
     }
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint["success"]
+    assert isinstance(result, TestEndpoint)
 
 
-def test_endpoint_get_response_not_cached_when_cache_not_provided(mock_api):
-    mock_api.get.return_value.ok = True
+def test_slash_operator_returns_most_specific_endpoint() -> None:
+    class TestEndpoint(BaseEndpoint): ...
 
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    first_response = test_endpoint.get()
-    second_response = test_endpoint.get()
-
-    assert first_response == second_response
-    assert mock_api.get.call_count == 2
-
-
-# --------------------------------------------------------------------------------
-# Tests for POST Method
-# --------------------------------------------------------------------------------
-def test_endpoint_post_method_when_response_is_ok(mock_api):
-    mock_api.post.return_value.ok = True
-    mock_api.post.return_value.text = "created"
-
-    data = {"id": 1, "name": "Test", "completed": False}
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.post(data=data)
-
-    assert response.text == "created"
-    mock_api.post.assert_called_once_with(
-        "test",
-        data=data,
-        headers={"Accept": "application/json"},
-        params=None,
-    )
-
-
-def test_endpoint_post_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-    )
-
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.post({})
-
-    assert not mock_api.post.called
-
-
-# --------------------------------------------------------------------------------
-# Tests for PUT Method
-# --------------------------------------------------------------------------------
-def test_endpoint_put_method_when_response_is_ok(mock_api):
-    mock_api.put.return_value.ok = True
-    mock_api.put.return_value.text = "success"
-
-    data = {"name": "Test", "completed": False}
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.put(data=data)
-
-    assert response.text == "success"
-    mock_api.put.assert_called_once_with(
-        "test",
-        data=data,
-        headers={"Accept": "application/json"},
-        params=None,
-    )
-
-
-def test_endpoint_put_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET, HTTPMethod.POST, HTTPMethod.DELETE],
-    )
-
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.put({})
-
-    assert not mock_api.put.called
-
-
-# --------------------------------------------------------------------------------
-# Tests for PATCH Method
-# --------------------------------------------------------------------------------
-def test_endpoint_patch_method_when_response_is_ok(mock_api):
-    mock_api.patch.return_value.ok = True
-    mock_api.patch.return_value.text = "success"
-
-    data = {"name": "Test", "completed": False}
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.patch(data=data)
-
-    assert response.text == "success"
-    mock_api.patch.assert_called_once_with(
-        "test",
-        data=data,
-        headers={"Accept": "application/json"},
-        params=None,
-    )
-
-
-def test_endpoint_patch_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET, HTTPMethod.POST, HTTPMethod.DELETE],
-    )
-
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.patch({})
-
-    assert not mock_api.patch.called
-
-
-# --------------------------------------------------------------------------------
-# Tests for DELETE Method
-# --------------------------------------------------------------------------------
-def test_endpoint_delete_method_when_response_is_ok(mock_api):
-    mock_api.delete.return_value.ok = True
-    mock_api.delete.return_value.text = "success"
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.delete()
-
-    assert response.text == "success"
-    mock_api.delete.assert_called_once_with(
-        "test",
-        headers={"Accept": "application/json"},
-        params=None,
-    )
-
-
-def test_endpoint_delete_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[HTTPMethod.GET, HTTPMethod.POST, HTTPMethod.PUT],
-    )
-
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.delete()
-
-    assert not mock_api.delete.called
-
-
-# --------------------------------------------------------------------------------
-# Tests for OPTIONS Method
-# --------------------------------------------------------------------------------
-def test_endpoint_options_method_when_response_is_ok(mock_api):
-    mock_api.options.return_value.ok = True
-    mock_api.options.return_value.headers = {
-        "Allow": ["OPTIONS", "GET", "POST", "PUT", "DELETE"]
+    endpoints = {
+        Route("test"): BaseEndpoint,
+        Route("test/{}"): BaseEndpoint,
+        Route("test/success"): TestEndpoint,
     }
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.options()
-
-    assert response.headers == {
-        "Allow": ["OPTIONS", "GET", "POST", "PUT", "DELETE"]
-    }
-    mock_api.options.assert_called_once_with(
-        "test",
-        headers={"Accept": "application/json"},
-        params=None,
-    )
+    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
+    endpoint = BaseEndpoint(api, "test")
+    result = endpoint / "success"
+    assert isinstance(result, TestEndpoint)
 
 
-def test_endpoint_options_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[
-            HTTPMethod.GET,
-            HTTPMethod.POST,
-            HTTPMethod.PUT,
-            HTTPMethod.DELETE,
-        ],
-    )
-
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.options()
-
-    assert not mock_api.options.called
+# ----------------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------------
+def assert_method_called(__api: mocks.MockAPI, method: str) -> None:
+    func = getattr(__api.connection, method.lower())  # type: Mock
+    assert func.called
 
 
-# --------------------------------------------------------------------------------
-# Tests for TRACE Method
-# --------------------------------------------------------------------------------
-def test_endpoint_trace_method_when_response_is_ok(mock_api):
-    mock_api.trace.return_value.ok = True
-    mock_api.trace.return_value.headers = {"Content-Type": "application/json"}
-
-    test_endpoint = BaseEndpoint(
-        mock_api, "test", headers={"Accept": "application/json"}
-    )
-
-    response = test_endpoint.trace()
-
-    assert response.headers == {"Content-Type": "application/json"}
-    mock_api.trace.assert_called_once_with(
-        "test",
-        headers={"Accept": "application/json"},
-        params=None,
-    )
+def assert_method_call_count(
+    __api: mocks.MockAPI, method: str, count: int
+) -> None:
+    func = getattr(__api.connection, method.lower())  # type: Mock
+    assert func.call_count == count
 
 
-def test_endpoint_trace_method_when_not_allowed(mock_api):
-    test_endpoint = BaseEndpoint(
-        mock_api,
-        "test",
-        headers={"Accept": "application/json"},
-        methods=[
-            HTTPMethod.GET,
-            HTTPMethod.POST,
-            HTTPMethod.PUT,
-            HTTPMethod.DELETE,
-        ],
-    )
-
-    with pytest.raises(NotImplementedError, match=""):
-        test_endpoint.trace()
-
-    assert not mock_api.trace.called
+def assert_method_not_called(__api: mocks.MockAPI, method: str) -> None:
+    func = getattr(__api.connection, method.lower())  # type: Mock
+    assert not func.called

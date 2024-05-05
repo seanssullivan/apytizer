@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/abstracts/abstract_state.py
+# src/apytizer/states/abstract_state.py
 """Abstract state class interface.
 
 This module defines an abstract state class which provides an interface
@@ -10,7 +10,9 @@ for subclasses to implement.
 # Standard Library Imports
 from __future__ import annotations
 import abc
-from typing import Any, Generator, Mapping
+from typing import Any
+from typing import Generator
+from typing import Mapping
 
 __all__ = ["AbstractState"]
 

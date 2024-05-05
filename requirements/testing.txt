@@ -1,0 +1,8 @@
+# Testing requirements
+-r base.txt
+coverage
+Flask
+pytest
+pytest-cov
+pytest-env
+tox

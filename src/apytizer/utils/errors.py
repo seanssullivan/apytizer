@@ -2,12 +2,19 @@
 # src/apytizer/utils/errors.py
 
 # Standard Library Imports
-from typing import Collection, Type, Union
+from typing import Any
+from typing import Tuple
+from typing import Type
+from typing import Union
 
 # Local Imports
 from .. import utils
 
-__all__ = ["raise_for_attribute", "raise_for_instance"]
+__all__ = [
+    "raise_for_attribute",
+    "raise_for_instance",
+    "raise_for_none",
+]
 
 
 def raise_for_attribute(__obj: object, __attr: str, /) -> None:
@@ -25,7 +32,9 @@ def raise_for_attribute(__obj: object, __attr: str, /) -> None:
 
 
 def raise_for_instance(
-    __value: object, __expected: Union[Collection[Type], Type], /
+    __value: object,
+    __expected: Union[type, Tuple[Union[type, Tuple[Any, ...]], ...]],
+    /,
 ) -> None:
     """Raise error if value is not an instance of expected type.
 
@@ -35,17 +44,16 @@ def raise_for_instance(
 
     """
     correct_type = isinstance(__value, __expected)
-    multiple_types = isinstance(__expected, (list, tuple))
 
-    if not correct_type and multiple_types:
+    if not correct_type and isinstance(__expected, tuple):
         _raise_for_multiple_types(__value, __expected)
 
-    if not correct_type and not multiple_types:
+    if not correct_type and not isinstance(__expected, tuple):
         _raise_for_single_type(__value, __expected)
 
 
 def _raise_for_multiple_types(
-    __value: object, __types: Collection[Type], /
+    __value: object, __types: Tuple[Union[type, Tuple[Any, ...]], ...], /
 ) -> None:
     """Raise error if value is not among expected types.
 
@@ -74,3 +82,24 @@ def _raise_for_single_type(__value: object, __type: Type, /) -> None:
     expected, actual = f"'{__type.__name__}'", type(__value).__name__
     message = f"expected type {expected!s}, got {actual!s} instead"
     raise TypeError(message)
+
+
+def raise_for_none(*args, **kwargs) -> None:
+    """Raise error if value is None.
+
+    Args:
+        *args: Positional arguments.
+        **kwargs: Keyword arguments.
+
+    Raises:
+        ValueError: when any argument is ``None``.
+
+    """
+    if any(arg is None for arg in args):
+        message = "argument cannot be 'None'"
+        raise ValueError(message)
+
+    for name, value in kwargs.items():
+        if value is None:
+            message = f"{name} cannot be 'None'"
+            raise ValueError(message)

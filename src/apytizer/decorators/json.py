@@ -6,16 +6,16 @@ import functools
 from http import HTTPStatus
 import json
 import logging
-from typing import Callable, Dict, List, Union
+from typing import Callable
+from typing import Union
 
-# Third-Party Importd
+# Third-Party Imports
 from requests import Response
 
 __all__ = ["json_response"]
 
 
-# Initialize logger.
-log = logging.getLogger(__name__)
+log = logging.getLogger("apytizer")
 
 # Define constants.
 APPLICATION_JSON = "application/json"
@@ -34,7 +34,7 @@ def json_response(func: Callable) -> Callable:
     """
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Union[Dict, List, Response]:
+    def wrapper(*args, **kwargs) -> Union[dict, list, Response]:
         """Wrapper applied to decorated function.
 
         Args:
@@ -60,7 +60,7 @@ def json_response(func: Callable) -> Callable:
     return wrapper
 
 
-def parse_json_response(response: Response) -> Union[Dict, List, Response]:
+def parse_json_response(response: Response) -> Union[dict, list, Response]:
     """Parse JSON response.
 
     Args:

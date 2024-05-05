@@ -1,33 +1,39 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/abstracts/abstract_endpoint.py
-"""Abstract endpoint class interface.
+# src/apytizer/apis/abstract_api.py
+"""Abstract Web API class.
 
-This module defines an abstract endpoint class which provides an interface
-for subclasses to implement. Each of the abstract methods represents
-a standard HTTP request method.
+This module defines an abstract API class which provides an interface
+for subclasses to implement.
 
 """
 
 # Standard Library Imports
+from __future__ import annotations
 import abc
+from typing import Optional
 
 # Third-Party Imports
 from requests import Response
 
 # Local Imports
-from .abstract_api import AbstractAPI
+from ..connections import AbstractConnection
 
-__all__ = ["AbstractEndpoint"]
+__all__ = ["AbstractWebAPI"]
 
 
-class AbstractEndpoint(abc.ABC):
-    """Represents an abstract endpoint."""
-
-    api: AbstractAPI
+class AbstractWebAPI(abc.ABC):
+    """Represents an abstract web API."""
 
     @property
     @abc.abstractmethod
-    def path(self) -> str:
+    def connection(self) -> Optional[AbstractConnection]:
+        """Connection with which to make requests."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def url(self) -> str:
+        """Base URL."""
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -38,17 +44,11 @@ class AbstractEndpoint(abc.ABC):
     def __hash__(self) -> int:
         raise NotImplementedError
 
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__!s} path={self.path!s}>"
-
-    def __str__(self) -> str:
-        return self.path
-
     @abc.abstractmethod
     def head(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP HEAD request.
 
-        This method must call the `head` method on the component API instance.
+        This method must call the `head` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -67,7 +67,7 @@ class AbstractEndpoint(abc.ABC):
     def get(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP GET request.
 
-        This method must call the `get` method on the component API instance.
+        This method must call the `get` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -86,7 +86,7 @@ class AbstractEndpoint(abc.ABC):
     def post(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP POST request.
 
-        This method must call the `post` method on the component API instance.
+        This method must call the `post` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -105,7 +105,7 @@ class AbstractEndpoint(abc.ABC):
     def put(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP PUT request.
 
-        This method must call the `put` method on the component API instance.
+        This method must call the `put` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -124,7 +124,7 @@ class AbstractEndpoint(abc.ABC):
     def patch(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP PATCH request.
 
-        This method must call the `patch` method on the component API instance.
+        This method must call the `patch` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -143,7 +143,7 @@ class AbstractEndpoint(abc.ABC):
     def delete(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP DELETE request.
 
-        This method must call the `delete` method on the component API instance.
+        This method must call the `delete` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -162,7 +162,7 @@ class AbstractEndpoint(abc.ABC):
     def options(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP OPTIONS request.
 
-        This method must call the `options` method on the component API instance.
+        This method must call the `options` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.
@@ -181,7 +181,7 @@ class AbstractEndpoint(abc.ABC):
     def trace(self, *args, **kwargs) -> Response:
         """Abstract method for sending an HTTP TRACE request.
 
-        This method must call the `trace` method on the component API instance.
+        This method must call the `trace` method on a `Connection` instance.
 
         Args:
             *args: Positional arguments.

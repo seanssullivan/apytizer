@@ -2,10 +2,11 @@
 # src/apytizer/protocols.py
 
 # Standard Library Imports
-from enum import Enum
+import enum
 
 
-class Protocol(Enum):
+@enum.unique
+class Protocol(str, enum.Enum):
     """Implements standard application layer protocols."""
 
     HTTP = "http"

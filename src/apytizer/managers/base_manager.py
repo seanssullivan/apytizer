@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/base/manager.py
+# src/apytizer/managers/base_manager.py
 """Base manager class.
 
-This module defines the implementation of a base manager class.
+This module defines a base implementation of a manager class.
 
 """
 
 # Standard Library Imports
+from __future__ import annotations
 import logging
-from typing import Any, Callable, List, Set
+from typing import Any
+from typing import Type
+from typing import TYPE_CHECKING
 
 # Local Imports
-from .. import abstracts
+from .abstract_manager import AbstractManager
+from ..apis import AbstractWebAPI
+
+if TYPE_CHECKING:
+    from ..models import AbstractModel
 
 __all__ = ["BaseManager"]
 
@@ -20,111 +27,74 @@ __all__ = ["BaseManager"]
 log = logging.getLogger(__name__)
 
 
-class BaseManager(abstracts.AbstractManager):
-    """Implements a base object manager.
+class BaseManager(AbstractManager):
+    """Implements a base manager.
 
     Args:
-        endpoint: Endpoint.
-        factory: Factory which creates objects.
+        endpoint: Endpoint at which to manage objects.
+
+    Raises:
+        TypeError: when argument is not type 'Endpoint'.
 
     """
 
-    def __init__(
-        self,
-        endpoint: abstracts.AbstractEndpoint,
-        factory: Callable[..., abstracts.AbstractModel],
-    ):
-        self.endpoint = endpoint
-        self.factory = factory
+    def __new__(cls: Type[BaseManager], api: AbstractWebAPI) -> BaseManager:
+        if not isinstance(api, AbstractWebAPI):
+            message = f"expected type 'WebAPI', got {type(api)} instead"
+            raise TypeError(message)
 
-        # Components
-        self.objects = set()  # type: Set[abstracts.AbstractModel]
+        instance = super().__new__(cls)
+        return instance
 
-    def add(self, obj: abstracts.AbstractModel) -> None:
-        """Add an object.
+    def __init__(self, api: AbstractWebAPI, /) -> None:
+        self._api = api
 
-        Args:
-            obj: Object to add.
+    def __repr__(self) -> str:
+        result = "<{cls!s}>".format(cls=self.__class__.__name__)
+        return result
 
-        """
-        self.objects.add(obj)
-
-    def _create(self, obj: abstracts.AbstractModel) -> None:
+    def create(self, obj: "AbstractModel", /) -> None:
         """Create an object.
 
         Args:
             obj: Object to create.
 
         """
-        data = dict(obj.state)
-        self.endpoint.post(data)
+        raise NotImplementedError
 
-    def get(self, ref: Any, *args, **kwargs) -> abstracts.AbstractModel:
-        """Retrieving an object.
+    def read(self, ref: Any, /) -> "AbstractModel":
+        """Read an object.
 
-        Args:
-            ref: Reference to object.
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Object.
-
-        """
-        try:
-            result = next(obj for obj in self.objects if obj.reference == ref)
-
-        except StopIteration:
-            response = self.endpoint.get(ref, *args, **kwargs)
-            result = self.factory(response)
-            self.objects.add(result)
-            return result
-
-        else:
-            return result
-
-    def list(self, *args, **kwargs) -> List[abstracts.AbstractModel]:
-        """Retrieving all objects.
+        Calls `get` method on associated endpoint to retrieve object data.
+        Uses response to instantiate an instance of the managed object class.
 
         Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
+            ref: Reference to object on endpoint.
 
         Returns:
-            List of objects.
+            Object instance.
 
         """
         raise NotImplementedError
 
-    def _update(
-        self, obj: abstracts.AbstractModel, *args, **kwargs
-    ) -> abstracts.AbstractModel:
-        """Update object.
+    def update(self, obj: "AbstractModel", /) -> None:
+        """Update an object.
+
+        Calls `put` method on associated endpoint to update object data.
 
         Args:
             obj: Object to update.
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Updated object.
 
         """
         raise NotImplementedError
 
-    def remove(self, obj: abstracts.AbstractModel) -> None:
-        """Remove an object.
+    def delete(self, obj: "AbstractModel", /) -> None:
+        """Delete an object.
+
+        Calls `delete` method on associated endpoint to delete the object.
 
         Args:
-            obj: Object to remove.
+            obj: Object to delete.
 
         """
-        self.objects.discard(obj)
-
-    def commit(self) -> None:
-        """Commit changes to objects."""
-        raise NotImplementedError
-
-    def rollback(self) -> None:
-        """Roll back changes to objects."""
         raise NotImplementedError
