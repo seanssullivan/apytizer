@@ -24,7 +24,7 @@ import requests
 
 # Local Imports
 from .abstract_endpoint import AbstractEndpoint
-from ..connections import AbstractConnection
+from ..connections import AbstractHttpConnection
 from ..decorators import cache_response
 from ..http_methods import HTTPMethod
 from ..routes import Route
@@ -101,7 +101,7 @@ class BaseEndpoint(AbstractEndpoint):
         return self._api
 
     @property
-    def connection(self) -> Optional[AbstractConnection]:
+    def connection(self) -> Optional[AbstractHttpConnection]:
         """Connection with which to make requests."""
         return self._api.connection
 

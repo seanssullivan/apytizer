@@ -19,12 +19,11 @@ import requests
 
 # Local Imports
 from .abstract_web_api import AbstractWebAPI
-from ..connections import AbstractConnection
+from ..connections import AbstractHttpConnection
 from ..endpoints import AbstractEndpoint
 from ..endpoints import BaseEndpoint
 from ..engines import AbstractEngine
 from ..routes import AbstractRoute
-from ..connections import DEFAULT_PATH
 from .. import errors
 
 __all__ = ["BaseWebAPI"]
@@ -61,7 +60,7 @@ class BaseWebAPI(AbstractWebAPI):
         self._endpoints = endpoints.copy() if endpoints else {}
 
     @property
-    def connection(self) -> Optional[AbstractConnection]:
+    def connection(self) -> Optional[AbstractHttpConnection]:
         """Connection with which to make requests."""
         result = getattr(self, "_connection", None)
         return result
@@ -150,13 +149,13 @@ class BaseWebAPI(AbstractWebAPI):
 
     def connect(self) -> None:
         """Start connection to web API."""
-        self._connection = self._engine.connect()
-        self._connection.start()
+        setattr(self, "_connection", self._engine.connect())
+        self.connection.start()
 
     def close(self) -> None:
         """Close connection to web API."""
-        self._connection.close()
-        del self._connection
+        self.connection.close()
+        delattr(self, "_connection")
 
     @final
     def head(
@@ -188,7 +187,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.head(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -225,7 +223,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.get(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -262,7 +259,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.post(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -299,7 +295,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.put(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -336,7 +331,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.patch(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -373,7 +367,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.delete(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -410,7 +403,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.options(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,
@@ -447,7 +439,6 @@ class BaseWebAPI(AbstractWebAPI):
             raise errors.ConnectionNotStarted(message)
 
         response = self.connection.trace(
-            DEFAULT_PATH,
             headers=headers,
             params=params,
             **kwargs,

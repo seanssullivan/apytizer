@@ -8,7 +8,7 @@ sdist:
 	python setup.py sdist
 
 test:
-	coverage run -m pytest --tb=short
+	pytest --cov-report html:htmlcov --cov=src tests --tb=short
 
 tox:
 	tox

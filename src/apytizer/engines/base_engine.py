@@ -20,8 +20,9 @@ from requests.adapters import HTTPAdapter
 
 # Local Imports
 from .abstract_engine import AbstractEngine
-from ..connections import Connection
+from ..connections import HttpConnection
 from ..protocols import Protocol
+from ..protocols import get_protocol
 from ..utils import errors
 
 __all__ = ["BaseEngine"]
@@ -74,6 +75,12 @@ class BaseEngine(AbstractEngine):
         self.verify = verify
 
     @property
+    def protocol(self) -> Optional[Protocol]:
+        """Protocol."""
+        result = get_protocol(self.url)
+        return result
+
+    @property
     def url(self) -> str:
         """Base URL."""
         return self._url
@@ -83,12 +90,12 @@ class BaseEngine(AbstractEngine):
         errors.raise_for_instance(url, str)
         self._url = url if url.endswith("/") else url + "/"
 
-    def connect(self) -> Connection:
+    def connect(self) -> HttpConnection:
         """Establish connection.
 
         Returns:
             Connection instance.
 
         """
-        result = Connection(self)
+        result = HttpConnection(self)
         return result

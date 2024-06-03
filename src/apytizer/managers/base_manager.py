@@ -28,26 +28,26 @@ log = logging.getLogger(__name__)
 
 
 class BaseManager(AbstractManager):
-    """Implements a base manager.
+    """Base class from which all manager implementations are derived.
 
     Args:
-        endpoint: Endpoint at which to manage objects.
+        __api: API instance.
 
     Raises:
         TypeError: when argument is not type 'Endpoint'.
 
     """
 
-    def __new__(cls: Type[BaseManager], api: AbstractWebAPI) -> BaseManager:
-        if not isinstance(api, AbstractWebAPI):
-            message = f"expected type 'WebAPI', got {type(api)} instead"
+    def __new__(cls: Type[BaseManager], __api: AbstractWebAPI) -> BaseManager:
+        if not isinstance(__api, AbstractWebAPI):
+            message = f"expected type 'WebAPI', got {type(__api)} instead"
             raise TypeError(message)
 
         instance = super().__new__(cls)
         return instance
 
-    def __init__(self, api: AbstractWebAPI, /) -> None:
-        self._api = api
+    def __init__(self, __api: AbstractWebAPI, /) -> None:
+        self._api = __api
 
     def __repr__(self) -> str:
         result = "<{cls!s}>".format(cls=self.__class__.__name__)

@@ -12,13 +12,15 @@ from typing import Union
 # Third-Party Imports
 from requests import Response
 
+# Local Imports
+from ..media_types import MediaType
+
 __all__ = ["json_response"]
 
 
 log = logging.getLogger("apytizer")
 
-# Define constants.
-APPLICATION_JSON = "application/json"
+# Constants
 CONTENT_TYPE = "Content-Type"
 
 
@@ -50,7 +52,7 @@ def json_response(func: Callable) -> Callable:
             return response
 
         content_type = response.headers.get(CONTENT_TYPE)
-        if not content_type or APPLICATION_JSON not in content_type:
+        if not content_type or MediaType.APPLICATION_JSON not in content_type:
             return response
 
         result = parse_json_response(response)

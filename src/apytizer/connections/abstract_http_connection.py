@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/connections/abstract_connection.py
-"""Abstract connection class.
+"""Abstract HTTP connection class.
 
-This module defines an abstract connection class which provides an interface
-for subclasses to implement. Each of the abstract methods represents
+This module defines an abstract HTTP connection class which provides an
+interface for subclasses to implement. Each of the abstract methods represents
 a standard HTTP request method.
 
 """
@@ -22,11 +22,11 @@ import requests
 if TYPE_CHECKING:
     from ..http_methods import HTTPMethod
 
-__all__ = ["AbstractConnection"]
+__all__ = ["AbstractHttpConnection"]
 
 
-class AbstractConnection(abc.ABC):
-    """Represents an abstract connection."""
+class AbstractHttpConnection(abc.ABC):
+    """Represents an abstract HTTP connection."""
 
     @abc.abstractmethod
     def start(self) -> None:
@@ -41,7 +41,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def head(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -50,7 +50,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP HEAD request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -67,7 +67,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def get(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -76,7 +76,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP GET request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -93,7 +93,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def post(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -102,7 +102,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP POST request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -119,7 +119,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def put(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -128,7 +128,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP PUT request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -145,7 +145,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def patch(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -154,7 +154,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP PATCH request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -171,7 +171,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def delete(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -180,7 +180,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP DELETE request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -197,7 +197,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def options(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -206,7 +206,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP OPTIONS request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -223,7 +223,7 @@ class AbstractConnection(abc.ABC):
     @abc.abstractmethod
     def trace(
         self,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -232,7 +232,7 @@ class AbstractConnection(abc.ABC):
         """Abstract method for sending an HTTP TRACE request.
 
         Args:
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -251,7 +251,7 @@ class AbstractConnection(abc.ABC):
         self,
         method: HTTPMethod,
         /,
-        route: str,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -261,7 +261,7 @@ class AbstractConnection(abc.ABC):
 
         Args:
             method: HTTP request method to use.
-            route: API route to which the request will be sent.
+            route: API route to which the request will be sent. Default ``/``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -277,5 +277,13 @@ class AbstractConnection(abc.ABC):
 
     @abc.abstractmethod
     def send(self, request: requests.Request) -> requests.Response:
-        """Send an HTTP request."""
+        """Sends an HTTP request.
+
+        Args:
+            request: Request to send.
+
+        Returns:
+            Response object.
+
+        """
         raise NotImplementedError

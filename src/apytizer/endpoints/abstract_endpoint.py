@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from requests import Response
 
 # Local Imports
-from ..connections import AbstractConnection
+from ..connections import AbstractHttpConnection
 
 if TYPE_CHECKING:
     from ..apis import AbstractWebAPI
@@ -36,7 +36,7 @@ class AbstractEndpoint(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def connection(self) -> Optional[AbstractConnection]:
+    def connection(self) -> Optional[AbstractHttpConnection]:
         """Connection with which to make requests."""
         raise NotImplementedError
 

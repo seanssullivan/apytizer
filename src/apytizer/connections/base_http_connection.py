@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/connection/base_connection.py
-"""Base connection class.
+"""Base HTTP connection class.
 
-This module defines the base connection class implementation.
+This module defines the base HTTP connection class implementation.
 
 """
 
@@ -21,7 +21,7 @@ from urllib.parse import urljoin
 import requests
 
 # Local Imports
-from .abstract_connection import AbstractConnection
+from .abstract_http_connection import AbstractHttpConnection
 from ..decorators import confirm_connection
 from ..http_methods import HTTPMethod
 from ..sessions import sessionmaker
@@ -30,18 +30,17 @@ from .. import utils
 if TYPE_CHECKING:
     from ..engines import BaseEngine
 
-__all__ = ["Connection", "DEFAULT_PATH"]
+__all__ = ["HttpConnection"]
 
 
 log = logging.getLogger("apytizer")
 
-# Constants:
-DEFAULT_PATH = "/"
+# Constants
 DEFAULT_SESSION_FACTORY = sessionmaker()
 
 
-class Connection(AbstractConnection):
-    """Implements a connection.
+class HttpConnection(AbstractHttpConnection):
+    """Implements an HTTP connection.
 
     The connection class provides an interface for interacting with an API.
     It implements the standard HTTP methods (HEAD, GET, POST, PUT, PATCH,
@@ -64,7 +63,7 @@ class Connection(AbstractConnection):
         self._session_factory = session_factory
 
     @final
-    def __enter__(self) -> AbstractConnection:
+    def __enter__(self) -> AbstractHttpConnection:
         """Starts connection as context manager."""
         self.start()
         return self
@@ -106,7 +105,7 @@ class Connection(AbstractConnection):
 
     def head(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -138,7 +137,7 @@ class Connection(AbstractConnection):
 
     def get(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -170,7 +169,7 @@ class Connection(AbstractConnection):
 
     def post(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -202,7 +201,7 @@ class Connection(AbstractConnection):
 
     def put(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -234,7 +233,7 @@ class Connection(AbstractConnection):
 
     def patch(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -266,7 +265,7 @@ class Connection(AbstractConnection):
 
     def delete(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -298,7 +297,7 @@ class Connection(AbstractConnection):
 
     def options(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -330,7 +329,7 @@ class Connection(AbstractConnection):
 
     def trace(
         self,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -364,7 +363,7 @@ class Connection(AbstractConnection):
         self,
         method: HTTPMethod,
         /,
-        route: str = DEFAULT_PATH,
+        route: str = "/",
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -398,10 +397,10 @@ class Connection(AbstractConnection):
 
     @confirm_connection
     def send(self, request: requests.Request) -> requests.Response:
-        """Sends an HTTP request to an API session.
+        """Sends an HTTP request.
 
         Args:
-            request: Request to send with session.
+            request: Request to send.
 
         Returns:
             Response object.
