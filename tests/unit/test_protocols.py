@@ -4,8 +4,13 @@
 import pytest
 
 # Local Imports
-from src.apytizer.protocols import Protocol
-from src.apytizer.protocols import get_protocol
+try:
+    from apytizer.protocols import Protocol
+    from apytizer.protocols import get_protocol
+
+except ImportError:
+    from src.apytizer.protocols import Protocol
+    from src.apytizer.protocols import get_protocol
 
 
 @pytest.mark.parametrize("url", ["http://testing.com"])

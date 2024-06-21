@@ -13,6 +13,7 @@ try:
     from apytizer.engines import BaseEngine
     from apytizer.routes import Route
     from apytizer import errors
+
 except ImportError:
     from src.apytizer.apis import BaseWebAPI
     from src.apytizer.endpoints import BaseEndpoint

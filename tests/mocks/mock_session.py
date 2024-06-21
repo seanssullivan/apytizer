@@ -9,6 +9,7 @@ from requests import Request
 # Local Imports
 try:
     from apytizer.sessions import AbstractSession
+
 except ImportError:
     from src.apytizer.sessions import AbstractSession
 

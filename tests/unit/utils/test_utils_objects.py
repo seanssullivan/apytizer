@@ -9,6 +9,7 @@ from unittest import mock
 # Local Imports
 try:
     from apytizer import utils
+
 except ImportError:
     from src.apytizer import utils
 

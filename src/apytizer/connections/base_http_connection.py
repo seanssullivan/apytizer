@@ -105,7 +105,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def head(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -114,7 +114,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP HEAD request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -137,7 +137,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def get(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -146,7 +146,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP GET request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -169,7 +169,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def post(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -178,7 +178,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP POST request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -201,7 +201,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def put(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -210,7 +210,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP PUT request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -233,7 +233,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def patch(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -242,7 +242,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP PATCH request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -265,7 +265,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def delete(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -274,7 +274,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP DELETE request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -297,7 +297,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def options(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -306,7 +306,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP OPTIONS request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -329,7 +329,7 @@ class HttpConnection(AbstractHttpConnection):
 
     def trace(
         self,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -338,7 +338,7 @@ class HttpConnection(AbstractHttpConnection):
         """Sends an HTTP TRACE request.
 
         Args:
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.
@@ -363,7 +363,7 @@ class HttpConnection(AbstractHttpConnection):
         self,
         method: HTTPMethod,
         /,
-        route: str = "/",
+        route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -373,7 +373,7 @@ class HttpConnection(AbstractHttpConnection):
 
         Args:
             method: HTTP request method to use.
-            route (optional): Route to which to send request. Default ``/``.
+            route (optional): Route to which to send request. Default ``None``.
             headers (optional): Request headers (overrides global headers).
             params (optional): Request parameters (overrides global parameters).
             **kwargs: Additional arguments to pass to request.

@@ -3,6 +3,7 @@
 # Local Imports
 try:
     from apytizer.routes import Route
+
 except ImportError:
     from src.apytizer.routes import Route
 

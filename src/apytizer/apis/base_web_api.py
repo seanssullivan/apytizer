@@ -33,18 +33,35 @@ class BaseWebAPI(AbstractWebAPI):
     """Base class from which all web API implementations are derived.
 
     Args:
-        __engine: Engine.
+        engine: Engine.
         endpoints (optional): Endpoints. Default ``None``.
+        locked (optional): Whether to lock endpoints. Default ``False``.
+
+    Raises:
+        TypeError: when `engine` argument is not type ``Engine``.
+        TypeError: when `endpoints` argument is not type ``dict``.
+        TypeError: when `locked` argument is not type ``bool``.
 
     """
 
-    def __new__(cls, __engine: object, /, endpoints: Any = None) -> BaseWebAPI:
-        if not isinstance(__engine, AbstractEngine):
-            message = f"expected type 'Engine', got {type(__engine)} instead"
+    def __new__(
+        cls,
+        engine: object,
+        /,
+        endpoints: Optional[dict] = None,
+        *,
+        locked: bool = False,
+    ) -> BaseWebAPI:
+        if not isinstance(engine, AbstractEngine):
+            message = f"expected type 'Engine', got {type(engine)} instead"
             raise TypeError(message)
 
         if endpoints and not isinstance(endpoints, dict):
             message = f"expected type 'dict', got {type(endpoints)} instead"
+            raise TypeError(message)
+
+        if not isinstance(locked, bool):
+            message = f"expected type 'bool', got {type(locked)} instead"
             raise TypeError(message)
 
         instance = super().__new__(cls)
@@ -52,12 +69,15 @@ class BaseWebAPI(AbstractWebAPI):
 
     def __init__(
         self,
-        __engine: AbstractEngine,
+        engine: AbstractEngine,
         /,
         endpoints: Optional[Dict[AbstractRoute, Type[BaseEndpoint]]] = None,
+        *,
+        locked: bool = False,
     ) -> None:
-        self._engine = __engine
+        self._engine = engine
         self._endpoints = endpoints.copy() if endpoints else {}
+        self._locked = locked
 
     @property
     def connection(self) -> Optional[AbstractHttpConnection]:
@@ -83,7 +103,7 @@ class BaseWebAPI(AbstractWebAPI):
 
     def __eq__(self, other: object) -> bool:
         result = (
-            other.url.strip("/").lower() == self.url.strip("/").lower()
+            other.url.lower() == self.url.lower()
             if isinstance(other, AbstractWebAPI)
             else False
         )
@@ -142,6 +162,10 @@ class BaseWebAPI(AbstractWebAPI):
             _, endpoint = next(iter(matches))
 
         except StopIteration:
+            if self._locked is True:
+                message = f"endpoint not found: {path}"
+                raise errors.EndpointNotFound(message)
+
             endpoint = BaseEndpoint
 
         result = endpoint(self, path)

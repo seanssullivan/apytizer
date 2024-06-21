@@ -6,6 +6,7 @@ from unittest.mock import Mock
 # Local Imports
 try:
     from apytizer.engines import BaseEngine
+
 except ImportError:
     from src.apytizer.engines import BaseEngine
 

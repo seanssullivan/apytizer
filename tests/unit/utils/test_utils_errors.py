@@ -6,6 +6,7 @@ import pytest
 # Local Imports
 try:
     from apytizer.utils import errors
+
 except ImportError:
     from src.apytizer.utils import errors
 

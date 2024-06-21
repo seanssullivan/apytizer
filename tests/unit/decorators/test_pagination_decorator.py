@@ -13,6 +13,7 @@ import pytest
 try:
     from apytizer.decorators import pagination
     from apytizer import utils
+
 except ImportError:
     from src.apytizer.decorators import pagination
     from src.apytizer import utils

@@ -11,6 +11,7 @@ try:
     from apytizer.connections import HttpConnection
     from apytizer.sessions import sessionmaker
     from apytizer.http_methods import HTTPMethod
+
 except ImportError:
     from src.apytizer.connections import HttpConnection
     from src.apytizer.sessions import sessionmaker

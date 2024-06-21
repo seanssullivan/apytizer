@@ -7,6 +7,7 @@ import pytest
 try:
     from apytizer.models import BaseModel
     from apytizer.states import BaseState
+
 except ImportError:
     from src.apytizer.models import BaseModel
     from src.apytizer.states import BaseState

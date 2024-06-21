@@ -7,6 +7,7 @@
 try:
     from apytizer.connections import AbstractHttpConnection
     from apytizer.engines import BaseEngine
+
 except ImportError:
     from src.apytizer.connections import AbstractHttpConnection
     from src.apytizer.engines import BaseEngine

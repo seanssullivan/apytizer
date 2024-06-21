@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 # Local Imports
 from .abstract_manager import AbstractManager
 from ..apis import AbstractWebAPI
+from ..mappers import AbstractMapper
 
 if TYPE_CHECKING:
     from ..models import AbstractModel
@@ -38,16 +39,31 @@ class BaseManager(AbstractManager):
 
     """
 
-    def __new__(cls: Type[BaseManager], __api: AbstractWebAPI) -> BaseManager:
+    def __new__(
+        cls: Type[BaseManager],
+        __api: AbstractWebAPI,
+        __mapper: AbstractMapper,
+        /,
+    ) -> BaseManager:
         if not isinstance(__api, AbstractWebAPI):
             message = f"expected type 'WebAPI', got {type(__api)} instead"
+            raise TypeError(message)
+
+        if not isinstance(__mapper, AbstractMapper):
+            message = f"expected type 'Mapper', got {type(__mapper)} instead"
             raise TypeError(message)
 
         instance = super().__new__(cls)
         return instance
 
-    def __init__(self, __api: AbstractWebAPI, /) -> None:
+    def __init__(
+        self,
+        __api: AbstractWebAPI,
+        __mapper: AbstractMapper,
+        /,
+    ) -> None:
         self._api = __api
+        self._mapper = __mapper
 
     def __repr__(self) -> str:
         result = "<{cls!s}>".format(cls=self.__class__.__name__)

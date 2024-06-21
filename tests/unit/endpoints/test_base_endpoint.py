@@ -14,6 +14,7 @@ try:
     from apytizer.http_methods import HTTPMethod
     from apytizer.routes import Route
     from apytizer import errors
+
 except ImportError:
     from src.apytizer.apis import BaseWebAPI
     from src.apytizer.endpoints import BaseEndpoint

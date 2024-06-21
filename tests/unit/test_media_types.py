@@ -4,7 +4,11 @@
 import pytest
 
 # Local Imports
-from src.apytizer.media_types import MediaType
+try:
+    from apytizer.media_types import MediaType
+
+except ImportError:
+    from src.apytizer.media_types import MediaType
 
 
 @pytest.mark.parametrize(

@@ -12,6 +12,7 @@ from typing import Dict
 from typing import Mapping
 from typing import Optional
 from typing import Tuple
+from typing import Type
 from typing import TypeVar
 from typing import Union
 
@@ -51,6 +52,8 @@ class BaseEngine(AbstractEngine):
 
     """
 
+    _connection_cls: Type[HttpConnection] = HttpConnection
+
     def __init__(
         self,
         url: str,
@@ -86,9 +89,12 @@ class BaseEngine(AbstractEngine):
         return self._url
 
     @url.setter
-    def url(self, url: str) -> None:
-        errors.raise_for_instance(url, str)
-        self._url = url if url.endswith("/") else url + "/"
+    def url(self, value: str) -> None:
+        errors.raise_for_instance(value, str)
+        self._url = standardize_url(value)
+
+    def __repr__(self) -> str:
+        return f"Engine({self.url!r})"
 
     def connect(self) -> HttpConnection:
         """Establish connection.
@@ -97,5 +103,23 @@ class BaseEngine(AbstractEngine):
             Connection instance.
 
         """
-        result = HttpConnection(self)
+        result = self._connection_cls(self)
         return result
+
+
+def standardize_url(__url: str, /) -> str:
+    """Standardize URL.
+
+    Args:
+        __url: URL.
+
+    Returns:
+        URL.
+
+    """
+    if not isinstance(__url, str):
+        message = f"expected type 'str', got {type(__url)} instead"
+        raise TypeError(message)
+
+    result = __url if __url.endswith("/") else __url + "/"
+    return result

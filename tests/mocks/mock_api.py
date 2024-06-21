@@ -11,6 +11,7 @@ from unittest.mock import Mock
 try:
     from apytizer.apis import AbstractWebAPI
     from apytizer.engines import AbstractEngine
+
 except ImportError:
     from src.apytizer.apis import AbstractWebAPI
     from src.apytizer.engines import AbstractEngine
