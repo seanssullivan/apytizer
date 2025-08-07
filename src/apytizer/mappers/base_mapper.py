@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/mappers/base_mapper.py
-"""Base mapper class.
+"""Base Mapper Class.
 
 This module defines the base mapper class implementation.
 
@@ -17,7 +17,7 @@ from .abstract_mapper import AbstractMapper
 from ..models import AbstractModel
 from ..routes import AbstractRoute
 
-__all__ = ["BaseMapper"]
+__all__ = ["Mapper"]
 
 
 class Mapper(AbstractMapper):
@@ -35,21 +35,21 @@ class Mapper(AbstractMapper):
         __properties: Mapping[str, str],
         /,
     ) -> Mapper:
-        if not issubclass(__class, AbstractModel):
+        if not issubclass(__class, AbstractModel):  # type: ignore
             message = f"{__class} is not a subclass of 'AbstractModel'"
             raise TypeError(message)
 
-        if not isinstance(__route, AbstractRoute):
+        if not isinstance(__route, AbstractRoute):  # type: ignore
             message = f"expected type 'Route', got {type(__route)} instead"
             raise TypeError(message)
 
-        if not isinstance(__properties, Mapping):
+        if not isinstance(__properties, Mapping):  # type: ignore
             expected = "expected type 'Mapping'"
             actual = f"got {type(__properties)} instead"
             message = ", ".join([expected, actual])
             raise TypeError(message)
 
-        instance = super().__new__(cls)
+        instance = super().__new__(cls)  # type: ignore
         return instance
 
     def __init__(

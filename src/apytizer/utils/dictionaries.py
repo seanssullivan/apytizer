@@ -8,7 +8,10 @@ from typing import Any
 from typing import Collection
 from typing import Dict
 from typing import List
+from typing import Mapping
+from typing import MutableMapping
 from typing import Optional
+from typing import Set
 from typing import TypeVar
 from typing import Union
 
@@ -32,7 +35,9 @@ __all__ = [
 T = TypeVar("T")
 
 
-def deep_get(__d: dict, /, keys: str, default: Optional[object] = None) -> Any:
+def deep_get(
+    __d: Mapping[str, Any], /, keys: str, default: Optional[object] = None
+) -> Any:
     """Get value from nested dictionary object.
 
     Args:
@@ -48,7 +53,7 @@ def deep_get(__d: dict, /, keys: str, default: Optional[object] = None) -> Any:
 
     """
 
-    def _get(data: dict, key: str) -> Any:
+    def _get(data: Dict[str, Any], key: str) -> Any:
         """Get value of key from dictionary.
 
         Args:
@@ -73,7 +78,9 @@ def deep_get(__d: dict, /, keys: str, default: Optional[object] = None) -> Any:
     return value
 
 
-def deep_set(__d: dict, /, keys: Union[List[str], str], value: Any) -> dict:
+def deep_set(
+    __d: MutableMapping[str, Any], /, keys: Union[List[str], str], value: Any
+) -> MutableMapping[str, Any]:
     """Sets key to value in nested dictionary object.
 
     Args:
@@ -101,14 +108,15 @@ def deep_set(__d: dict, /, keys: Union[List[str], str], value: Any) -> dict:
             else value
         )
     except KeyError as error:
-        raise KeyError(f"{key}.{error.args[0]}") from error
+        raise KeyError(f"{key}.{error.args[0]}") from error  # type: ignore
+
     except (IndexError, TypeError) as error:
         raise KeyError(keys[0]) from error
-    else:
-        return __d
+
+    return __d
 
 
-def iter_get(__iter: List[dict], /, key: str) -> List[object]:
+def iter_get(__iter: List[Dict[str, Any]], /, key: str) -> List[object]:
     """Get value for key from each dictionary in an iterable object.
 
     Args:
@@ -129,7 +137,9 @@ def iter_get(__iter: List[dict], /, key: str) -> List[object]:
     return results
 
 
-def iter_set(__iter: List[dict], /, key: str, value: Any) -> List[dict]:
+def iter_set(
+    __iter: List[MutableMapping[str, Any]], /, key: str, value: Any
+) -> List[MutableMapping[str, Any]]:
     """Set value of key on each dictionary in an iterable object.
 
     Args:
@@ -175,12 +185,12 @@ def merge(
         raise TypeError("all arguments must be instances of 'dict'")
 
     def _merge_dictionaries(
-        first: dict,
-        second: dict,
+        first: Dict[str, Any],
+        second: Dict[str, Any],
         /,
         path: Optional[List[str]] = None,
         overwrite: bool = False,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """Merge two dictionaries.
 
         Args:
@@ -227,20 +237,20 @@ def merge(
 
         return first
 
-    def _merge_lists(first: list, second: list) -> list:
+    def _merge_lists(first: List[Any], second: List[Any]) -> List[Any]:
         return [*first, *second]
 
-    def _merge_sets(first: set, second: set) -> set:
+    def _merge_sets(first: Set[Any], second: Set[Any]) -> Set[Any]:
         return first.union(second)
 
     func = functools.partial(_merge_dictionaries, overwrite=overwrite)
-    result = functools.reduce(
+    result: Dict[str, Any] = functools.reduce(
         lambda acc, cur: func(acc, cur) if cur else acc, args, {}
-    )  # type: dict
+    )
     return result if result else None
 
 
-def omit(__d: dict, /, keys: Collection[str]) -> Dict[str, Any]:
+def omit(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
     """Omit multiple key-value pairs from dictionary.
 
     Args:
@@ -261,7 +271,7 @@ def omit(__d: dict, /, keys: Collection[str]) -> Dict[str, Any]:
     return results
 
 
-def pick(__d: dict, /, keys: Collection[str]) -> Dict[str, Any]:
+def pick(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
     """Pick multiple values from a dictionary.
 
     Args:
@@ -285,7 +295,7 @@ def pick(__d: dict, /, keys: Collection[str]) -> Dict[str, Any]:
 
 
 def remap_keys(
-    __d: dict, /, key_map: Dict[str, str], remove: bool = False
+    __d: Dict[str, Any], /, key_map: Dict[str, str], remove: bool = False
 ) -> Dict[str, Any]:
     """Remap dictionary object to new keys.
 
@@ -313,7 +323,7 @@ def remap_keys(
 
 
 def remove_nulls(
-    __d: dict, /, null_values: Collection[Any] = None
+    __d: Dict[str, Any], /, null_values: Optional[Collection[Any]] = None
 ) -> Dict[str, Any]:
     """Remove all null values from dictionary.
 

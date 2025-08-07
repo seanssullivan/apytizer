@@ -6,8 +6,8 @@ import functools
 from http import HTTPStatus
 import json
 import logging
+from typing import Any
 from typing import Callable
-from typing import Union
 
 # Third-Party Imports
 from requests import Response
@@ -24,7 +24,7 @@ log = logging.getLogger("apytizer")
 CONTENT_TYPE = "Content-Type"
 
 
-def json_response(func: Callable) -> Callable:
+def json_response(func: Callable[..., Response]) -> Callable[..., Any]:
     """Automatically parses a JSON response.
 
     Args:
@@ -36,7 +36,7 @@ def json_response(func: Callable) -> Callable:
     """
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Union[dict, list, Response]:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         """Wrapper applied to decorated function.
 
         Args:
@@ -47,7 +47,7 @@ def json_response(func: Callable) -> Callable:
             Parsed JSON or Response.
 
         """
-        response = func(*args, **kwargs)  # type: Response
+        response: Response = func(*args, **kwargs)
         if response.status_code == HTTPStatus.NO_CONTENT:
             return response
 
@@ -62,7 +62,7 @@ def json_response(func: Callable) -> Callable:
     return wrapper
 
 
-def parse_json_response(response: Response) -> Union[dict, list, Response]:
+def parse_json_response(response: Response) -> Any:
     """Parse JSON response.
 
     Args:

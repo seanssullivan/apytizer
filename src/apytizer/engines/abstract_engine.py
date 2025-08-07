@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/engines/abstract_engine.py
-"""Abstract engine class.
+"""Abstract Engine Class.
 
 This module defines an abstract engine class which provides an interface
 for subclasses to implement.
@@ -13,7 +13,7 @@ import abc
 from typing import Optional
 
 # Local Imports
-from ..connections import AbstractHttpConnection
+from ..connections import AbstractConnection
 from ..protocols import Protocol
 
 __all__ = ["AbstractEngine"]
@@ -35,7 +35,7 @@ class AbstractEngine(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def connect(self) -> AbstractHttpConnection:
+    def connect(self) -> AbstractConnection:
         """Establish connection.
 
         Returns:

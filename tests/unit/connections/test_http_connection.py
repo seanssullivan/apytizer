@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
+from typing import Any
+from typing import Dict
 from unittest.mock import Mock
 
 # Third-Party Imports
@@ -19,10 +21,14 @@ except ImportError:
 
 from ... import mocks
 
-# Constants:
-DEFAULT_FACTORY = sessionmaker(mocks.MockSession)
+# Custom types
+Headers = Dict[str, Any]
+Params = Dict[str, Any]
 
-# Media Types:
+# Constants
+DEFAULT_FACTORY = sessionmaker(mocks.MockSession)  # type: ignore
+
+# Media Types
 APPLICATION_JSON = "application/json"
 TEXT_HTML = "text/html"
 
@@ -178,33 +184,33 @@ def test_connection_sends_trace_request() -> None:
 # ----------------------------------------------------------------------------
 # --------------------------------- Requests ---------------------------------
 def assert_request_sent(__conn: HttpConnection) -> None:
-    mock = getattr(__conn.session, "mock")  # type: Mock
+    mock: Mock = getattr(__conn.session, "mock")
     mock.assert_called_once()
 
 
 def get_request(__conn: HttpConnection) -> Request:
-    mock = getattr(__conn.session, "mock")  # type: Mock
+    mock: Mock = getattr(__conn.session, "mock")
     return mock.call_args[0][0]
 
 
 # --------------------------------- Headers ----------------------------------
-def assert_headers_equal(__conn: HttpConnection, headers: dict) -> None:
+def assert_headers_equal(__conn: HttpConnection, headers: Headers) -> None:
     result = get_request_headers(__conn)
     assert result == headers
 
 
-def get_request_headers(__conn: HttpConnection) -> dict:
+def get_request_headers(__conn: HttpConnection) -> Headers:
     request = get_request(__conn)
     return request.headers
 
 
 # ---------------------------------- Params ----------------------------------
-def assert_params_equal(__conn: HttpConnection, params: dict) -> None:
+def assert_params_equal(__conn: HttpConnection, params: Params) -> None:
     result = get_request_params(__conn)
     assert result == params
 
 
-def get_request_params(__conn: HttpConnection) -> dict:
+def get_request_params(__conn: HttpConnection) -> Params:
     request = get_request(__conn)
     return request.params
 

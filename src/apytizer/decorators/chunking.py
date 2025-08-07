@@ -7,6 +7,7 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Iterable
+from typing import List
 from typing import Union
 
 # Third-Party Imports
@@ -18,7 +19,9 @@ from .. import utils
 __all__ = ["chunked_request"]
 
 
-def chunked_request(max_size: int) -> Callable:
+def chunked_request(
+    max_size: int,
+) -> Callable[..., Callable[..., Union[Dict[str, Any], Response]]]:
     """Split request payload based on maximum request size.
 
     Args:
@@ -30,8 +33,8 @@ def chunked_request(max_size: int) -> Callable:
     """
 
     def decorator(
-        func: Callable[[list], Union[dict, Response]]
-    ) -> Callable[..., Union[dict, Response]]:
+        func: Callable[[Any, List[Any]], Union[Dict[str, Any], Response]],
+    ) -> Callable[..., Union[Dict[str, Any], Response]]:
         """Decorator function for handling chunking.
 
         Args:
@@ -44,8 +47,8 @@ def chunked_request(max_size: int) -> Callable:
 
         @functools.wraps(func)
         def wrapper(
-            self, data: list, *args, **kwargs
-        ) -> Union[dict, Response]:
+            self: Any, data: List[Any], *args: Any, **kwargs: Any
+        ) -> Union[Dict[str, Any], Response]:
             """Wrapper applied to decorated function.
 
             Args:
@@ -57,7 +60,7 @@ def chunked_request(max_size: int) -> Callable:
                 Results.
 
             """
-            if not isinstance(data, Iterable):
+            if not isinstance(data, Iterable):  # type: ignore
                 message = f"expected iterable object, got {type(data)} instead"
                 raise TypeError(message)
 
@@ -75,8 +78,8 @@ def chunked_request(max_size: int) -> Callable:
 
 
 def update_results(
-    results: Dict[str, list],
-    response: Dict[str, list],
+    results: Dict[str, List[Any]],
+    response: Union[Dict[str, List[Any]], Response],
 ) -> Dict[str, Any]:
     """Update results with response data.
 
@@ -88,7 +91,10 @@ def update_results(
         Updated results.
 
     """
-    if not isinstance(response, dict):
+    if isinstance(response, Response) and response.ok:
+        return results
+
+    if not isinstance(response, dict):  # type: ignore
         message = f"expected type `dict`, got {type(response)} instead"
         raise TypeError(message)
 

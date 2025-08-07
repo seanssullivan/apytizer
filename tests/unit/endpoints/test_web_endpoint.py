@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
+from typing import Dict
+from typing import Type
 from unittest.mock import Mock
 
 # Third-Party Imports
@@ -8,18 +10,20 @@ import pytest
 
 # Local Imports
 try:
-    from apytizer.apis import BaseWebAPI
-    from apytizer.endpoints import BaseEndpoint
-    from apytizer.engines import BaseEngine
+    from apytizer.apis import WebAPI
+    from apytizer.endpoints import WebEndpoint
+    from apytizer.engines import HTTPEngine
     from apytizer.http_methods import HTTPMethod
+    from apytizer.routes import AbstractRoute
     from apytizer.routes import Route
     from apytizer import errors
 
 except ImportError:
-    from src.apytizer.apis import BaseWebAPI
-    from src.apytizer.endpoints import BaseEndpoint
-    from src.apytizer.engines import BaseEngine
+    from src.apytizer.apis import WebAPI
+    from src.apytizer.endpoints import WebEndpoint
+    from src.apytizer.engines import HTTPEngine
     from src.apytizer.http_methods import HTTPMethod
+    from src.apytizer.routes import AbstractRoute
     from src.apytizer.routes import Route
     from src.apytizer import errors
 
@@ -43,7 +47,7 @@ ALLOWED_METHODS = {
 # Tests for Base Endpoint
 # ----------------------------------------------------------------------------
 def test_url_contains_base_and_path(mock_api: mocks.MockAPI) -> None:
-    endpoint = BaseEndpoint(mock_api, "test")
+    endpoint = WebEndpoint(mock_api, "test")
     assert endpoint.url == mock_api.url + "test"
 
 
@@ -51,7 +55,7 @@ def test_url_contains_base_and_path(mock_api: mocks.MockAPI) -> None:
 def test_endpoint_method_sends_request(
     mock_api: mocks.MockAPI, method: str
 ) -> None:
-    endpoint = BaseEndpoint(mock_api, "test")
+    endpoint = WebEndpoint(mock_api, "test")
     getattr(endpoint, method.lower())()
     assert_method_called(mock_api, method)
 
@@ -61,7 +65,7 @@ def test_endpoint_raises_error_when_method_not_allowed(
     mock_api: mocks.MockAPI, method: str
 ) -> None:
     allowed_methods = [HTTPMethod(m) for m in ALLOWED_METHODS if m != method]
-    endpoint = BaseEndpoint(mock_api, "test", methods=allowed_methods)
+    endpoint = WebEndpoint(mock_api, "test", methods=allowed_methods)
 
     with pytest.raises(errors.MethodNotAllowed):
         getattr(endpoint, method.lower())()
@@ -73,7 +77,7 @@ def test_endpoint_raises_error_when_method_not_allowed(
 def test_endpoint_caches_response_when_cache_provided(
     mock_api: mocks.MockAPI, method: str
 ) -> None:
-    endpoint = BaseEndpoint(mock_api, "test", cache={})
+    endpoint = WebEndpoint(mock_api, "test", cache={})
 
     getattr(endpoint, method.lower())()
     getattr(endpoint, method.lower())()
@@ -85,7 +89,7 @@ def test_endpoint_caches_response_when_cache_provided(
 def test_endpoint_does_not_cache_response_when_no_cache_provided(
     mock_api: mocks.MockAPI, method: str
 ) -> None:
-    endpoint = BaseEndpoint(mock_api, "test")
+    endpoint = WebEndpoint(mock_api, "test")
 
     getattr(endpoint, method.lower())()
     getattr(endpoint, method.lower())()
@@ -94,91 +98,95 @@ def test_endpoint_does_not_cache_response_when_no_cache_provided(
 
 
 def test_indexing_returns_endpoint() -> None:
-    api = BaseWebAPI(BaseEngine("testing.com"))
-    endpoint = BaseEndpoint(api, "test")
+    api = WebAPI(HTTPEngine("testing.com"))
+    endpoint = WebEndpoint(api, "test")
     result = endpoint["success"]
-    assert isinstance(result, BaseEndpoint)
+    assert isinstance(result, WebEndpoint)
 
 
 def test_slash_operator_returns_endpoint() -> None:
-    api = BaseWebAPI(BaseEngine("testing.com"))
-    endpoint = BaseEndpoint(api, "test")
+    api = WebAPI(HTTPEngine("testing.com"))
+    endpoint = WebEndpoint(api, "test")
     result = endpoint / "success"
-    assert isinstance(result, BaseEndpoint)
+    assert isinstance(result, WebEndpoint)
 
 
 def test_indexing_returns_custom_endpoint() -> None:
-    class TestEndpoint(BaseEndpoint): ...
+    class TestEndpoint(WebEndpoint): ...
 
-    endpoints = {Route("test/success"): TestEndpoint}
-    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
-    endpoint = BaseEndpoint(api, "test")
+    endpoints: Dict[AbstractRoute, Type[WebEndpoint]] = {
+        Route("test/success"): TestEndpoint
+    }
+    api = WebAPI(HTTPEngine("testing.com"), endpoints)
+    endpoint = WebEndpoint(api, "test")
     result = endpoint["success"]
     assert isinstance(result, TestEndpoint)
 
 
 def test_slash_operator_returns_custom_endpoint() -> None:
-    class TestEndpoint(BaseEndpoint): ...
+    class TestEndpoint(WebEndpoint): ...
 
-    endpoints = {Route("test/success"): TestEndpoint}
-    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
-    endpoint = BaseEndpoint(api, "test")
+    endpoints: Dict[AbstractRoute, Type[WebEndpoint]] = {
+        Route("test/success"): TestEndpoint
+    }
+    api = WebAPI(HTTPEngine("testing.com"), endpoints)
+    endpoint = WebEndpoint(api, "test")
     result = endpoint / "success"
     assert isinstance(result, TestEndpoint)
 
 
 def test_indexing_returns_endpoint_with_path_argument() -> None:
-    class TestEndpoint(BaseEndpoint): ...
+    class TestEndpoint(WebEndpoint): ...
 
-    endpoints = {
-        Route("test"): BaseEndpoint,
+    endpoints: Dict[AbstractRoute, Type[WebEndpoint]] = {
+        Route("test"): WebEndpoint,
         Route("test/{}"): TestEndpoint,
-        Route("test/failure"): BaseEndpoint,
+        Route("test/failure"): WebEndpoint,
     }
-    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
-    endpoint = BaseEndpoint(api, "test")
+    api = WebAPI(HTTPEngine("testing.com"), endpoints)
+    endpoint = WebEndpoint(api, "test")
     result = endpoint["1"]
     assert isinstance(result, TestEndpoint)
 
 
 def test_slash_operator_returns_endpoint_with_path_argument() -> None:
-    class TestEndpoint(BaseEndpoint): ...
+    class TestEndpoint(WebEndpoint): ...
 
-    endpoints = {
-        Route("test"): BaseEndpoint,
+    endpoints: Dict[AbstractRoute, Type[WebEndpoint]] = {
+        Route("test"): WebEndpoint,
         Route("test/{}"): TestEndpoint,
-        Route("test/failure"): BaseEndpoint,
+        Route("test/failure"): WebEndpoint,
     }
-    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
-    endpoint = BaseEndpoint(api, "test")
+    api = WebAPI(HTTPEngine("testing.com"), endpoints)
+    endpoint = WebEndpoint(api, "test")
     result = endpoint / "1"
     assert isinstance(result, TestEndpoint)
 
 
 def test_indexing_returns_most_specific_endpoint() -> None:
-    class TestEndpoint(BaseEndpoint): ...
+    class TestEndpoint(WebEndpoint): ...
 
-    endpoints = {
-        Route("test"): BaseEndpoint,
-        Route("test/{}"): BaseEndpoint,
+    endpoints: Dict[AbstractRoute, Type[WebEndpoint]] = {
+        Route("test"): WebEndpoint,
+        Route("test/{}"): WebEndpoint,
         Route("test/success"): TestEndpoint,
     }
-    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
-    endpoint = BaseEndpoint(api, "test")
+    api = WebAPI(HTTPEngine("testing.com"), endpoints)
+    endpoint = WebEndpoint(api, "test")
     result = endpoint["success"]
     assert isinstance(result, TestEndpoint)
 
 
 def test_slash_operator_returns_most_specific_endpoint() -> None:
-    class TestEndpoint(BaseEndpoint): ...
+    class TestEndpoint(WebEndpoint): ...
 
-    endpoints = {
-        Route("test"): BaseEndpoint,
-        Route("test/{}"): BaseEndpoint,
+    endpoints: Dict[AbstractRoute, Type[WebEndpoint]] = {
+        Route("test"): WebEndpoint,
+        Route("test/{}"): WebEndpoint,
         Route("test/success"): TestEndpoint,
     }
-    api = BaseWebAPI(BaseEngine("testing.com"), endpoints)
-    endpoint = BaseEndpoint(api, "test")
+    api = WebAPI(HTTPEngine("testing.com"), endpoints)
+    endpoint = WebEndpoint(api, "test")
     result = endpoint / "success"
     assert isinstance(result, TestEndpoint)
 
@@ -187,17 +195,17 @@ def test_slash_operator_returns_most_specific_endpoint() -> None:
 # Helpers
 # ----------------------------------------------------------------------------
 def assert_method_called(__api: mocks.MockAPI, method: str) -> None:
-    func = getattr(__api.connection, method.lower())  # type: Mock
+    func: Mock = getattr(__api.connection, method.lower())
     assert func.called
 
 
 def assert_method_call_count(
     __api: mocks.MockAPI, method: str, count: int
 ) -> None:
-    func = getattr(__api.connection, method.lower())  # type: Mock
+    func: Mock = getattr(__api.connection, method.lower())
     assert func.call_count == count
 
 
 def assert_method_not_called(__api: mocks.MockAPI, method: str) -> None:
-    func = getattr(__api.connection, method.lower())  # type: Mock
+    func: Mock = getattr(__api.connection, method.lower())
     assert not func.called

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/states/abstract_state.py
-"""Abstract state class interface.
+"""Abstract State Class Interface.
 
 This module defines an abstract state class which provides an interface
 for subclasses to implement.
@@ -13,6 +13,7 @@ import abc
 from typing import Any
 from typing import Generator
 from typing import Mapping
+from typing import Optional
 
 __all__ = ["AbstractState"]
 
@@ -37,7 +38,7 @@ class AbstractState(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __iter__(self) -> Generator:
+    def __iter__(self) -> Generator[Any, None, None]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -51,7 +52,11 @@ class AbstractState(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, __m: Mapping = None, **kwargs) -> None:
+    def update(
+        self,
+        __m: Optional[Mapping[str, Any]] = None,
+        **kwargs: Any,
+    ) -> None:
         """Abstract method for updating state."""
         raise NotImplementedError
 

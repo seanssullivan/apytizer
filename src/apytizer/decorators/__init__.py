@@ -3,5 +3,5 @@
 
 from .caching import *
 from .connection import *
-from .json import *
+from .json_response import *
 from .pagination import *

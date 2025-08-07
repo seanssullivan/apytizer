@@ -3,4 +3,4 @@
 
 # Local Imports
 from .abstract_repository import *
-from .base_repository import *
+from .managed_repository import *

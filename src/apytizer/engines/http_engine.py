@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/engines/base_engine.py
-"""Base engine class.
+"""Base Engine Class.
 
 This module defines the base engine class implementation.
 
@@ -9,7 +9,7 @@ This module defines the base engine class implementation.
 # Standard Library Imports
 from typing import Any
 from typing import Dict
-from typing import Mapping
+from typing import MutableMapping
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -26,15 +26,15 @@ from ..protocols import Protocol
 from ..protocols import get_protocol
 from ..utils import errors
 
-__all__ = ["BaseEngine"]
+__all__ = ["HTTPEngine"]
 
 
 # Custom types:
 T = TypeVar("T")
 
 
-class BaseEngine(AbstractEngine):
-    """Implements an engine.
+class HTTPEngine(AbstractEngine):
+    """Implements an HTTP engine.
 
     Args:
         url: Base URL.
@@ -62,7 +62,7 @@ class BaseEngine(AbstractEngine):
         cert: Optional[Union[str, Tuple[str, str]]] = None,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        proxies: Optional[Mapping] = None,
+        proxies: Optional[MutableMapping[str, str]] = None,
         stream: Optional[bool] = False,
         timeout: Optional[Union[float, Tuple[float, float]]] = None,
         verify: Optional[bool] = True,
@@ -107,7 +107,7 @@ class BaseEngine(AbstractEngine):
         return result
 
 
-def standardize_url(__url: str, /) -> str:
+def standardize_url(__url: Any, /) -> str:
     """Standardize URL.
 
     Args:

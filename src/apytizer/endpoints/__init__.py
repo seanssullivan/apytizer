@@ -3,4 +3,4 @@
 
 # Local Imports
 from .abstract_endpoint import *
-from .base_endpoint import *
+from .web_endpoint import *

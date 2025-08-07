@@ -13,14 +13,11 @@ import abc
 from typing import Optional
 from typing import TYPE_CHECKING
 
-# Third-Party Imports
-from requests import Response
-
 # Local Imports
-from ..connections import AbstractHttpConnection
+from ..connections import AbstractConnection
 
 if TYPE_CHECKING:
-    from ..apis import AbstractWebAPI
+    from ..apis import AbstractAPI
 
 __all__ = ["AbstractEndpoint"]
 
@@ -30,176 +27,12 @@ class AbstractEndpoint(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def api(self) -> "AbstractWebAPI":
+    def api(self) -> "AbstractAPI":
         """API."""
         raise NotImplementedError
 
     @property
     @abc.abstractmethod
-    def connection(self) -> Optional[AbstractHttpConnection]:
+    def connection(self) -> Optional[AbstractConnection]:
         """Connection with which to make requests."""
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def path(self) -> str:
-        """Endpoint path."""
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def url(self) -> str:
-        """Endpoint URL."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def head(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP HEAD request.
-
-        This method must call the `get` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP GET request.
-
-        This method must call the `get` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def post(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP POST request.
-
-        This method must call the `post` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def put(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP PUT request.
-
-        This method must call the `put` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def patch(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP PATCH request.
-
-        This method must call the `patch` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def delete(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP DELETE request.
-
-        This method must call the `delete` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def options(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP OPTIONS request.
-
-        This method must call the `options` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def trace(self, *args, **kwargs) -> Response:
-        """Abstract method for sending an HTTP TRACE request.
-
-        This method must call the `trace` method on the parent `API` instance.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Response object.
-
-        .. _MDN Web Docs:
-            https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE
-
-        """
         raise NotImplementedError

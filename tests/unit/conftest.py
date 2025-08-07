@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Standard Library Imports
-from unittest.mock import Mock
-
 # Third-Party Imports
 import pytest
 
@@ -11,7 +8,7 @@ from .. import mocks
 
 
 @pytest.fixture
-def mock_engine() -> Mock:
+def mock_engine() -> mocks.MockEngine:
     """Fixture mocks `BaseAPI` interface.
 
     Returns:

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/repositories/base_repository.py
-"""Base repository class.
+# src/apytizer/repositories/managed_repository.py
+"""Managed Repository Class.
 
-This module defines a base implementation of a repository class.
+This module defines a managed repository class.
 
 """
 
 # Standard Library Imports
 from typing import Any
 from typing import List
+from typing import Optional
 from typing import Set
 from typing import TYPE_CHECKING
 
@@ -19,11 +20,11 @@ if TYPE_CHECKING:
     from ..managers import AbstractManager
     from ..models import AbstractModel
 
-__all__ = ["BaseRepository"]
+__all__ = ["ManagedRepository"]
 
 
-class BaseRepository(AbstractRepository):
-    """Implements a base repository.
+class ManagedRepository(AbstractRepository):
+    """Implements a managed repository.
 
     Args:
         manager: Manager.
@@ -34,10 +35,10 @@ class BaseRepository(AbstractRepository):
     def __init__(
         self,
         manager: AbstractManager,
-        objects: List[AbstractModel] = None,
+        objects: Optional[List[AbstractModel]] = None,
     ) -> None:
         self._manager = manager
-        self._objects = set(objects or [])  # type: Set[AbstractModel]
+        self._objects: Set[AbstractModel] = set(objects or [])
 
     @property
     def objects(self) -> List[AbstractModel]:

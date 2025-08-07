@@ -9,7 +9,9 @@ This module defines the implementation of a base model class.
 # Standard Library Imports
 from __future__ import annotations
 from typing import Any
+from typing import Generator
 from typing import Mapping
+from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
 
@@ -33,7 +35,7 @@ class BaseModel(AbstractModel):
 
     reference: Union[int, str]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         self._state = states.BaseState(kwargs)
 
     @property
@@ -75,13 +77,13 @@ class BaseModel(AbstractModel):
         value = self._state[key]
         return value
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
         yield from self._state.items()
 
     def __repr__(self) -> str:
         return self.__class__.__name__
 
-    def update(self, __m: Mapping = None, **kwargs) -> None:
+    def update(self, __m: Mapping[str, Any], **kwargs: Any) -> None:
         """Update local state with provided data.
 
         Args:

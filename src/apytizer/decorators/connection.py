@@ -4,12 +4,13 @@
 # Standard Library Imports
 import functools
 import logging
-from typing import Callable, Union
+from typing import Any
+from typing import Callable
+from typing import Optional
 
 # Third-Party Imports
-import requests
+from requests import Response
 from requests.exceptions import ConnectionError
-from requests.exceptions import RequestException
 from requests.exceptions import Timeout
 
 __all__ = ["confirm_connection"]
@@ -19,8 +20,8 @@ log = logging.getLogger("apytizer")
 
 
 def confirm_connection(
-    func: Callable[..., requests.Response],
-) -> Callable[..., Union[requests.Response, RequestException]]:
+    func: Callable[..., Optional[Response]],
+) -> Callable[..., Optional[Response]]:
     """Confirms successful connection to API.
 
     Args:
@@ -32,9 +33,7 @@ def confirm_connection(
     """
 
     @functools.wraps(func)
-    def wrapper(
-        self, *args, **kwargs
-    ) -> Union[requests.Response, RequestException]:
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Optional[Response]:
         """Wrapper applied to decorated function.
 
         Args:
@@ -46,18 +45,17 @@ def confirm_connection(
 
         """
         try:
-            response = func(self, *args, **kwargs)  # type: requests.Response
+            response = func(self, *args, **kwargs)
 
         except ConnectionError as error:
             handle_connection_error(error)
-            return error
+            return error.response
 
         except Timeout as error:
             handle_timeout_error(error)
-            return error
+            return error.response
 
-        else:
-            return response
+        return response
 
     functools.update_wrapper(wrapper, func)
     return wrapper

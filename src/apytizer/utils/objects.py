@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-def deep_getattr(__o: object, __name: Iterable, /) -> Any:
+def deep_getattr(__o: object, __name: Iterable[str], /) -> Any:
     """Get value of attribute in nested object.
 
     Args:
@@ -33,7 +33,7 @@ def deep_getattr(__o: object, __name: Iterable, /) -> Any:
         Value of attribute in nested object.
 
     """
-    if not isinstance(__name, Iterable):
+    if not isinstance(__name, Iterable):  # type: ignore
         message = f"'{type(__name)}' object is not iterable"
         raise TypeError(message)
 
@@ -108,7 +108,7 @@ def iter_getattr(__iter: Iterable[object], __name: str, /) -> List[Any]:
         ValueError: when not all items are mappings.
 
     """
-    if not isinstance(__iter, Iterable):
+    if not isinstance(__iter, Iterable):  # type: ignore
         raise TypeError("must be an iterable object")
 
     if not allinstance(__iter, object):
@@ -133,7 +133,7 @@ def iter_setattr(
         ValueError: when not all items are objects.
 
     """
-    if not isinstance(__iter, Iterable):
+    if not isinstance(__iter, Iterable):  # type: ignore
         raise TypeError("must be an iterable object")
 
     if not allinstance(__iter, object):

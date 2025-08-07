@@ -3,7 +3,9 @@
 
 # Standard Library Imports
 import functools
+from typing import Any
 from typing import Callable
+from typing import Dict
 from typing import Generator
 from typing import TypeVar
 
@@ -27,8 +29,8 @@ class pagination:
 
     def __init__(
         self,
-        reducer: Callable[[dict, dict], dict],
-        callback: Callable[[dict, dict], bool],
+        reducer: Callable[[Dict[str, Any], Any], Dict[str, Any]],
+        callback: Callable[[Dict[str, Any], Any], bool],
     ) -> None:
         self._reducer = reducer
         self._callback = callback
@@ -47,7 +49,7 @@ class pagination:
         """
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> Generator[T, None, None]:
+        def wrapper(*args: Any, **kwargs: Any) -> Generator[T, None, None]:
             """Wrapper applied to decorated function.
 
             Args:
@@ -56,7 +58,7 @@ class pagination:
 
             """
             completed = False
-            state = {"args": args, "kwargs": kwargs}
+            state: Dict[str, Any] = {"args": args, "kwargs": kwargs}
 
             while not completed:
                 response = func(*state["args"], **state["kwargs"])

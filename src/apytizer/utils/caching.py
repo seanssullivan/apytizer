@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Import
+from typing import Any
 from typing import Callable
 from typing import Hashable
 from typing import Tuple
@@ -19,11 +20,20 @@ def generate_key(*tags: str) -> Callable[..., Tuple[Hashable, ...]]:
 
     """
 
-    def hash_parameters(*args, **kwargs) -> Tuple[Hashable, ...]:
-        """Hashes function parameters."""
-        key = hashkey(
+    def hash_parameters(*args: Any, **kwargs: Any) -> Tuple[Hashable, ...]:
+        """Hashes function parameters.
+
+        Args:
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+
+        Return:
+            Cache Key.
+
+        """
+        result = hashkey(
             *tags, *args, *[f"{k!s}={v!s}" for k, v in sorted(kwargs.items())]
         )
-        return key
+        return result
 
     return hash_parameters

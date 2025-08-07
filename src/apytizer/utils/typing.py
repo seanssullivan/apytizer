@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
-from typing import Any, Iterable, Tuple, Type, Union
+from typing import Any
+from typing import Iterable
+from typing import Tuple
+from typing import Type
+from typing import Union
 
 __all__ = ["allinstance"]
 
 
 def allinstance(
-    __objs: Iterable, __class_or_tuple: Union[Tuple[Type[Any], ...], type], /
+    __objs: Iterable[Any],
+    __class_or_tuple: Union[Tuple[Type[Any], ...], type],
+    /,
 ) -> bool:
     """Whether all elements in an iterable object are instances of provided type(s).
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/sessions/abstract_session.py
-"""Abstract session class.
+"""Abstract Session Class.
 
 This module defines an abstract session class which provides an interface
 for subclasses to implement.
@@ -9,6 +9,7 @@ for subclasses to implement.
 
 # Standard Library Imports
 import abc
+from typing import Any
 from typing import TYPE_CHECKING
 
 # Third-Party Imports
@@ -47,7 +48,7 @@ class AbstractSession(abc.ABC):
 
     @abc.abstractmethod
     def send(
-        self, __request: requests.Request, /, **kwargs
+        self, __request: requests.Request, /, **kwargs: Any
     ) -> requests.Response:
         """Send an HTTP request.
 

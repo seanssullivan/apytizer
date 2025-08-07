@@ -24,3 +24,11 @@ class RequestError(Exception):
 
 class MethodNotAllowed(RequestError):
     """Error raised when request method not allowed."""
+
+
+class SessionError(Exception):
+    """Base class for session errors."""
+
+
+class SessionNotStarted(SessionError):
+    """Error raised when session not started."""

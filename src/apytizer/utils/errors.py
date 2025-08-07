@@ -4,7 +4,6 @@
 # Standard Library Imports
 from typing import Any
 from typing import Tuple
-from typing import Type
 from typing import Union
 
 # Local Imports
@@ -71,7 +70,7 @@ def _raise_for_multiple_types(
     raise TypeError(message)
 
 
-def _raise_for_single_type(__value: object, __type: Type, /) -> None:
+def _raise_for_single_type(__value: object, __type: type, /) -> None:
     """Raise error if value is not an instance of expected type.
 
     Args:
@@ -84,7 +83,7 @@ def _raise_for_single_type(__value: object, __type: Type, /) -> None:
     raise TypeError(message)
 
 
-def raise_for_none(*args, **kwargs) -> None:
+def raise_for_none(*args: Any, **kwargs: Any) -> None:
     """Raise error if value is None.
 
     Args:

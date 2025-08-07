@@ -10,6 +10,7 @@ for subclasses to implement.
 # Standard Library Imports
 from __future__ import annotations
 import abc
+from typing import Any
 from typing import Mapping
 from typing import TYPE_CHECKING
 
@@ -50,7 +51,7 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Any:
         """Abstract method for getting an attribute from state.
 
         Returns:
@@ -60,7 +61,7 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __getitem__(self, name: str):
+    def __getitem__(self, name: str) -> Any:
         """Abstract method for getting an item from state.
 
         Returns:
@@ -75,7 +76,7 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, __m: Mapping = None, **kwargs) -> None:
+    def update(self, __m: Mapping[str, Any], **kwargs: Any) -> None:
         """Abstract method for updating state of model."""
         raise NotImplementedError
 

@@ -4,6 +4,7 @@
 # Standard Library Imports
 import functools
 import operator
+from typing import Any
 from typing import Callable
 from typing import TypeVar
 
@@ -36,7 +37,7 @@ def cache_response(func: Callable[..., T]) -> Callable[..., T]:
     )(func)
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> T:
+    def wrapper(*args: Any, **kwargs: Any) -> T:
         """Wrapper applied to decorated function."""
         return cached_func(*args, **kwargs)
 

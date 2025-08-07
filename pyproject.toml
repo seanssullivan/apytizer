@@ -1,9 +1,9 @@
-[dev-dependencies]
-black = { version = "^22.10.0", python = "^3.9" }
-
 [build-system]
 requires = ["setuptools >= 44.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[dev-dependencies]
+black = { version = "^22.10.0", python = "^3.9" }
 
 [tool.black]
 line-length = 79

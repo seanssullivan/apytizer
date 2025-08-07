@@ -59,7 +59,7 @@ def test_get_method_raises_type_error_when_passed_a_dictionary() -> None:
         },
     )
     with pytest.raises(TypeError):
-        model[{"status": "progress"}]
+        model[{"status": "progress"}]  # type: ignore
 
 
 def test_update_method_changes_model_state() -> None:
@@ -147,7 +147,7 @@ def test_getitem_method_raises_type_error_when_passed_a_dictionary() -> None:
         }
     )
     with pytest.raises(TypeError):
-        state[{"status": "progress"}]
+        state[{"status": "progress"}]  # type: ignore
 
 
 def test_sets_nested_items_from_string_of_keys() -> None:
@@ -188,8 +188,8 @@ def test_update_does_not_overwrite_default_context() -> None:
     }
     state = BaseState(default=data)
     state.update({"status": "completed"})
-    assert state._state.maps[0] == {"status": "completed"}
-    assert state._state.maps[-1] == data
+    assert state._state.maps[0] == {"status": "completed"}  # type: ignore
+    assert state._state.maps[-1] == data  # type: ignore
 
 
 def test_save_adds_new_context_to_state() -> None:
@@ -202,8 +202,8 @@ def test_save_adds_new_context_to_state() -> None:
     )
     state.update({"status": "completed"})
     state.save()
-    assert not state._state.maps[0]
-    assert state._state.maps[1] == {"status": "completed"}
+    assert not state._state.maps[0]  # type: ignore
+    assert state._state.maps[1] == {"status": "completed"}  # type: ignore
 
 
 def test_save_does_not_add_a_context_when_there_are_no_updates() -> None:
@@ -213,8 +213,8 @@ def test_save_does_not_add_a_context_when_there_are_no_updates() -> None:
         "status": "in progress",
     }
     state = BaseState(default=data)
-    assert not state._state.maps[0]
+    assert not state._state.maps[0]  # type: ignore
 
     state.save()
-    assert len(state._state.maps) == 2
-    assert state._state.maps[1] == data
+    assert len(state._state.maps) == 2  # type: ignore
+    assert state._state.maps[1] == data  # type: ignore

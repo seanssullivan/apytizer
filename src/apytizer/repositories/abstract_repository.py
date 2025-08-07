@@ -29,7 +29,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def add(self, obj: AbstractModel) -> None:
+    def add(self, obj: AbstractModel, /) -> None:
         """Abstract method to add an object to repository.
 
         This method only adds an object to the local state of the repository.
@@ -43,7 +43,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, ref: Any, *args, **kwargs) -> AbstractModel:
+    def get(self, ref: Any, *args: Any, **kwargs: Any) -> AbstractModel:
         """Abstract method to get an object from the repository.
 
         If the object is not found in local state, a request is send to the
@@ -61,7 +61,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def remove(self, obj: AbstractModel) -> None:
+    def remove(self, obj: AbstractModel, /) -> None:
         """Abstract method to remove an object from repository.
 
         Args:

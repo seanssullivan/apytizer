@@ -3,7 +3,9 @@
 # pylint: disable=redefined-outer-name
 
 # Standard Library Imports
+from typing import Any
 from typing import Callable
+from typing import Dict
 from unittest.mock import Mock
 
 # Third-Party Imports
@@ -20,10 +22,10 @@ except ImportError:
 
 
 @pytest.fixture
-def callback() -> Callable[[dict, dict], bool]:
+def callback() -> Callable[[Dict[str, Any], Dict[str, Any]], bool]:
     """Callback fixture."""
 
-    def _callback(state: dict, resp: dict) -> bool:
+    def _callback(state: Dict[str, Any], resp: Dict[str, Any]) -> bool:
         """Callback function.
 
         Args:
@@ -34,18 +36,21 @@ def callback() -> Callable[[dict, dict], bool]:
             Whether pagination is complete.
 
         """
-        results = state.get("results", 0)  # type: int
-        total = resp.get("total", 0)  # type: int
+        results: int = state.get("results", 0)
+        total: int = resp.get("total", 0)
         return results >= total
 
     return _callback
 
 
 @pytest.fixture
-def reducer() -> Callable[[dict, dict], dict]:
+def reducer() -> Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]]:
     """Reducer fixture."""
 
-    def _reducer(state: dict, resp: dict) -> bool:
+    def _reducer(
+        state: Dict[str, Dict[str, Any]],
+        resp: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Reducer function.
 
         Args:
@@ -56,37 +61,29 @@ def reducer() -> Callable[[dict, dict], dict]:
             State.
 
         """
-        kwargs = state.get("kwargs")  # type: dict
         results = get_results(state, resp)
         total = get_total(state, resp)
 
-        received_results = resp.get("results", 0)
-        result = {**state, "results": results, "total": total}
+        kwargs: Dict[str, Any] = state["kwargs"]
+        num_results: int = resp.get("results", 0)
+        result: Dict[str, Any] = {**state, "results": results, "total": total}
+
         if "data" in kwargs and "startAt" in kwargs["data"]:
-            result["kwargs"] = {
-                "data": {
-                    "startAt": utils.deep_get(state, "kwargs.data.startAt", 0)
-                    + received_results
-                }
-            }
+            old_start: int = utils.deep_get(state, "kwargs.data.startAt", 0)
+            result["kwargs"] = {"data": {"startAt": old_start + num_results}}
 
         if "params" in kwargs and "startAt" in kwargs["params"]:
-            result["kwargs"] = {
-                "params": {
-                    "startAt": utils.deep_get(
-                        state, "kwargs.params.startAt", 0
-                    )
-                    + received_results
-                }
-            }
+            old_start: int = utils.deep_get(state, "kwargs.params.startAt", 0)
+            result["kwargs"] = {"params": {"startAt": old_start + num_results}}
+
         return result
 
     return _reducer
 
 
 def test_pagination_repeats_request(
-    callback: Callable[[dict, dict], bool],
-    reducer: Callable[[dict, dict], dict],
+    callback: Callable[[Dict[str, Any], Dict[str, Any]], bool],
+    reducer: Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]],
 ) -> None:
     request = create_mock_request(response={"results": 1, "total": 2})
     decorator = pagination(reducer=reducer, callback=callback)
@@ -99,8 +96,8 @@ def test_pagination_repeats_request(
 
 
 def test_pagination_updates_parameters(
-    callback: Callable[[dict, dict], bool],
-    reducer: Callable[[dict, dict], dict],
+    callback: Callable[[Dict[str, Any], Dict[str, Any]], bool],
+    reducer: Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]],
 ) -> None:
     request = create_mock_request(response={"results": 1, "total": 2})
     decorator = pagination(reducer=reducer, callback=callback)
@@ -116,8 +113,8 @@ def test_pagination_updates_parameters(
 
 
 def test_pagination_updates_data(
-    callback: Callable[[dict, dict], bool],
-    reducer: Callable[[dict, dict], dict],
+    callback: Callable[[Dict[str, Any], Dict[str, Any]], bool],
+    reducer: Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]],
 ) -> None:
     request = create_mock_request(response={"results": 1, "total": 2})
     decorator = pagination(reducer=reducer, callback=callback)
@@ -141,7 +138,7 @@ def create_mock_request(*, response: object) -> Mock:
     return mock_request
 
 
-def get_results(state: dict, resp: dict) -> int:
+def get_results(state: Dict[str, Any], resp: Dict[str, Any]) -> int:
     """Get number of results from state and response.
 
     Args:
@@ -152,13 +149,13 @@ def get_results(state: dict, resp: dict) -> int:
         Number of results.
 
     """
-    from_state = state.get("results", 0)  # type: int
-    from_resp = resp.get("results", 0)  # type: int
+    from_state: int = state.get("results", 0)
+    from_resp: int = resp.get("results", 0)
     result = from_state + from_resp if from_state else from_resp
     return result
 
 
-def get_total(_, res: dict) -> int:
+def get_total(_, res: Dict[str, Any]) -> int:
     """Get total from state and response.
 
     Args:
@@ -169,5 +166,5 @@ def get_total(_, res: dict) -> int:
         Total.
 
     """
-    result = res.get("total", 0)  # type: int
+    result: int = res.get("total", 0)
     return result

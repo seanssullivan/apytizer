@@ -19,7 +19,7 @@ class Route(AbstractRoute):
     """
 
     def __init__(self, __value: str = "/", /) -> None:
-        if not isinstance(__value, (AbstractRoute, str)):
+        if not isinstance(__value, (AbstractRoute, str)):  # type: ignore
             message = f"expected type 'str', got {type(__value)} instead"
             raise TypeError(message)
 
@@ -61,7 +61,7 @@ class Route(AbstractRoute):
         result = tuple(self_segments) < tuple(other_segments)
         return result
 
-    def __add__(self, other: str) -> str:
+    def __add__(self, other: object) -> AbstractRoute:
         if not isinstance(other, str):
             message = f"expected type 'str', got {type(other)} instead"
             raise TypeError(message)
@@ -69,7 +69,7 @@ class Route(AbstractRoute):
         result = Route(self._value + other.strip("/"))
         return result
 
-    def __truediv__(self, other: object) -> str:
+    def __truediv__(self, other: object) -> AbstractRoute:
         if not isinstance(other, str):
             message = f"expected type 'str', got {type(other)} instead"
             raise TypeError(message)
@@ -105,7 +105,7 @@ def get_segments(__value: str, /) -> List[str]:
         Segments.
 
     """
-    if not isinstance(__value, str):
+    if not isinstance(__value, str):  # type: ignore
         message = f"expected type 'str', got {type(__value)} instead"
         raise TypeError(message)
 

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/sessions/base_session.py
-"""Base session class.
+# src/apytizer/sessions/requests_session.py
+"""Requests Session Class.
 
-This module defines the base session class implementation.
+This module defines the requests session class implementation.
 
 """
 
 # Standard Library Imports
 import logging
+from typing import Any
 from typing import Dict
 from typing import MutableMapping
 from typing import Optional
@@ -23,16 +24,16 @@ from requests.adapters import HTTPAdapter
 from .abstract_session import AbstractSession
 from ..protocols import Protocol
 
-__all__ = ["BaseSession"]
+__all__ = ["RequestsSession"]
 
 
 log = logging.getLogger("apytizer")
 
 
-class BaseSession(AbstractSession):
-    """Implements a session.
+class RequestsSession(AbstractSession):
+    """Implements a requests session.
 
-    The BaseSession class provides `start` and `close` methods for manual
+    The `RequestsSession` class provides `start` and `close` methods for manual
     control of the session.
 
     A session instance can also be used as a context manager.
@@ -83,11 +84,9 @@ class BaseSession(AbstractSession):
         """Starts session."""
         log.debug("Starting session...")
 
-    def close(self, *_) -> None:
+    def close(self, *_: Any) -> None:
         """Destroys session."""
-        if self._session is not None:
-            self._session.close()
-
+        self._session.close()
         log.debug("Session closed")
 
     def mount(self, protocol: Protocol, adapter: HTTPAdapter) -> None:
@@ -105,7 +104,7 @@ class BaseSession(AbstractSession):
         )
 
     def send(
-        self, __request: requests.Request, /, **kwargs
+        self, __request: requests.Request, /, **kwargs: Any
     ) -> requests.Response:
         """Send an HTTP request.
 

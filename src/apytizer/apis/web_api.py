@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/apis/base_api.py
-"""Base Web API class.
+"""Web API class.
 
-This module defines the base web API class implementation.
+This module defines the web API class implementation.
 
 """
 
@@ -15,22 +15,22 @@ from typing import Optional
 from typing import Type
 
 # Third-Party Imports
-import requests
+from requests import Response
 
 # Local Imports
-from .abstract_web_api import AbstractWebAPI
-from ..connections import AbstractHttpConnection
+from .abstract_api import AbstractAPI
+from ..connections import HttpConnection
 from ..endpoints import AbstractEndpoint
-from ..endpoints import BaseEndpoint
+from ..endpoints import WebEndpoint
 from ..engines import AbstractEngine
 from ..routes import AbstractRoute
 from .. import errors
 
-__all__ = ["BaseWebAPI"]
+__all__ = ["WebAPI"]
 
 
-class BaseWebAPI(AbstractWebAPI):
-    """Base class from which all web API implementations are derived.
+class WebAPI(AbstractAPI):
+    """Implements a web API.
 
     Args:
         engine: Engine.
@@ -44,43 +44,32 @@ class BaseWebAPI(AbstractWebAPI):
 
     """
 
-    def __new__(
-        cls,
-        engine: object,
-        /,
-        endpoints: Optional[dict] = None,
-        *,
-        locked: bool = False,
-    ) -> BaseWebAPI:
-        if not isinstance(engine, AbstractEngine):
-            message = f"expected type 'Engine', got {type(engine)} instead"
-            raise TypeError(message)
-
-        if endpoints and not isinstance(endpoints, dict):
-            message = f"expected type 'dict', got {type(endpoints)} instead"
-            raise TypeError(message)
-
-        if not isinstance(locked, bool):
-            message = f"expected type 'bool', got {type(locked)} instead"
-            raise TypeError(message)
-
-        instance = super().__new__(cls)
-        return instance
-
     def __init__(
         self,
         engine: AbstractEngine,
         /,
-        endpoints: Optional[Dict[AbstractRoute, Type[BaseEndpoint]]] = None,
+        endpoints: Optional[Dict[AbstractRoute, Type[WebEndpoint]]] = None,
         *,
         locked: bool = False,
     ) -> None:
+        if not isinstance(engine, AbstractEngine):  # type: ignore
+            message = f"expected type 'Engine', got {type(engine)} instead"
+            raise TypeError(message)
+
+        if endpoints and not isinstance(endpoints, dict):  # type: ignore
+            message = f"expected type 'dict', got {type(endpoints)} instead"
+            raise TypeError(message)
+
+        if not isinstance(locked, bool):  # type: ignore
+            message = f"expected type 'bool', got {type(locked)} instead"
+            raise TypeError(message)
+
         self._engine = engine
         self._endpoints = endpoints.copy() if endpoints else {}
         self._locked = locked
 
     @property
-    def connection(self) -> Optional[AbstractHttpConnection]:
+    def connection(self) -> Optional[HttpConnection]:
         """Connection with which to make requests."""
         result = getattr(self, "_connection", None)
         return result
@@ -91,7 +80,7 @@ class BaseWebAPI(AbstractWebAPI):
         return self._engine.url
 
     @final
-    def __enter__(self) -> AbstractWebAPI:
+    def __enter__(self) -> AbstractAPI:
         """Starts API as context manager."""
         self.connect()
         return self
@@ -104,7 +93,7 @@ class BaseWebAPI(AbstractWebAPI):
     def __eq__(self, other: object) -> bool:
         result = (
             other.url.lower() == self.url.lower()
-            if isinstance(other, AbstractWebAPI)
+            if isinstance(other, WebAPI)
             else False
         )
         return result
@@ -166,20 +155,22 @@ class BaseWebAPI(AbstractWebAPI):
                 message = f"endpoint not found: {path}"
                 raise errors.EndpointNotFound(message)
 
-            endpoint = BaseEndpoint
+            endpoint = WebEndpoint
 
         result = endpoint(self, path)
         return result
 
     def connect(self) -> None:
         """Start connection to web API."""
-        setattr(self, "_connection", self._engine.connect())
-        self.connection.start()
+        connection = self._engine.connect()
+        setattr(self, "_connection", connection)
+        connection.start()
 
     def close(self) -> None:
         """Close connection to web API."""
-        self.connection.close()
-        delattr(self, "_connection")
+        if self.connection is not None:
+            self.connection.close()
+            delattr(self, "_connection")
 
     @final
     def head(
@@ -187,8 +178,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP HEAD request to the API.
 
         Args:
@@ -223,8 +214,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP GET request to the API.
 
         Args:
@@ -259,8 +250,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP POST request to the API.
 
         Args:
@@ -295,8 +286,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP PUT request to the API.
 
         Args:
@@ -331,8 +322,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP PATCH request to the API.
 
         Args:
@@ -367,8 +358,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP DELETE request to the API.
 
         Args:
@@ -403,8 +394,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP OPTIONS request to the API.
 
         Args:
@@ -439,8 +430,8 @@ class BaseWebAPI(AbstractWebAPI):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP TRACE request to the API.
 
         Args:

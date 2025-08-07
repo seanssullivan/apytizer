@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/endpoints/base_endpoint.py
-"""Base endpoint class.
+"""WEb Endpoint Class.
 
-This module defines the base endpoint class implementation.
+This module defines the web endpoint class implementation.
 
 """
 
@@ -20,11 +20,11 @@ from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
 # Third-Party Imports
-import requests
+from requests import Response
 
 # Local Imports
 from .abstract_endpoint import AbstractEndpoint
-from ..connections import AbstractHttpConnection
+from ..connections import HttpConnection
 from ..decorators import cache_response
 from ..http_methods import HTTPMethod
 from ..routes import Route
@@ -32,9 +32,9 @@ from .. import errors
 from .. import utils
 
 if TYPE_CHECKING:
-    from ..apis import AbstractWebAPI
+    from ..apis import WebAPI
 
-__all__ = ["BaseEndpoint"]
+__all__ = ["WebEndpoint"]
 
 
 log = logging.getLogger("apytizer")
@@ -52,8 +52,8 @@ DEFAULT_METHODS = (
 )
 
 
-class BaseEndpoint(AbstractEndpoint):
-    """Base class from which all endpoint implementations are derived.
+class WebEndpoint(AbstractEndpoint):
+    """Implements an endpoint for web APIs.
 
     Args:
         __api: API instance.
@@ -79,14 +79,14 @@ class BaseEndpoint(AbstractEndpoint):
 
     def __init__(
         self,
-        __api: "AbstractWebAPI",
+        __api: "WebAPI",
         /,
         path: Union[int, Route, str],
         *,
         methods: Collection[HTTPMethod] = DEFAULT_METHODS,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        cache: Optional[MutableMapping] = None,
+        cache: Optional[MutableMapping[str, Any]] = None,
     ) -> None:
         self._api = __api
         self._path = str(path).strip("/")
@@ -96,12 +96,12 @@ class BaseEndpoint(AbstractEndpoint):
         self._cache = cache
 
     @property
-    def api(self) -> "AbstractWebAPI":
+    def api(self) -> "WebAPI":
         """API."""
         return self._api
 
     @property
-    def connection(self) -> Optional[AbstractHttpConnection]:
+    def connection(self) -> Optional[HttpConnection]:
         """Connection with which to make requests."""
         return self._api.connection
 
@@ -132,14 +132,14 @@ class BaseEndpoint(AbstractEndpoint):
         return self._params
 
     @property
-    def cache(self) -> Optional[MutableMapping]:
+    def cache(self) -> Optional[MutableMapping[str, Any]]:
         """Cache."""
         return self._cache
 
     def __eq__(self, other: object) -> bool:
         result = (
             other.path.lower() == self.path.lower()
-            if isinstance(other, AbstractEndpoint)
+            if isinstance(other, WebEndpoint)
             else False
         )
         return result
@@ -188,8 +188,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP HEAD request to the endpoint.
 
         Args:
@@ -230,8 +230,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP GET request to the endpoint.
 
         Args:
@@ -272,8 +272,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP POST request to the endpoint.
 
         Args:
@@ -314,8 +314,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP PUT request to the endpoint.
 
         Args:
@@ -356,8 +356,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP PATCH request to the endpoint.
 
         Args:
@@ -398,8 +398,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP DELETE request to the endpoint.
 
         Args:
@@ -440,8 +440,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP OPTIONS request to the endpoint.
 
         Args:
@@ -482,8 +482,8 @@ class BaseEndpoint(AbstractEndpoint):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP TRACE request to the endpoint.
 
         Args:

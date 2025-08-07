@@ -54,7 +54,7 @@ class AbstractManager(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, obj: AbstractModel) -> None:
+    def update(self, obj: AbstractModel, /) -> None:
         """Abstract method to update an object.
 
         This method must call the `put` method on an associated endpoint to
@@ -67,7 +67,7 @@ class AbstractManager(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, obj: AbstractModel) -> None:
+    def delete(self, obj: AbstractModel, /) -> None:
         """Abstract method to delete an object.
 
         This method must call the `delete` method on an associated endpoint

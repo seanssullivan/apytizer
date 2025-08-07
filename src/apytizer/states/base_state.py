@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/states/base_state.py
-"""Base state class.
+"""Base State Class.
 
 This module defines the implementation of a base state class.
 
@@ -13,6 +13,8 @@ from typing import Any
 from typing import Dict
 from typing import Generator
 from typing import Mapping
+from typing import Optional
+from typing import Tuple
 
 # Local Imports
 from ..states import AbstractState
@@ -26,8 +28,8 @@ class BaseState(AbstractState):
 
     def __init__(
         self,
-        base: Dict[str, Any] = None,
-        default: Dict[str, Any] = None,
+        base: Optional[Dict[str, Any]] = None,
+        default: Optional[Dict[str, Any]] = None,
     ) -> None:
         self._state = collections.ChainMap(base or {}, default or {})
 
@@ -48,7 +50,7 @@ class BaseState(AbstractState):
     def __setitem__(self, key: str, value: Any) -> None:
         self._state = utils.deep_set(self._state, key, value)
 
-    def __iter__(self) -> Generator:
+    def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
         yield from self._state.items()
 
     def get(self, key: str) -> Any:
@@ -61,7 +63,7 @@ class BaseState(AbstractState):
             Value of key in state.
 
         """
-        if not isinstance(key, str):
+        if not isinstance(key, str):  # type: ignore
             message = f"expected type 'str', got {type(key)} instead"
             raise TypeError(message)
 
@@ -73,11 +75,15 @@ class BaseState(AbstractState):
         results = self._state.items()
         return results
 
-    def update(self, __m: Mapping = None, **kwargs) -> None:
+    def update(
+        self,
+        __m: Optional[Mapping[str, Any]] = None,
+        **kwargs: Any,
+    ) -> None:
         """Update state.
 
         Args:
-            __m: Mapping.
+            __m (optional): Mapping. Default ``None``.
             **kwargs: Keyword arguments.
 
         """
@@ -89,5 +95,5 @@ class BaseState(AbstractState):
 
     def save(self) -> None:
         """Save changes to state."""
-        if self._state.maps[0]:
-            self._state = self._state.new_child()
+        if self._state.maps[0]:  # type: ignore
+            self._state = self._state.new_child()  # type: ignore

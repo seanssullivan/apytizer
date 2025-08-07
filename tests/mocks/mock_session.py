@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
+from typing import Any
 from unittest.mock import Mock
 
 # Third-Party Imports
@@ -22,16 +23,16 @@ class MockSession(AbstractSession):
 
     def start(self) -> None:
         """Starts the session."""
-        return self
+        pass
 
     def close(self) -> None:
         """Stops the session."""
         pass
 
-    def mount(self, *args, **kwargs) -> None:
+    def mount(self, *args: Any, **kwargs: Any) -> None:
         """Mount adapter."""
         pass
 
-    def send(self, request: Request, **kwargs):
+    def send(self, request: Request, **kwargs: Any):
         """Send an HTTP request."""
         return self.mock(request, **kwargs)

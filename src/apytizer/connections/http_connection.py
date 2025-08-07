@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # src/apytizer/connection/base_connection.py
-"""Base HTTP connection class.
+"""HTTP Connection Class.
 
 This module defines the base HTTP connection class implementation.
 
@@ -18,17 +18,20 @@ from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
 # Third-Party Imports
-import requests
+from requests import Request
+from requests import Response
 
 # Local Imports
-from .abstract_http_connection import AbstractHttpConnection
+from .abstract_connection import AbstractConnection
 from ..decorators import confirm_connection
 from ..http_methods import HTTPMethod
+from ..sessions import AbstractSession
 from ..sessions import sessionmaker
+from .. import errors
 from .. import utils
 
 if TYPE_CHECKING:
-    from ..engines import BaseEngine
+    from ..engines import HTTPEngine
 
 __all__ = ["HttpConnection"]
 
@@ -39,7 +42,7 @@ log = logging.getLogger("apytizer")
 DEFAULT_SESSION_FACTORY = sessionmaker()
 
 
-class HttpConnection(AbstractHttpConnection):
+class HttpConnection(AbstractConnection):
     """Implements an HTTP connection.
 
     The connection class provides an interface for interacting with an API.
@@ -55,33 +58,12 @@ class HttpConnection(AbstractHttpConnection):
 
     def __init__(
         self,
-        engine: "BaseEngine",
+        engine: "HTTPEngine",
         *,
         session_factory: sessionmaker = DEFAULT_SESSION_FACTORY,
     ) -> None:
         self._engine = engine
         self._session_factory = session_factory
-
-    @final
-    def __enter__(self) -> AbstractHttpConnection:
-        """Starts connection as context manager."""
-        self.start()
-        return self
-
-    @final
-    def __exit__(self, *_) -> None:
-        """Ends connection as context manager."""
-        self.close()
-
-    def start(self) -> None:
-        """Start connection."""
-        self.session = self._session_factory(self._engine)
-        self.session.start()
-
-    def close(self) -> None:
-        """Close connection."""
-        if getattr(self, "session", None) is not None:
-            self.session.close()
 
     @property
     def headers(self) -> Optional[Dict[str, str]]:
@@ -94,6 +76,11 @@ class HttpConnection(AbstractHttpConnection):
         return getattr(self._engine, "params", None)
 
     @property
+    def session(self) -> Optional[AbstractSession]:
+        """Session."""
+        return getattr(self, "_session", None)
+
+    @property
     def timeout(self) -> Optional[Union[float, Tuple[float, float]]]:
         """Connection timeout."""
         return getattr(self._engine, "timeout", None)
@@ -103,14 +90,36 @@ class HttpConnection(AbstractHttpConnection):
         """Connection URL."""
         return getattr(self._engine, "url")
 
+    @final
+    def __enter__(self) -> AbstractConnection:
+        """Starts connection as context manager."""
+        self.start()
+        return self
+
+    @final
+    def __exit__(self, *_) -> None:
+        """Ends connection as context manager."""
+        self.close()
+
+    def start(self) -> None:
+        """Start connection."""
+        session = self._session_factory(self._engine)
+        setattr(self, "_session", session)
+        session.start()
+
+    def close(self) -> None:
+        """Close connection."""
+        if self.session is not None:
+            self.session.close()
+
     def head(
         self,
         route: Optional[str] = None,
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP HEAD request.
 
         Args:
@@ -141,8 +150,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP GET request.
 
         Args:
@@ -173,8 +182,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP POST request.
 
         Args:
@@ -205,8 +214,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP PUT request.
 
         Args:
@@ -237,8 +246,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP PATCH request.
 
         Args:
@@ -269,8 +278,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP DELETE request.
 
         Args:
@@ -301,8 +310,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP OPTIONS request.
 
         Args:
@@ -333,8 +342,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP TRACE request.
 
         Args:
@@ -367,8 +376,8 @@ class HttpConnection(AbstractHttpConnection):
         *,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> requests.Response:
+        **kwargs: Any,
+    ) -> Optional[Response]:
         """Sends an HTTP request.
 
         Args:
@@ -385,18 +394,18 @@ class HttpConnection(AbstractHttpConnection):
             https://docs.python-requests.org/en/latest/api/
 
         """
-        request = requests.Request(
+        request = Request(
             method.name,
             urljoin(self.url, route),
             headers=utils.merge(self.headers, headers),
             params=utils.merge(self.params, params),
             **kwargs,
         )
-        response = self.send(request)  # type: requests.Response
+        response = self.send(request)
         return response
 
     @confirm_connection
-    def send(self, request: requests.Request) -> requests.Response:
+    def send(self, request: Request) -> Optional[Response]:
         """Sends an HTTP request.
 
         Args:
@@ -406,6 +415,10 @@ class HttpConnection(AbstractHttpConnection):
             Response object.
 
         """
+        if self.session is None:
+            message = "session not started before sending request"
+            raise errors.SessionNotStarted(message)
+
         log.debug(
             "Sending HTTP %(method)s request to %(url)s",
             {"method": request.method, "url": request.url},
