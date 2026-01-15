@@ -10,46 +10,29 @@ This module defines the implementation of a base model class.
 from __future__ import annotations
 from typing import Any
 from typing import Generator
+from typing import Hashable
 from typing import Mapping
 from typing import Tuple
-from typing import Union
-from typing import TYPE_CHECKING
 
 # Local Imports
 from .abstract_model import AbstractModel
 from .. import states
 
-if TYPE_CHECKING:
-    from ..managers import AbstractManager
-
 __all__ = ["BaseModel"]
 
 
 class BaseModel(AbstractModel):
-    """Implements a base object model.
+    """Implements a stateful model.
 
     Args:
         **kwargs: Data with which to set model state.
 
     """
 
-    reference: Union[int, str]
+    reference: Hashable
 
     def __init__(self, **kwargs: Any):
-        self._state = states.BaseState(kwargs)
-
-    @property
-    def manager(self) -> AbstractManager:
-        """Manager for model."""
-        return getattr(self, "_manager")
-
-    @manager.setter
-    def manager(self, manager: AbstractManager) -> None:
-        setattr(self, "_manager", manager)
-
-    @manager.deleter
-    def manager(self) -> None:
-        delattr(self, "_manager")
+        self._state = states.LocalState(kwargs)
 
     def __contains__(self, key: str) -> bool:
         return key in self._state

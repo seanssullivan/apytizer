@@ -24,6 +24,7 @@ class sessionmaker:
     def __call__(self, __engine: "AbstractEngine", /) -> RequestsSession:
         result = self._session_type(
             adapters=getattr(__engine, "adapters", None),
+            auth=getattr(__engine, "auth", None),
             cert=getattr(__engine, "cert", None),
             proxies=getattr(__engine, "proxies", None),
             stream=getattr(__engine, "stream", False),

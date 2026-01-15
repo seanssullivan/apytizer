@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+# Standard Library Imports
+from typing import Any
+from typing import Dict
+from typing import List
+
 # Third-Party Imports
 import pytest
 
@@ -46,7 +51,7 @@ def test_deep_set_replaces_none_with_dictionary() -> None:
 
 
 @pytest.mark.parametrize("value", ["test", 1.0, [1, 2, 3]])
-def test_raises_key_error(value) -> None:
+def test_raises_key_error(value: Any) -> None:
     dict_ = {"parent": {"child": value}}
     with pytest.raises(KeyError, match="parent.child"):
         utils.deep_set(dict_, "parent.child.name", "success")
@@ -69,7 +74,7 @@ def test_iter_get_returns_nested_values() -> None:
 
 
 def test_iter_set_updates_mappings() -> None:
-    data = [{"value": 1}, {"value": 2}, {"value": 3}]
+    data: List[Dict[str, Any]] = [{"value": 1}, {"value": 2}, {"value": 3}]
     results = utils.iter_set(data, "value", "success")
     assert results == [
         {"value": "success"},
@@ -79,7 +84,7 @@ def test_iter_set_updates_mappings() -> None:
 
 
 def test_iter_set_updates_nested_mappings() -> None:
-    data = [
+    data: List[Dict[str, Any]] = [
         {"data": {"value": 1}},
         {"data": {"value": 2}},
         {"data": {"value": 3}},
@@ -174,12 +179,12 @@ def test_remap_keys_returns_new_dictionary() -> None:
 
 
 def test_remove_null_returns_values_which_are_not_none() -> None:
-    data = {"a": 0, "b": 1, "c": None, "d": 3}
+    data: Dict[str, Any] = {"a": 0, "b": 1, "c": None, "d": 3}
     result = utils.remove_nulls(data)
     assert list(result.keys()) == ["a", "b", "d"]
 
 
 def test_remove_null_returns_values_which_are_not_provided() -> None:
-    data = {"a": 0, "b": 1, "c": None, "d": 3}
+    data: Dict[str, Any] = {"a": 0, "b": 1, "c": None, "d": 3}
     result = utils.remove_nulls(data, null_values=[0])
     assert list(result.keys()) == ["b", "d"]

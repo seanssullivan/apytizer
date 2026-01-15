@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/apis/base_api.py
+# src/apytizer/apis/web_api.py
 """Web API class.
 
 This module defines the web API class implementation.
@@ -116,7 +116,7 @@ class WebAPI(AbstractAPI):
             Endpoint.
 
         """
-        result = self._get_endpoint(path)
+        result = self.get_endpoint(path)
         return result
 
     def __truediv__(self, path: str) -> AbstractEndpoint:
@@ -129,10 +129,10 @@ class WebAPI(AbstractAPI):
             Endpoint.
 
         """
-        result = self._get_endpoint(path)
+        result = self.get_endpoint(path)
         return result
 
-    def _get_endpoint(self, path: str) -> AbstractEndpoint:
+    def get_endpoint(self, path: str) -> AbstractEndpoint:
         """Get endpoint.
 
         Arhs:

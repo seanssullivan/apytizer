@@ -6,11 +6,11 @@ import pytest
 # Local Imports
 try:
     from apytizer.models import BaseModel
-    from apytizer.states import BaseState
+    from apytizer.states import LocalState
 
 except ImportError:
     from src.apytizer.models import BaseModel
-    from src.apytizer.states import BaseState
+    from src.apytizer.states import LocalState
 
 
 # --------------------------------------------------------------------------------
@@ -76,24 +76,24 @@ def test_update_method_changes_model_state() -> None:
 # Tests for BaseState Class
 # --------------------------------------------------------------------------------
 def test_state_returns_true_when_key_in_state() -> None:
-    state = BaseState({"test": True})
+    state = LocalState({"test": True})
     assert "test" in state
 
 
 def test_models_are_equal_when_they_contain_same_state() -> None:
-    state_one = BaseState({"name": "Test State", "status": "incomplete"})
-    state_two = BaseState({"name": "Test State", "status": "incomplete"})
+    state_one = LocalState({"name": "Test State", "status": "incomplete"})
+    state_two = LocalState({"name": "Test State", "status": "incomplete"})
     assert state_one == state_two
 
 
 def test_states_are_not_equal_when_they_contain_different_key_values() -> None:
-    state_one = BaseState({"name": "Test State", "status": "incomplete"})
-    state_two = BaseState({"name": "Test State", "status": "completed"})
+    state_one = LocalState({"name": "Test State", "status": "incomplete"})
+    state_two = LocalState({"name": "Test State", "status": "completed"})
     assert state_one != state_two
 
 
 def test_state_is_iterable() -> None:
-    state = BaseState(
+    state = LocalState(
         {
             "name": "Test State",
             "description": "For testing purposes only.",
@@ -108,7 +108,7 @@ def test_state_is_iterable() -> None:
 
 
 def test_iterating_through_state_includes_updates() -> None:
-    state = BaseState(
+    state = LocalState(
         {
             "name": "Test State",
             "description": "For testing purposes only.",
@@ -124,7 +124,7 @@ def test_iterating_through_state_includes_updates() -> None:
 
 
 def test_gets_nested_items_from_string_of_keys() -> None:
-    state = BaseState(
+    state = LocalState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -137,7 +137,7 @@ def test_gets_nested_items_from_string_of_keys() -> None:
 
 
 def test_getitem_method_raises_type_error_when_passed_a_dictionary() -> None:
-    state = BaseState(
+    state = LocalState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -151,7 +151,7 @@ def test_getitem_method_raises_type_error_when_passed_a_dictionary() -> None:
 
 
 def test_sets_nested_items_from_string_of_keys() -> None:
-    state = BaseState(
+    state = LocalState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -169,7 +169,7 @@ def test_sets_nested_items_from_string_of_keys() -> None:
 
 
 def test_update_method_changes_state() -> None:
-    state = BaseState(
+    state = LocalState(
         {
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -186,14 +186,14 @@ def test_update_does_not_overwrite_default_context() -> None:
         "description": "For testing purposes only.",
         "status": "in progress",
     }
-    state = BaseState(default=data)
+    state = LocalState(default=data)
     state.update({"status": "completed"})
     assert state._state.maps[0] == {"status": "completed"}  # type: ignore
     assert state._state.maps[-1] == data  # type: ignore
 
 
 def test_save_adds_new_context_to_state() -> None:
-    state = BaseState(
+    state = LocalState(
         default={
             "name": "Test Model",
             "description": "For testing purposes only.",
@@ -212,7 +212,7 @@ def test_save_does_not_add_a_context_when_there_are_no_updates() -> None:
         "description": "For testing purposes only.",
         "status": "in progress",
     }
-    state = BaseState(default=data)
+    state = LocalState(default=data)
     assert not state._state.maps[0]  # type: ignore
 
     state.save()

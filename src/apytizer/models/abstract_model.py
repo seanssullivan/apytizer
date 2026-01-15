@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 # Local Imports
 if TYPE_CHECKING:
     from ..managers import AbstractManager
+    from ..states import AbstractState
 
 __all__ = ["AbstractModel"]
 
@@ -25,10 +26,17 @@ class AbstractModel(abc.ABC):
     """Represents an abstract model."""
 
     @property
-    @abc.abstractmethod
     def manager(self) -> AbstractManager:
         """Manager for model."""
-        raise NotImplementedError
+        return getattr(self, "__manager__")
+
+    @manager.setter
+    def manager(self, manager: AbstractManager, /) -> None:
+        setattr(self, "__manager__", manager)
+
+    @manager.deleter
+    def manager(self) -> None:
+        delattr(self, "__manager__")
 
     @abc.abstractmethod
     def __eq__(self, other: object) -> bool:
@@ -51,6 +59,31 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def __repr__(self) -> str:
+        """Abstract method for returning string representation of model."""
+        raise NotImplementedError
+
+
+class AbstractStatefulModel(AbstractModel):
+    """Class represents an abstract stateful model."""
+
+    @property
+    @abc.abstractmethod
+    def state(self) -> AbstractState:
+        """State."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __contains__(self, other: object) -> bool:
+        """Abstract method for determining whether object in state.
+
+        Returns:
+            Whether object in state.
+
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def __getattr__(self, name: str) -> Any:
         """Abstract method for getting an attribute from state.
 
@@ -68,11 +101,6 @@ class AbstractModel(abc.ABC):
             Value of item.
 
         """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def __repr__(self) -> str:
-        """Abstract method for returning string representation of model."""
         raise NotImplementedError
 
     @abc.abstractmethod

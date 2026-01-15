@@ -18,6 +18,7 @@ from typing import final
 
 # Third-Party Imports
 import requests
+from requests.auth import AuthBase
 from requests.adapters import HTTPAdapter
 
 # Local Imports
@@ -40,6 +41,7 @@ class RequestsSession(AbstractSession):
 
     Args:
         adapters (optional): Connection adapters. Default ``None``.
+        auth (optional): Authentication header. default ``None``.
         cert (optional): Client certificate. Default ``None``.
         proxies (optional): Protocols mapped to proxy URLs. Default ``None``.
         stream (optional): Whether to stream response content. Default ``False``.
@@ -54,13 +56,15 @@ class RequestsSession(AbstractSession):
         self,
         *,
         adapters: Optional[Dict[Protocol, HTTPAdapter]] = None,
+        auth: Optional[Union[AuthBase, Tuple[str, str]]] = None,
         cert: Optional[Union[str, Tuple[str, str]]] = None,
         proxies: Optional[MutableMapping[str, str]] = None,
         stream: Optional[bool] = False,
         verify: Optional[bool] = True,
     ) -> None:
         self._session = requests.Session()
-        self._session.cert = cert  # type: ignore
+        self._session.auth = auth
+        self._session.cert = cert
         self._session.proxies = proxies  # type: ignore
         self._session.stream = stream  # type: ignore
         self._session.verify = verify  # type: ignore

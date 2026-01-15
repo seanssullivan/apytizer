@@ -80,8 +80,7 @@ def parse_json_response(response: Response) -> Any:
         handle_decode_error(error)
         return response
 
-    else:
-        return result
+    return result
 
 
 def handle_decode_error(error: json.JSONDecodeError) -> None:

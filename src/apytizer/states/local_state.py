@@ -17,14 +17,14 @@ from typing import Optional
 from typing import Tuple
 
 # Local Imports
-from ..states import AbstractState
+from . import AbstractState
 from .. import utils
 
-__all__ = ["BaseState"]
+__all__ = ["LocalState"]
 
 
-class BaseState(AbstractState):
-    """Implements a base local state."""
+class LocalState(AbstractState):
+    """Class implements a local state."""
 
     def __init__(
         self,

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/engines/base_engine.py
-"""Base Engine Class.
+# src/apytizer/engines/http_engine.py
+"""HTTP Engine Class.
 
-This module defines the base engine class implementation.
+This module defines the HTTP engine class implementation.
 
 """
 
@@ -17,6 +17,7 @@ from typing import TypeVar
 from typing import Union
 
 # Third-Party Imports
+from requests.auth import AuthBase
 from requests.adapters import HTTPAdapter
 
 # Local Imports
@@ -39,6 +40,7 @@ class HTTPEngine(AbstractEngine):
     Args:
         url: Base URL.
         adapters (optional): Connection adapters. Default ``None``.
+        uth (optional): Authentication header. default ``None``.
         cert (optional): Client certificate. Default ``None``.
         headers (optional): Headers to set globally. Default ``None``.
         params (optional): Parameters to set globally. Default ``None``.
@@ -59,6 +61,7 @@ class HTTPEngine(AbstractEngine):
         url: str,
         *,
         adapters: Optional[Dict[Protocol, HTTPAdapter]] = None,
+        auth: Optional[Union[AuthBase, Tuple[str, str]]] = None,
         cert: Optional[Union[str, Tuple[str, str]]] = None,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -69,6 +72,7 @@ class HTTPEngine(AbstractEngine):
     ) -> None:
         self.url = url
         self.adapters = adapters or {}
+        self.auth = auth
         self.cert = cert
         self.headers = headers
         self.params = params
