@@ -7,9 +7,8 @@ import functools
 from typing import Any
 from typing import Collection
 from typing import Dict
+from typing import Hashable
 from typing import List
-from typing import Mapping
-from typing import MutableMapping
 from typing import Optional
 from typing import Set
 from typing import TypeVar
@@ -36,12 +35,15 @@ T = TypeVar("T")
 
 
 def deep_get(
-    __d: Mapping[str, Any], /, keys: str, default: Optional[object] = None
+    __d: Dict[Hashable, Any],
+    /,
+    keys: str,
+    default: Optional[object] = None,
 ) -> Any:
     """Get value from nested dictionary object.
 
     Args:
-        __d: Mapping object.
+        __d: Dictionary object.
         keys: String of keys seperated by periods.
         default (optional): Default if value not found. Default ``None``.
 
@@ -79,12 +81,15 @@ def deep_get(
 
 
 def deep_set(
-    __d: MutableMapping[str, Any], /, keys: Union[List[str], str], value: Any
-) -> MutableMapping[str, Any]:
+    __d: Dict[Hashable, Any],
+    /,
+    keys: Union[List[str], str],
+    value: Any,
+) -> Dict[Hashable, Any]:
     """Sets key to value in nested dictionary object.
 
     Args:
-        __d: Mapping object.
+        __d: Dictionary object.
         keys: Either list of keys, or string of keys seperated by periods.
         value: Value to set for key.
 
@@ -116,7 +121,11 @@ def deep_set(
     return __d
 
 
-def iter_get(__iter: List[Dict[str, Any]], /, key: str) -> List[object]:
+def iter_get(
+    __iter: List[Dict[Hashable, Any]],
+    /,
+    key: str,
+) -> List[object]:
     """Get value for key from each dictionary in an iterable object.
 
     Args:
@@ -138,8 +147,11 @@ def iter_get(__iter: List[Dict[str, Any]], /, key: str) -> List[object]:
 
 
 def iter_set(
-    __iter: List[MutableMapping[str, Any]], /, key: str, value: Any
-) -> List[MutableMapping[str, Any]]:
+    __iter: List[Dict[Hashable, Any]],
+    /,
+    key: str,
+    value: Any,
+) -> List[Dict[Hashable, Any]]:
     """Set value of key on each dictionary in an iterable object.
 
     Args:
@@ -165,8 +177,9 @@ def iter_set(
 
 
 def merge(
-    *args: Optional[Dict[str, T]], overwrite: bool = True
-) -> Optional[Dict[str, T]]:
+    *args: Optional[Dict[Hashable, T]],
+    overwrite: bool = True,
+) -> Optional[Dict[Hashable, T]]:
     """Combines dictionary objects into a single dictionary.
 
     Args:
@@ -185,12 +198,12 @@ def merge(
         raise TypeError("all arguments must be instances of 'dict'")
 
     def _merge_dictionaries(
-        first: Dict[str, Any],
-        second: Dict[str, Any],
+        first: Dict[Hashable, Any],
+        second: Dict[Hashable, Any],
         /,
         path: Optional[List[str]] = None,
         overwrite: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> Dict[Hashable, Any]:
         """Merge two dictionaries.
 
         Args:
@@ -206,7 +219,7 @@ def merge(
             https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries.
 
         """
-        __path = [] if path is None else path
+        __path: List[str] = [] if path is None else path
 
         for key in second:
             if key in first:
@@ -228,7 +241,7 @@ def merge(
                     first[key] = second[key]
 
                 else:
-                    location = ".".join(k for k in [*__path, key] if k)
+                    location = ".".join(k for k in [*__path, str(key)] if k)
                     message = f"Conflict at {location!s}"
                     raise ValueError(message)
 
@@ -244,13 +257,17 @@ def merge(
         return first.union(second)
 
     func = functools.partial(_merge_dictionaries, overwrite=overwrite)
-    result: Dict[str, Any] = functools.reduce(
+    result: Dict[Hashable, Any] = functools.reduce(
         lambda acc, cur: func(acc, cur) if cur else acc, args, {}
     )
     return result if result else None
 
 
-def omit(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
+def omit(
+    __d: Dict[Hashable, Any],
+    /,
+    keys: Collection[str],
+) -> Dict[Hashable, Any]:
     """Omit multiple key-value pairs from dictionary.
 
     Args:
@@ -267,11 +284,15 @@ def omit(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
     raise_for_instance(__d, dict)
 
     # TODO: Add support for omitting key-value pairs from nested dictionaries.
-    results = {key: __d[key] for key in __d if key not in keys}
+    results: Dict[Hashable, Any] = {k: __d[k] for k in __d if k not in keys}
     return results
 
 
-def pick(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
+def pick(
+    __d: Dict[Hashable, Any],
+    /,
+    keys: Collection[str],
+) -> Dict[Hashable, Any]:
     """Pick multiple values from a dictionary.
 
     Args:
@@ -287,7 +308,7 @@ def pick(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
     """
     raise_for_instance(__d, (dict, ChainMap))
 
-    def _last(key: str) -> str:
+    def _last(key: str) -> Hashable:
         return key.split(".")[-1]
 
     results = {_last(key): deep_get(__d, key) for key in keys}
@@ -295,8 +316,11 @@ def pick(__d: Dict[str, Any], /, keys: Collection[str]) -> Dict[str, Any]:
 
 
 def remap_keys(
-    __d: Dict[str, Any], /, key_map: Dict[str, str], remove: bool = False
-) -> Dict[str, Any]:
+    __d: Dict[Hashable, Any],
+    /,
+    key_map: Dict[Hashable, str],
+    remove: bool = False,
+) -> Dict[Hashable, Any]:
     """Remap dictionary object to new keys.
 
     Args:
@@ -314,7 +338,7 @@ def remap_keys(
     """
     raise_for_instance(__d, dict)
 
-    result = {
+    result: Dict[Hashable, Any] = {
         key_map.get(key, key): value
         for key, value in __d.items()
         if key in key_map or remove is False
@@ -323,8 +347,10 @@ def remap_keys(
 
 
 def remove_nulls(
-    __d: Dict[str, Any], /, null_values: Optional[Collection[Any]] = None
-) -> Dict[str, Any]:
+    __d: Dict[Hashable, Any],
+    /,
+    null_values: Optional[Collection[Any]] = None,
+) -> Dict[Hashable, Any]:
     """Remove all null values from dictionary.
 
     Args:
@@ -341,7 +367,7 @@ def remove_nulls(
     raise_for_instance(__d, dict)
 
     nulls = null_values or []
-    result = {
+    result: Dict[Hashable, Any] = {
         key: value
         for key, value in __d.items()
         if value is not None and value not in nulls

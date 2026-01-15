@@ -73,7 +73,7 @@ def test_iter_get_returns_nested_values() -> None:
     assert results == [1, 2, 3]
 
 
-def test_iter_set_updates_mappings() -> None:
+def test_iter_set_updates_dictionaries() -> None:
     data: List[Dict[str, Any]] = [{"value": 1}, {"value": 2}, {"value": 3}]
     results = utils.iter_set(data, "value", "success")
     assert results == [
@@ -83,7 +83,7 @@ def test_iter_set_updates_mappings() -> None:
     ]
 
 
-def test_iter_set_updates_nested_mappings() -> None:
+def test_iter_set_updates_nested_dictionaries() -> None:
     data: List[Dict[str, Any]] = [
         {"data": {"value": 1}},
         {"data": {"value": 2}},
