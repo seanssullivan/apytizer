@@ -8,4 +8,4 @@ test:
 	pytest --cov-report html:htmlcov --cov=src tests --tb=short
 
 tox:
-	tox
+	tox -- tests/$(path)

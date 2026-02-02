@@ -39,7 +39,49 @@ def cache_response(func: Callable[..., T]) -> Callable[..., T]:
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> T:
         """Wrapper applied to decorated function."""
-        return cached_func(*args, **kwargs)
+        try:
+            result = cached_func(*args, **kwargs)
+
+        except TypeError as error:  # raised when cache is 'None'
+            if is_missing_cache(error):
+                result = func(*args, **kwargs)
+
+            else:
+                raise error
+
+        return result
 
     functools.update_wrapper(wrapper, func)
     return wrapper
+
+
+# ----------------------------------------------------------------------------
+# Validators
+# ----------------------------------------------------------------------------
+def is_missing_cache(e: Exception) -> bool:
+    """Check whether exception was raised because of missing cache.
+
+    Args:
+        e: Exception.
+
+    Returns:
+        Whether exception was raised because of missing cache.
+
+    """
+    expected = "'NoneType' object is not subscriptable"
+    result = is_nonetype_error(e) and expected in str(e)
+    return result
+
+
+def is_nonetype_error(e: Exception) -> bool:
+    """Check whether exception is 'NoneType' error.
+
+    Args:
+        e: Exception.
+
+    Returns:
+        Whether exception wis 'NoneType' error.
+
+    """
+    result = isinstance(e, TypeError) and "NoneType" in str(e)
+    return result
