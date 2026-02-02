@@ -1,0 +1,9 @@
+# Development requirements
+-r testing.txt
+hatch
+mypy
+sphinx
+wheel
+
+# Typing requirements
+types-cachetools

@@ -1,8 +1,2 @@
-cachetools
-coverage
-pytest
-python-dotenv
-requests
-sphinx
-tox
-wheel
+# Requirements
+-r requirements/development.txt

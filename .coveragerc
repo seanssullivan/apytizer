@@ -1,10 +1,15 @@
 # .coveragerc to control coverage.py
 
-[run]
-include =
-    src/*
+[paths]
+source =
+   src
+   */site-packages
 
-omit =
-    env/*
-    src/abstracts/*
-    tests/*
+[run]
+branch = true
+parallel = true
+source =
+    src/apytizer
+
+[report]
+show_missing = true

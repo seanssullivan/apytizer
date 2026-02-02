@@ -1,0 +1,129 @@
+# -*- coding: utf-8 -*-
+# src/apytizer/engines/http_engine.py
+"""HTTP Engine Class.
+
+This module defines the HTTP engine class implementation.
+
+"""
+
+# Standard Library Imports
+from typing import Any
+from typing import Dict
+from typing import MutableMapping
+from typing import Optional
+from typing import Tuple
+from typing import Type
+from typing import TypeVar
+from typing import Union
+
+# Third-Party Imports
+from requests.auth import AuthBase
+from requests.adapters import HTTPAdapter
+
+# Local Imports
+from .abstract_engine import AbstractEngine
+from ..connections import HttpConnection
+from ..protocols import Protocol
+from ..protocols import get_protocol
+from ..utils import errors
+
+__all__ = ["HTTPEngine"]
+
+
+# Custom types:
+T = TypeVar("T")
+
+
+class HTTPEngine(AbstractEngine):
+    """Implements an HTTP engine.
+
+    Args:
+        url: Base URL.
+        adapters (optional): Connection adapters. Default ``None``.
+        uth (optional): Authentication header. default ``None``.
+        cert (optional): Client certificate. Default ``None``.
+        headers (optional): Headers to set globally. Default ``None``.
+        params (optional): Parameters to set globally. Default ``None``.
+        proxies (optional): Protocols mapped to proxy URLs. Default ``None``.
+        stream (optional): Whether to stream response content. Default ``False``.
+        timeout (optional): How long to wait before timing out. Default ``None``.
+        verify (optional): Whether to verify certificate. Default ``True``.
+
+    Raises:
+        TypeError: when URL of type other than `str`.
+
+    """
+
+    _connection_cls: Type[HttpConnection] = HttpConnection
+
+    def __init__(
+        self,
+        url: str,
+        *,
+        adapters: Optional[Dict[Protocol, HTTPAdapter]] = None,
+        auth: Optional[Union[AuthBase, Tuple[str, str]]] = None,
+        cert: Optional[Union[str, Tuple[str, str]]] = None,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        proxies: Optional[MutableMapping[str, str]] = None,
+        stream: Optional[bool] = False,
+        timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        verify: Optional[bool] = True,
+    ) -> None:
+        self.url = url
+        self.adapters = adapters or {}
+        self.auth = auth
+        self.cert = cert
+        self.headers = headers
+        self.params = params
+        self.proxies = proxies
+        self.stream = stream
+        self.timeout = timeout
+        self.verify = verify
+
+    @property
+    def protocol(self) -> Optional[Protocol]:
+        """Protocol."""
+        result = get_protocol(self.url)
+        return result
+
+    @property
+    def url(self) -> str:
+        """Base URL."""
+        return self._url
+
+    @url.setter
+    def url(self, value: str) -> None:
+        errors.raise_for_instance(value, str)
+        self._url = standardize_url(value)
+
+    def __repr__(self) -> str:
+        return f"Engine({self.url!r})"
+
+    def connect(self) -> HttpConnection:
+        """Establish connection.
+
+        Returns:
+            Connection instance.
+
+        """
+        result = self._connection_cls(self)
+        return result
+
+
+def standardize_url(__url: Any, /) -> str:
+    """Standardize URL.
+
+    Args:
+        __url: URL.
+
+    Returns:
+        URL.
+
+    """
+    if not isinstance(__url, str):
+        message = f"expected type 'str', got {type(__url)} instead"
+        raise TypeError(message)
+
+    result = __url if __url.endswith("/") else __url + "/"
+    return result

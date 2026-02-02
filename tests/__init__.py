@@ -1,3 +1,2 @@
 # -*- coding: utf-8 -*-
-
-# pylint: skip-file
+# tests/__init__.py

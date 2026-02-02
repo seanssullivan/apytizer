@@ -1,6 +1,97 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apytizer"
+version = "0.0.1b1"
+authors = [
+  { name="Sean Sullivan", email="seansullivan@seanmedia.ca" },
 ]
-build-backend = "setuptools.build_meta"
+description = "Implement wrappers quickly for REST APIs."
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.9"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+  "cachetools",
+  "requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/seanssullivan/apytizer"
+Repository = "https://github.com/seanssullivan/apytizer.git"
+Issues = "https://github.com/seanssullivan/apytizer/issues"
+
+[project.optional-dependencies]
+docs = [
+  "sphinx>=2.0.0",
+]
+testing = [
+  "cachetools",
+  "coverage",
+  "Flask",
+  "pytest",
+  "pytest-cov",
+  "pytest-env",
+  "requests",
+  "tox",
+]
+
+[dev-dependencies]
+black = { version = "^22.10.0", python = "^3.9" }
+
+[tool.black]
+line-length = 79
+exclude = '''
+
+(
+    /(
+          \.eggs      # exclude a few common directories in the
+        | \.git       # root of the project
+        | \.mypy_cache
+        | \.tox
+        | \.venv
+        | build
+        | dist
+        | env
+    )
+)
+'''
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    'pragma: no cover',
+    '\.\.\.',
+    'if TYPE_CHECKING:',
+    "if __name__ == '__main__':",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/apytizer"]
+exclude = [
+  "src/apytizer/factories",
+  "src/apytizer/managers",
+  "src/apytizer/mappers",
+  "src/apytizer/repositories",
+  "src/apytizer/states",
+  "tests/*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/apytizer"]

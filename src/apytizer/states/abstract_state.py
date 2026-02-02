@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+# src/apytizer/states/abstract_state.py
+"""Abstract State Class Interface.
+
+This module defines an abstract state class which provides an interface
+for subclasses to implement.
+
+"""
+
+# Standard Library Imports
+from __future__ import annotations
+import abc
+from typing import Any
+from typing import Generator
+from typing import Mapping
+from typing import Optional
+
+__all__ = ["AbstractState"]
+
+
+class AbstractState(abc.ABC):
+    """Represents an abstract state."""
+
+    @abc.abstractmethod
+    def __contains__(self, key: str) -> bool:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __eq__(self, other: object) -> bool:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __getitem__(self, key: str) -> Any:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __setitem__(self, key: str, value: Any) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __iter__(self) -> Generator[Any, None, None]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, key: str) -> Any:
+        """Abstract method for getting an item from state."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def items(self) -> Any:
+        """Abstract method for getting items from state."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def update(
+        self,
+        __m: Optional[Mapping[str, Any]] = None,
+        **kwargs: Any,
+    ) -> None:
+        """Abstract method for updating state."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def rollback(self) -> None:
+        """Abstract method for rolling back changes to state."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def save(self) -> None:
+        """Abstract method for saving changes to state."""
+        raise NotImplementedError

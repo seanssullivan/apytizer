@@ -1,54 +1,71 @@
 # -*- coding: utf-8 -*-
+# src/apytizer/decorators/pagination.py
 
 # Standard Library Imports
 import functools
-import logging
+from typing import Any
 from typing import Callable
+from typing import Dict
+from typing import Generator
+from typing import TypeVar
+
+__all__ = ["pagination"]
 
 
-# Initialize logger.
-log = logging.getLogger(__name__)
+# Custom types
+T = TypeVar("T")
 
 
-def pagination(func) -> Callable:
-    """
+class pagination:
+    """Implements pagination for requests to an API endpoint.
+
     Args:
-        func: Decorated function.
-
-    Returns:
-        Function wrapper.
+        reducer (Callable): Function to update state from response.
+        callback (Callable): Function which returns 'True' when request is
+            complete, otherwise returns 'False'. Stop condition must depend
+            on either state or response.
 
     """
-    @functools.wraps(func)
-    def wrapper(*args, reducer: Callable, callback: Callable, **kwargs):
-        """
-        Wrapper applied to decorated function.
+
+    def __init__(
+        self,
+        reducer: Callable[[Dict[str, Any], Any], Dict[str, Any]],
+        callback: Callable[[Dict[str, Any], Any], bool],
+    ) -> None:
+        self._reducer = reducer
+        self._callback = callback
+
+    def __call__(
+        self, func: Callable[..., T]
+    ) -> Callable[..., Generator[T, None, None]]:
+        """Wrap function to handle paginated results.
 
         Args:
-            reducer (Callable): Function to update state with pagination metadata.
-            callback (Callable): Function which returns True once request is completed.
-                Stop condition must depend on state or pagination metadata.
-            *args
-            **kwargs
+            func: Decorated function.
+
+        Returns:
+            Function wrapper.
 
         """
-        completed = False
-        state = {
-            'params': kwargs.pop('params', None),
-            'data': kwargs.pop('data', None)
-        }
 
-        while not completed:
-            if state.get('params'):
-                kwargs.update({'params': state.get('params')})
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Generator[T, None, None]:
+            """Wrapper applied to decorated function.
 
-            if state.get('data'):
-                kwargs.update({'data': state.get('data')})
+            Args:
+                *args: Positional arguments to pass to wrapped function.
+                **kwargs: Keyword arguments to pass to wrapped function.
 
-            response = func(*args, **kwargs)
-            yield response
+            """
+            completed = False
+            state: Dict[str, Any] = {"args": args, "kwargs": kwargs}
 
-            state = reducer(state, response)
-            completed = callback(state, response)
+            while not completed:
+                response = func(*state["args"], **state["kwargs"])
+                yield response
 
-    return wrapper
+                state = self._reducer(state, response)
+                completed = self._callback(state, response)
+
+        functools.update_wrapper(wrapper, func)
+        return wrapper
