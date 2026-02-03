@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# src/apytizer/endpoints/base_endpoint.py
-"""WEb Endpoint Class.
+# src/apytizer/endpoints/web_endpoint.py
+"""Web Endpoint Class.
 
 This module defines the web endpoint class implementation.
 
@@ -8,6 +8,7 @@ This module defines the web endpoint class implementation.
 
 # Standard Library Imports
 from __future__ import annotations
+from collections import ChainMap
 import logging
 from typing import Any
 from typing import Collection
@@ -29,7 +30,6 @@ from ..decorators import cache_response
 from ..http_methods import HTTPMethod
 from ..routes import Route
 from .. import errors
-from .. import utils
 
 if TYPE_CHECKING:
     from ..apis import WebAPI
@@ -83,16 +83,16 @@ class WebEndpoint(AbstractEndpoint):
         /,
         path: Union[int, Route, str],
         *,
-        methods: Collection[HTTPMethod] = DEFAULT_METHODS,
+        methods: Optional[Collection[HTTPMethod]] = DEFAULT_METHODS,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
         cache: Optional[MutableMapping[str, Any]] = None,
     ) -> None:
         self._api = __api
         self._path = str(path).strip("/")
-        self._methods = set(methods)
-        self._headers = headers
-        self._params = params
+        self._methods: Set[HTTPMethod] = set(methods or [])
+        self._headers = ChainMap(headers or {})
+        self._params = ChainMap(params or {})
         self._cache = cache
 
     @property
@@ -122,12 +122,12 @@ class WebEndpoint(AbstractEndpoint):
         return self._methods
 
     @property
-    def headers(self) -> Optional[Dict[str, str]]:
+    def headers(self) -> ChainMap[str, str]:
         """Headers."""
         return self._headers
 
     @property
-    def params(self) -> Optional[Dict[str, Any]]:
+    def params(self) -> ChainMap[str, Any]:
         """Parameters."""
         return self._params
 
@@ -154,7 +154,7 @@ class WebEndpoint(AbstractEndpoint):
     def __str__(self) -> str:
         return self.path
 
-    def __getitem__(self, path: str) -> AbstractEndpoint:
+    def __getitem__(self, path: str) -> WebEndpoint:
         """Get endpoint.
 
         Args:
@@ -168,7 +168,7 @@ class WebEndpoint(AbstractEndpoint):
         result = self._api[route]
         return result
 
-    def __truediv__(self, path: str) -> AbstractEndpoint:
+    def __truediv__(self, path: str) -> WebEndpoint:
         """Get endpoint.
 
         Args:
@@ -218,8 +218,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.head(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -260,8 +260,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.get(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -302,8 +302,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.post(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -344,8 +344,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.put(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -386,8 +386,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.patch(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -428,8 +428,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.delete(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -470,8 +470,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.options(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response
@@ -512,8 +512,8 @@ class WebEndpoint(AbstractEndpoint):
 
         response = self.connection.trace(
             self.path,
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         return response

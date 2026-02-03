@@ -20,7 +20,6 @@ from requests import Response
 # Local Imports
 from .abstract_api import AbstractAPI
 from ..connections import HttpConnection
-from ..endpoints import AbstractEndpoint
 from ..endpoints import WebEndpoint
 from ..engines import AbstractEngine
 from ..routes import AbstractRoute
@@ -106,7 +105,7 @@ class WebAPI(AbstractAPI):
         result = f"<{self.__class__.__name__!s} url={self.url!s}>"
         return result
 
-    def __getitem__(self, path: str) -> AbstractEndpoint:
+    def __getitem__(self, path: str) -> WebEndpoint:
         """Get endpoint.
 
         Args:
@@ -119,7 +118,7 @@ class WebAPI(AbstractAPI):
         result = self.get_endpoint(path)
         return result
 
-    def __truediv__(self, path: str) -> AbstractEndpoint:
+    def __truediv__(self, path: str) -> WebEndpoint:
         """Get endpoint.
 
         Args:
@@ -132,7 +131,7 @@ class WebAPI(AbstractAPI):
         result = self.get_endpoint(path)
         return result
 
-    def get_endpoint(self, path: str) -> AbstractEndpoint:
+    def get_endpoint(self, path: str) -> WebEndpoint:
         """Get endpoint.
 
         Arhs:

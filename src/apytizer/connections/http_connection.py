@@ -7,9 +7,10 @@ This module defines the base HTTP connection class implementation.
 """
 
 # Standard Library Imports
+from collections import ChainMap
 import logging
 from typing import Any
-from typing import Dict
+from typing import MutableMapping
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -28,7 +29,6 @@ from ..http_methods import HTTPMethod
 from ..sessions import AbstractSession
 from ..sessions import sessionmaker
 from .. import errors
-from .. import utils
 
 if TYPE_CHECKING:
     from ..engines import HTTPEngine
@@ -66,14 +66,14 @@ class HttpConnection(AbstractConnection):
         self._session_factory = session_factory
 
     @property
-    def headers(self) -> Optional[Dict[str, str]]:
+    def headers(self) -> ChainMap[str, str]:
         """Connection headers."""
-        return getattr(self._engine, "headers", None)
+        return self._engine.headers
 
     @property
-    def params(self) -> Optional[Dict[str, Any]]:
+    def params(self) -> ChainMap[str, Any]:
         """Connection parameters."""
-        return getattr(self._engine, "params", None)
+        return self._engine.params
 
     @property
     def session(self) -> Optional[AbstractSession]:
@@ -83,12 +83,12 @@ class HttpConnection(AbstractConnection):
     @property
     def timeout(self) -> Optional[Union[float, Tuple[float, float]]]:
         """Connection timeout."""
-        return getattr(self._engine, "timeout", None)
+        return self._engine.timeout
 
     @property
     def url(self) -> str:
         """Connection URL."""
-        return getattr(self._engine, "url")
+        return self._engine.url
 
     @final
     def __enter__(self) -> AbstractConnection:
@@ -116,8 +116,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP HEAD request.
@@ -148,8 +148,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP GET request.
@@ -180,8 +180,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP POST request.
@@ -212,8 +212,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP PUT request.
@@ -244,8 +244,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP PATCH request.
@@ -276,8 +276,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP DELETE request.
@@ -308,8 +308,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP OPTIONS request.
@@ -340,8 +340,8 @@ class HttpConnection(AbstractConnection):
         self,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP TRACE request.
@@ -374,8 +374,8 @@ class HttpConnection(AbstractConnection):
         /,
         route: Optional[str] = None,
         *,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[MutableMapping[str, str]] = None,
+        params: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any,
     ) -> Optional[Response]:
         """Sends an HTTP request.
@@ -397,8 +397,8 @@ class HttpConnection(AbstractConnection):
         request = Request(
             method.name,
             urljoin(self.url, route),
-            headers=utils.merge(self.headers, headers),
-            params=utils.merge(self.params, params),
+            headers=self.headers.new_child(headers),
+            params=self.params.new_child(params),
             **kwargs,
         )
         response = self.send(request)

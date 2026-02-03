@@ -31,7 +31,8 @@ __all__ = [
 ]
 
 # Custom types:
-T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
 
 
 def deep_get(
@@ -177,9 +178,9 @@ def iter_set(
 
 
 def merge(
-    *args: Optional[Dict[Hashable, T]],
+    *args: Optional[Dict[K, V]],
     overwrite: bool = True,
-) -> Optional[Dict[Hashable, T]]:
+) -> Optional[Dict[K, V]]:
     """Combines dictionary objects into a single dictionary.
 
     Args:
@@ -198,12 +199,12 @@ def merge(
         raise TypeError("all arguments must be instances of 'dict'")
 
     def _merge_dictionaries(
-        first: Dict[Hashable, Any],
-        second: Dict[Hashable, Any],
+        first: Dict[Any, Any],
+        second: Dict[Any, Any],
         /,
         path: Optional[List[str]] = None,
         overwrite: bool = False,
-    ) -> Dict[Hashable, Any]:
+    ) -> Dict[Any, Any]:
         """Merge two dictionaries.
 
         Args:
@@ -257,7 +258,7 @@ def merge(
         return first.union(second)
 
     func = functools.partial(_merge_dictionaries, overwrite=overwrite)
-    result: Dict[Hashable, Any] = functools.reduce(
+    result: Dict[Any, Any] = functools.reduce(
         lambda acc, cur: func(acc, cur) if cur else acc, args, {}
     )
     return result if result else None
